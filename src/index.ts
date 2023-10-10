@@ -1,6 +1,6 @@
 import http from 'http'
 import { parseDashBoardId } from './parseDashBoardId'
-import { generateHtmlForDashBoard } from './generateHtmlForDashBoard'
+import { generateHtmlForDashboard } from './generateHtmlForDashboard'
 import { HttpResponseStatusError } from './HttpResponseStatusError'
 
 const host = 'localhost'
@@ -9,7 +9,7 @@ const port = 1337
 const server = http.createServer(async (req, res) => {
     try {
         const dashboardId = parseDashBoardId(req.url)
-        const html = await generateHtmlForDashBoard(dashboardId)
+        const html = await generateHtmlForDashboard(dashboardId)
         res.writeHead(200)
         res.end(html)
     } catch (error: unknown) {
