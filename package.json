@@ -7,7 +7,7 @@
     "license": "MIT",
     "private": false,
     "scripts": {
-        "start": "yarn nodemon",
+        "start:dev": "nodemon --exitcrash --exec ts-node -r dotenv/config src/index.ts",
         "start:prod": "npm run build && node build/index.js",
         "build": "rimraf ./build && tsc",
         "format": ""
@@ -17,6 +17,7 @@
         "@types/node": "^20.8.3",
         "@typescript-eslint/eslint-plugin": "^6.7.4",
         "@typescript-eslint/parser": "^6.7.4",
+        "dotenv": "^16.3.1",
         "eslint": "^8.51.0",
         "nodemon": "^3.0.1",
         "rimraf": "^5.0.5",

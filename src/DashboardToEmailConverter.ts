@@ -1,16 +1,23 @@
-export class DashboardToEmailConverter {
+type DashboardToEmailConverterOptions = {
     dhis2CoreUrl: string
+    dhis2CoreMajorVersion: string
     dhis2CoreUsername: string
     dhis2CorePassword: string
+}
 
-    constructor(
-        dhis2CoreUrl: string,
-        dhis2CoreUsername: string,
-        dhis2CorePassword: string
-    ) {
-        this.dhis2CoreUrl = dhis2CoreUrl
-        this.dhis2CoreUsername = dhis2CoreUsername
-        this.dhis2CorePassword = dhis2CorePassword
+export class DashboardToEmailConverter {
+    dhis2CoreUrl: string
+    dhis2CoreMajorVersion: string
+    dhis2CoreUsername: string
+    dhis2CorePassword: string
+    apiUrl: string
+
+    constructor(options: DashboardToEmailConverterOptions) {
+        this.dhis2CoreUrl = options.dhis2CoreUrl
+        this.dhis2CoreMajorVersion = options.dhis2CoreMajorVersion
+        this.dhis2CoreUsername = options.dhis2CoreUsername
+        this.dhis2CorePassword = options.dhis2CorePassword
+        this.apiUrl = `${options.dhis2CoreUrl}/api/${options.dhis2CoreMajorVersion}`
     }
 
     async convert(dashboardId: string) {

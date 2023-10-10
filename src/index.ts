@@ -3,14 +3,27 @@ import { parseDashBoardId } from './parseDashBoardId'
 import { DashboardToEmailConverter } from './DashboardToEmailConverter'
 import { HttpResponseStatusError } from './HttpResponseStatusError'
 import { validateRequest } from './validateRequest'
+import { readEnv } from './readEnv'
 
-const host = 'localhost'
-const port = 1337
+const {
+    host,
+    port,
+    dhis2CoreUrl,
+    dhis2CoreMajorVersion,
+    dhis2CoreUsername,
+    dhis2CorePassword,
+} = readEnv()
 
-const dashboardToEmailConverter = new DashboardToEmailConverter('a', 'b', 'c')
+const dashboardToEmailConverter = new DashboardToEmailConverter({
+    dhis2CoreUrl,
+    dhis2CoreMajorVersion,
+    dhis2CoreUsername,
+    dhis2CorePassword,
+})
 
 const server = http.createServer(async (req, res) => {
     try {
+        console.log(dashboardToEmailConverter)
         validateRequest(req)
         const dashboardId = parseDashBoardId(req.url)
         const html = await dashboardToEmailConverter.convert(dashboardId)
@@ -29,7 +42,7 @@ const server = http.createServer(async (req, res) => {
         }
     }
 })
-server.listen(port, host, () => {
+server.listen(port, parseInt(host), () => {
     console.log(
         `DHIS2 Push Analytics server is running on http://${host}:${port}`
     )
