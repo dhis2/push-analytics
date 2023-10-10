@@ -2,6 +2,7 @@ import http from 'http'
 import { parseDashBoardId } from './parseDashBoardId'
 import { DashboardToEmailConverter } from './DashboardToEmailConverter'
 import { HttpResponseStatusError } from './HttpResponseStatusError'
+import { validateRequest } from './validateRequest'
 
 const host = 'localhost'
 const port = 1337
@@ -10,6 +11,7 @@ const dashboardToEmailConverter = new DashboardToEmailConverter('a', 'b', 'c')
 
 const server = http.createServer(async (req, res) => {
     try {
+        validateRequest(req)
         const dashboardId = parseDashBoardId(req.url)
         const html = await dashboardToEmailConverter.convert(dashboardId)
         res.writeHead(200)
