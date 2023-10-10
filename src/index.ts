@@ -28,7 +28,7 @@ const server = http.createServer(async (req, res) => {
         const html = await dashboardToEmailConverter.convert(dashboardId)
         res.writeHead(200)
         res.end(html)
-    } catch (error: unknown) {
+    } catch (error) {
         if (error instanceof HttpResponseStatusError) {
             res.writeHead(error.status)
         } else {
