@@ -1,15 +1,17 @@
 import http from 'http'
 import { parseDashBoardId } from './parseDashBoardId'
-import { generateHtmlForDashboard } from './generateHtmlForDashboard'
+import { DashboardToEmailConverter } from './DashboardToEmailConverter'
 import { HttpResponseStatusError } from './HttpResponseStatusError'
 
 const host = 'localhost'
 const port = 1337
 
+const dashboardToEmailConverter = new DashboardToEmailConverter('a', 'b', 'c')
+
 const server = http.createServer(async (req, res) => {
     try {
         const dashboardId = parseDashBoardId(req.url)
-        const html = await generateHtmlForDashboard(dashboardId)
+        const html = await dashboardToEmailConverter.convert(dashboardId)
         res.writeHead(200)
         res.end(html)
     } catch (error: unknown) {
