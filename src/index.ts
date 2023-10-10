@@ -23,7 +23,6 @@ const dashboardToEmailConverter = new DashboardToEmailConverter({
 
 const server = http.createServer(async (req, res) => {
     try {
-        console.log(dashboardToEmailConverter)
         validateRequest(req)
         const dashboardId = parseDashBoardId(req.url)
         const html = await dashboardToEmailConverter.convert(dashboardId)
