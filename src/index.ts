@@ -1,9 +1,9 @@
 import http from 'http'
-import { parseDashBoardId } from './parseDashBoardId'
+import { parseDashBoardId } from './utils/parseDashBoardId'
 import { DashboardToEmailConverter } from './DashboardToEmailConverter'
-import { HttpResponseStatusError } from './HttpResponseStatusError'
+import { HttpResponseStatusError } from './utils/HttpResponseStatusError'
 import { validateRequest } from './validateRequest'
-import { readEnv } from './readEnv'
+import { readEnv } from './utils/readEnv'
 
 const {
     host,

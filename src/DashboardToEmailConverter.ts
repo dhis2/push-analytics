@@ -1,7 +1,7 @@
 import http from 'http'
-import { computeBaseRequestOptions } from './computeBaseRequestOptions'
-import { fieldsArrayToQueryParam } from './fieldsArrayToQueryParam'
-import { doGetRequest } from './doGetRequest'
+import { computeBaseRequestOptions } from './utils/computeBaseRequestOptions'
+import { fieldsArrayToQueryParam } from './utils/fieldsArrayToQueryParam'
+import { doGetRequest } from './utils/doGetRequest'
 import puppeteer, { Browser } from 'puppeteer'
 
 export class DashboardToEmailConverter {
