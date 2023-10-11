@@ -1,32 +1,24 @@
-type ParseUrlResult = {
-    host: string
-    protocol: string
-    port?: number
-}
+import http from 'http'
 
-const parseUrl = (url: string): ParseUrlResult => {
-    const protocol = url.includes('https://') ? 'https:' : 'http:'
-    const [host, port] = url.replace(`${protocol}//`, '').split(':')
-    const options: ParseUrlResult = { protocol, host }
+export const computeBaseRequestOptions = ({
+    dhis2CoreUrl,
+    dhis2CoreMajorVersion,
+    dhis2CoreUsername,
+    dhis2CorePassword,
+}: DashboardToEmailConverterOptions) => {
+    const protocol = dhis2CoreUrl.includes('https://') ? 'https:' : 'http:'
+    const [host, port] = dhis2CoreUrl.replace(`${protocol}//`, '').split(':')
+    const baseRequestOptions: http.RequestOptions = {
+        headers: {},
+        auth: `${dhis2CoreUsername}:${dhis2CorePassword}`,
+        path: `/api/${dhis2CoreMajorVersion}`,
+        protocol,
+        host,
+    }
 
     if (port) {
-        options.port = parseInt(port)
+        baseRequestOptions.port = parseInt(port)
     }
 
-    return options
-}
-
-export const computeBaseRequestOptions = (
-    options: DashboardToEmailConverterOptions
-) => {
-    const headers = {}
-    const auth = `${options.dhis2CoreUsername}:${options.dhis2CorePassword}`
-    const path = `/api/${options.dhis2CoreMajorVersion}`
-
-    return {
-        headers,
-        auth,
-        path,
-        ...parseUrl(options.dhis2CoreUrl),
-    }
+    return baseRequestOptions
 }
