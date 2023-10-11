@@ -1,3 +1,5 @@
+// Only use global type definitions for shared types
+
 type DashboardItemType =
     | 'VISUALIZATION'
     | 'EVENT_VISUALIZATION'
@@ -10,13 +12,6 @@ type DashboardItemType =
     | 'TEXT'
     | 'MESSAGES'
     | 'APP'
-
-type DashboardToEmailConverterOptions = {
-    dhis2CoreUrl: string
-    dhis2CoreMajorVersion: string
-    dhis2CoreUsername: string
-    dhis2CorePassword: string
-}
 
 type Visualization = {
     id: string
@@ -34,4 +29,11 @@ type Dashboard = {
     displayName: string
     itemCount: number
     dashboardItems: DashboardItem[]
+}
+
+type DashboardToEmailConverterOptions = {
+    dhis2CoreUrl: string
+    dhis2CoreMajorVersion: string
+    dhis2CoreUsername: string
+    dhis2CorePassword: string
 }
