@@ -13,6 +13,11 @@ type DashboardItemType =
     | 'MESSAGES'
     | 'APP'
 
+type Dhis2Map = {
+    id: string
+    name: string
+}
+
 type Visualization = {
     id: string
     name: string
@@ -23,6 +28,7 @@ type DashboardItem = {
     id: string
     type: DashboardItemType
     visualization?: Visualization
+    map?: Dhis2Map
 }
 
 type Dashboard = {
