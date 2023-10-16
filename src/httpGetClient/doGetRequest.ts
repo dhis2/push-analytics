@@ -1,10 +1,9 @@
 import http from 'http'
-import { HttpResponseStatusError } from './HttpResponseStatusError'
+import { HttpResponseStatusError } from '../utils/HttpResponseStatusError'
 
-export const doGetRequest = async (
-    relativePath: string,
+export const doGetRequest = async <T>(
     options: http.RequestOptions
-) =>
+): Promise<T> =>
     new Promise((resolve, reject) => {
         const req = http.request(options, (res) => {
             if (
@@ -14,22 +13,21 @@ export const doGetRequest = async (
             ) {
                 return reject(
                     new HttpResponseStatusError(
-                        `Get to "${relativePath}" failed`,
+                        `Get to "${options.path}" failed`,
                         res.statusCode ?? 500
                     )
                 )
             }
-            let body: Buffer[] = []
+            const body: Buffer[] = []
             res.on('data', (chunk: Buffer) => {
                 body.push(chunk)
             })
             res.on('end', () => {
                 try {
-                    body = JSON.parse(Buffer.concat(body).toString())
+                    resolve(JSON.parse(Buffer.concat(body).toString()))
                 } catch (e) {
                     reject(e)
                 }
-                resolve(body)
             })
         })
         req.on('error', (err) => {

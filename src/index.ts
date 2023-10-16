@@ -1,34 +1,27 @@
 import http from 'http'
 import { parseDashBoardId } from './utils/parseDashBoardId'
-import { DashboardToEmailConverter } from './DashboardToEmailConverter'
 import { HttpResponseStatusError } from './utils/HttpResponseStatusError'
 import { validateRequest } from './validateRequest'
 import { readEnv } from './utils/readEnv'
+import { convertDashboardToEmailHtml } from './convertDashboardToEmailHtml'
 
-const {
-    host,
-    port,
-    dhis2CoreUrl,
-    dhis2CoreMajorVersion,
-    dhis2CoreUsername,
-    dhis2CorePassword,
-} = readEnv()
-
-const dashboardToEmailConverter = new DashboardToEmailConverter({
-    dhis2CoreUrl,
-    dhis2CoreMajorVersion,
-    dhis2CoreUsername,
-    dhis2CorePassword,
-})
+const { host, port, baseUrl, apiVersion, username, password } = readEnv()
 
 const server = http.createServer(async (req, res) => {
     try {
         validateRequest(req)
         const dashboardId = parseDashBoardId(req.url)
-        const html = await dashboardToEmailConverter.convert(dashboardId)
+        const html = await convertDashboardToEmailHtml({
+            dashboardId,
+            baseUrl,
+            apiVersion,
+            username,
+            password,
+        })
         res.writeHead(200)
         res.end(html)
     } catch (error) {
+        console.log(error)
         if (error instanceof HttpResponseStatusError) {
             res.writeHead(error.status)
         } else {

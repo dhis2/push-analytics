@@ -1,6 +1,0 @@
-{
-    "events": {
-        "restart": "curl http://localhost:1337/JW7RlN5xafN",
-        "start": "curl http://localhost:1337/JW7RlN5xafN"
-    }
-}

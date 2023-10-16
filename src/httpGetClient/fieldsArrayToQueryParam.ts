@@ -1,8 +1,3 @@
-type FieldObject = {
-    name: string
-    fields: Field[]
-}
-type Field = string | FieldObject
 const parseField = (field: Field): string => {
     if (typeof field === 'string') {
         return field

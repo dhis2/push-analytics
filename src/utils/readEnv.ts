@@ -20,7 +20,7 @@ const readEnvVariable = (name: EnvVariableName): string => {
         return process.env[name] ?? ''
     } else {
         console.log(
-            `Env variable "${name}" not found. Using default value "${envVariableDefaults[name]}"instead`
+            `Env variable "${name}" not found. Using default value "${envVariableDefaults[name]}" instead`
         )
         return envVariableDefaults[name]
     }
@@ -29,8 +29,8 @@ const readEnvVariable = (name: EnvVariableName): string => {
 export const readEnv = () => ({
     host: readEnvVariable('HOST'),
     port: readEnvVariable('PORT'),
-    dhis2CoreUrl: readEnvVariable('DHIS2_CORE_URL'),
-    dhis2CoreMajorVersion: readEnvVariable('DHIS2_CORE_MAJOR_VERSION'),
-    dhis2CoreUsername: readEnvVariable('DHIS2_CORE_USERNAME'),
-    dhis2CorePassword: readEnvVariable('DHIS2_CORE_PASSWORD'),
+    baseUrl: readEnvVariable('DHIS2_CORE_URL'),
+    apiVersion: readEnvVariable('DHIS2_CORE_MAJOR_VERSION'),
+    username: readEnvVariable('DHIS2_CORE_USERNAME'),
+    password: readEnvVariable('DHIS2_CORE_PASSWORD'),
 })

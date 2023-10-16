@@ -1,4 +1,21 @@
 // Only use global type definitions for shared types
+type VisualizationType =
+    | 'COLUMN'
+    | 'STACKED_COLUMN'
+    | 'BAR'
+    | 'STACKED_BAR'
+    | 'LINE'
+    | 'AREA'
+    | 'STACKED_AREA'
+    | 'PIE'
+    | 'RADAR'
+    | 'GAUGE'
+    | 'YEAR_OVER_YEAR_LINE'
+    | 'YEAR_OVER_YEAR_COLUMN'
+    | 'SCATTER'
+    | 'BUBBLE'
+    | 'SINGLE_VALUE'
+    | 'PIVOT_TABLE'
 
 type DashboardItemType =
     | 'VISUALIZATION'
@@ -21,7 +38,7 @@ type Dhis2Map = {
 type Visualization = {
     id: string
     name: string
-    type: string
+    type: VisualizationType
 }
 
 type DashboardItem = {
@@ -35,11 +52,4 @@ type Dashboard = {
     displayName: string
     itemCount: number
     dashboardItems: DashboardItem[]
-}
-
-type DashboardToEmailConverterOptions = {
-    dhis2CoreUrl: string
-    dhis2CoreMajorVersion: string
-    dhis2CoreUsername: string
-    dhis2CorePassword: string
 }
