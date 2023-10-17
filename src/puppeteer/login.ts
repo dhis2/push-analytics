@@ -1,7 +1,5 @@
-import type { CustomPage } from './createAuthenticatedBrowserPage'
-
 type Options = {
-    page: CustomPage
+    page: PageWithRelativeNavigation
     username: string
     password: string
 }

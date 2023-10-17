@@ -1,4 +1,4 @@
-import puppeteer, { GoToOptions, Page, PuppeteerLaunchOptions } from 'puppeteer'
+import puppeteer, { GoToOptions, PuppeteerLaunchOptions } from 'puppeteer'
 import { login } from './login'
 
 type Options = {
@@ -8,16 +8,12 @@ type Options = {
     debug?: boolean
 }
 
-export type CustomPage = Page & {
-    gotoPath: (path: string, options?: GoToOptions) => Promise<void>
-}
-
 export const createAuthenticatedBrowserPage = async ({
     baseUrl,
     username,
     password,
     debug = false,
-}: Options): Promise<Page> => {
+}: Options): Promise<PageWithRelativeNavigation> => {
     const browserOptions: PuppeteerLaunchOptions = debug
         ? {
               headless: false,
@@ -31,13 +27,14 @@ export const createAuthenticatedBrowserPage = async ({
     const browser = await puppeteer.launch(browserOptions)
     const page = await browser.newPage()
 
-    const customPage: CustomPage = Object.assign(page, {
-        gotoPath: async (path: string, options?: GoToOptions) => {
-            await page.goto(`${baseUrl}/${path}`, options)
-        },
-    })
+    const pageWithRelativeNavigation: PageWithRelativeNavigation =
+        Object.assign(page, {
+            gotoPath: async (path: string, options?: GoToOptions) => {
+                await page.goto(`${baseUrl}/${path}`, options)
+            },
+        })
 
-    await login({ page: customPage, username, password })
+    await login({ page: pageWithRelativeNavigation, username, password })
 
-    return customPage
+    return pageWithRelativeNavigation
 }
