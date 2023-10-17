@@ -1,5 +1,6 @@
 import puppeteer, { GoToOptions, PuppeteerLaunchOptions } from 'puppeteer'
 import { login } from './login'
+import { PageWithRelativeNavigation } from '../types/Puppeteer'
 
 type Options = {
     baseUrl: string

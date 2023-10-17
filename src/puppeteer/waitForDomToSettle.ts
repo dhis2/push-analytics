@@ -1,7 +1,7 @@
-import { Page } from 'puppeteer'
+import type { PageWithRelativeNavigation } from '../types'
 
 export const waitForDomToSettle = (
-    page: Page,
+    page: PageWithRelativeNavigation,
     timeoutMs = 30000,
     debounceMs = 1000
 ) =>

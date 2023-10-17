@@ -1,5 +1,6 @@
-// Only use global type definitions for shared types
-type VisualizationType =
+import { PageWithRelativeNavigation } from './Puppeteer'
+
+export type VisualizationType =
     | 'COLUMN'
     | 'STACKED_COLUMN'
     | 'BAR'
@@ -17,7 +18,7 @@ type VisualizationType =
     | 'SINGLE_VALUE'
     | 'PIVOT_TABLE'
 
-type DashboardItemType =
+export type DashboardItemType =
     | 'VISUALIZATION'
     | 'EVENT_VISUALIZATION'
     | 'EVENT_CHART'
@@ -30,26 +31,36 @@ type DashboardItemType =
     | 'MESSAGES'
     | 'APP'
 
-type Dhis2Map = {
+export type Dhis2Map = {
     id: string
     name: string
 }
 
-type Visualization = {
+export type Visualization = {
     id: string
     name: string
     type: VisualizationType
 }
 
-type DashboardItem = {
+export type DashboardItem = {
     id: string
     type: DashboardItemType
     visualization?: Visualization
     map?: Dhis2Map
 }
 
-type Dashboard = {
+export type Dashboard = {
     displayName: string
     itemCount: number
     dashboardItems: DashboardItem[]
+}
+
+export type ConverterFn = (
+    dashboardItem: DashboardItem,
+    page: PageWithRelativeNavigation
+) => Promise<string>
+
+export type DashboardItemGroup = {
+    dashboardItems: DashboardItem[]
+    converter: ConverterFn
 }

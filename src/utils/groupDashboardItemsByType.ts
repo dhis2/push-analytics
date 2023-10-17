@@ -1,9 +1,8 @@
-import { Page } from 'puppeteer'
-
-type DashboardItemGroup = {
-    dashboardItems: DashboardItem[]
-    converter: (dashboardItem: DashboardItem, page: Page) => Promise<string>
-}
+import type {
+    DashboardItem,
+    DashboardItemGroup,
+    DashboardItemType,
+} from '../types'
 
 const defaultConverter = async (dashboardItem: DashboardItem) =>
     Promise.resolve(

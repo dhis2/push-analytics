@@ -1,3 +1,4 @@
+import type { Dashboard } from '../types'
 import { createHttpGetClient } from './createHttpGetClient'
 
 export const getDashboard = async (
@@ -27,5 +28,6 @@ export const getDashboard = async (
             ],
         },
     ]
+
     return await (<Promise<Dashboard>>fetchData(path, fields))
 }

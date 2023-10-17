@@ -1,6 +1,7 @@
 import { fieldsArrayToQueryParam } from './fieldsArrayToQueryParam'
 import { doGetRequest } from './doGetRequest'
 import { computeBaseRequestOptions } from './computeBaseRequestOptions'
+import type { Field } from '../types'
 
 type CreateOptions = {
     baseUrl: string

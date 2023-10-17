@@ -1,4 +1,5 @@
 import { Browser } from 'puppeteer'
+import type { DashboardItem } from '../types'
 
 type Options = {
     browser: Browser

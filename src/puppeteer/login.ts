@@ -1,3 +1,5 @@
+import type { PageWithRelativeNavigation } from '../types'
+
 type Options = {
     page: PageWithRelativeNavigation
     username: string
