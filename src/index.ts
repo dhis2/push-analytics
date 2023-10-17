@@ -1,7 +1,7 @@
 import http from 'http'
 import { parseDashBoardId } from './utils/parseDashBoardId'
 import { HttpResponseStatusError } from './utils/HttpResponseStatusError'
-import { validateRequest } from './validateRequest'
+import { validateRequest } from './utils/validateRequest'
 import { readEnv } from './utils/readEnv'
 import { convertDashboardToEmailHtml } from './convertDashboardToEmailHtml'
 

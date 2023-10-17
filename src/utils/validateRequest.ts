@@ -1,5 +1,5 @@
 import http from 'http'
-import { HttpResponseStatusError } from './utils/HttpResponseStatusError'
+import { HttpResponseStatusError } from './HttpResponseStatusError'
 
 const TYPE_JSON = 'application/json'
 const TYPE_ANY = '*/*'

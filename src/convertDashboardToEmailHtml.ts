@@ -1,41 +1,37 @@
-import { getDashboard } from './httpGetClient/getDashboard'
+import { getDashboard } from './httpGetClient'
 import { groupDashboardItemsByType } from './utils/groupDashboardItemsByType'
-import { createHttpGetClient } from './httpGetClient/createHttpGetClient'
 import { createAuthenticatedBrowserPage } from './puppeteer'
 
 type Options = {
-    dashboardId: string
-    baseUrl: string
     apiVersion: string
-    username: string
+    baseUrl: string
+    dashboardId: string
     password: string
+    username: string
 }
 
 export const convertDashboardToEmailHtml = async ({
-    dashboardId,
-    baseUrl,
     apiVersion,
-    username,
+    baseUrl,
+    dashboardId,
     password,
+    username,
 }: Options) => {
-    const fetchData = createHttpGetClient({
-        baseUrl,
-        apiVersion,
-        username,
-        password,
-    })
-    const { displayName, dashboardItems } = await getDashboard(
-        dashboardId,
-        fetchData
-    )
-    const dashboardItemsPerType = groupDashboardItemsByType(dashboardItems)
+    const htmlSnippets: Record<string, string> = {}
     const page = await createAuthenticatedBrowserPage({
         baseUrl,
         username,
         password,
-        debug: false,
     })
-    const htmlSnippets: Record<string, string> = {}
+    const { displayName, dashboardItems } = await getDashboard(
+        apiVersion,
+        baseUrl,
+        dashboardId,
+        password,
+        username
+    )
+    const dashboardItemsPerType = groupDashboardItemsByType(dashboardItems)
+
     for (const { converter, dashboardItems } of Object.values(
         dashboardItemsPerType
     )) {

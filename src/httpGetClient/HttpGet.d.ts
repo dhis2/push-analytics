@@ -4,5 +4,3 @@ type FieldObject = {
 }
 
 type Field = string | FieldObject
-
-type HttpGetFn = (path: string, fields: Field[]) => Promise<T>

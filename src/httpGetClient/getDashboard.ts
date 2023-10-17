@@ -1,7 +1,18 @@
+import { createHttpGetClient } from './createHttpGetClient'
+
 export const getDashboard = async (
+    apiVersion: string,
+    baseUrl: string,
     dashboardId: string,
-    fetchData: HttpGetFn
+    password: string,
+    username: string
 ) => {
+    const fetchData = createHttpGetClient({
+        apiVersion,
+        baseUrl,
+        password,
+        username,
+    })
     const path = `/dashboards/${dashboardId}`
     const fields = [
         'displayName',
@@ -16,6 +27,5 @@ export const getDashboard = async (
             ],
         },
     ]
-    const result: Dashboard = await fetchData(path, fields)
-    return result
+    return await (<Promise<Dashboard>>fetchData(path, fields))
 }
