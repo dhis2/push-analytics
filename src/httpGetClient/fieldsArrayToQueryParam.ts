@@ -1,3 +1,5 @@
+import type { Field } from '../types'
+
 const parseField = (field: Field): string => {
     if (typeof field === 'string') {
         return field
