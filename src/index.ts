@@ -21,7 +21,6 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(200)
         res.end(html)
     } catch (error) {
-        console.log(error)
         if (error instanceof HttpResponseStatusError) {
             res.writeHead(error.status)
         } else {

@@ -1,3 +1,3 @@
-export { createBrowser } from './createBrowser'
+export { createAuthenticatedBrowserPage } from './createAuthenticatedBrowserPage'
 export { login } from './login'
 export { waitForDomToSettle } from './waitForDomToSettle'
