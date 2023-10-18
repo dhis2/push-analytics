@@ -1,8 +1,10 @@
 import http from 'http'
-import { parseDashBoardId } from './utils/parseDashBoardId'
-import { HttpResponseStatusError } from './utils/HttpResponseStatusError'
-import { validateRequest } from './utils/validateRequest'
-import { readEnv } from './utils/readEnv'
+import {
+    parseDashBoardId,
+    HttpResponseStatusError,
+    readEnv,
+    validateRequest,
+} from './utils'
 import { convertDashboardToEmailHtml } from './convertDashboardToEmailHtml'
 
 const { host, port, baseUrl, apiVersion, username, password } = readEnv()

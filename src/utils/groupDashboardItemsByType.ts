@@ -1,3 +1,4 @@
+import { getMapHtml } from '../puppeteer'
 import type {
     DashboardItem,
     DashboardItemGroup,
@@ -22,7 +23,7 @@ export const groupDashboardItemsByType = (dashboardItems: DashboardItem[]) =>
                 converter: defaultConverter,
             },
             EVENT_CHART: { dashboardItems: [], converter: defaultConverter },
-            MAP: { dashboardItems: [], converter: defaultConverter },
+            MAP: { dashboardItems: [], converter: getMapHtml },
             EVENT_REPORT: { dashboardItems: [], converter: defaultConverter },
             USERS: { dashboardItems: [], converter: defaultConverter },
             REPORTS: { dashboardItems: [], converter: defaultConverter },

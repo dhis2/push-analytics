@@ -1,5 +1,9 @@
 import { getDashboard } from './httpGetClient'
-import { groupDashboardItemsByType } from './utils/groupDashboardItemsByType'
+import {
+    clearDownloadDir,
+    groupDashboardItemsByType,
+    insertIntoEmailTemplate,
+} from './utils'
 import { createAuthenticatedBrowserPage } from './puppeteer'
 
 type Options = {
@@ -17,11 +21,14 @@ export const convertDashboardToEmailHtml = async ({
     password,
     username,
 }: Options) => {
+    const startTimestamp = Date.now()
+    console.log('Dashboard to email generation started')
     const htmlSnippets: Record<string, string> = {}
-    const page = await createAuthenticatedBrowserPage({
+    const { browser, page } = await createAuthenticatedBrowserPage({
         baseUrl,
         username,
         password,
+        debug: false,
     })
     const { displayName, dashboardItems } = await getDashboard(
         apiVersion,
@@ -42,8 +49,16 @@ export const convertDashboardToEmailHtml = async ({
             )
         }
     }
-    return dashboardItems.reduce((html, { id }) => {
+    const dashboardHtml = dashboardItems.reduce((html, { id }) => {
         html += htmlSnippets[id] + ''
         return html
     }, `<h1>${displayName}</h1>`)
+
+    await browser.close()
+    await clearDownloadDir()
+
+    const duration = ((Date.now() - startTimestamp) / 1000).toFixed(2)
+    console.log(`Process completed in ${duration} seconds`)
+
+    return insertIntoEmailTemplate(dashboardHtml)
 }

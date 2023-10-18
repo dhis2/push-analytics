@@ -1,6 +1,12 @@
-import puppeteer, { GoToOptions, PuppeteerLaunchOptions } from 'puppeteer'
+import puppeteer, {
+    Browser,
+    GoToOptions,
+    PuppeteerLaunchOptions,
+} from 'puppeteer'
 import { login } from './login'
 import { PageWithRelativeNavigation } from '../types/Puppeteer'
+import { downloadPath } from '../utils'
+import path from 'path'
 
 type Options = {
     baseUrl: string
@@ -14,28 +20,53 @@ export const createAuthenticatedBrowserPage = async ({
     username,
     password,
     debug = false,
-}: Options): Promise<PageWithRelativeNavigation> => {
+}: Options): Promise<{
+    page: PageWithRelativeNavigation
+    browser: Browser
+}> => {
+    const defaultViewport = { width: 1280, height: 1000 }
     const browserOptions: PuppeteerLaunchOptions = debug
         ? {
               headless: false,
               devtools: true,
-              defaultViewport: { width: 1280, height: 1000 },
+              defaultViewport,
               args: ['--window-size=2560,2160', '--window-position=4000,0'],
           }
         : {
               headless: 'new',
+              defaultViewport,
           }
     const browser = await puppeteer.launch(browserOptions)
     const page = await browser.newPage()
+    const cdpSession = await page.target().createCDPSession()
+    cdpSession.send('Browser.setDownloadBehavior', {
+        behavior: 'allow',
+        downloadPath,
+    })
 
     const pageWithRelativeNavigation: PageWithRelativeNavigation =
         Object.assign(page, {
             gotoPath: async (path: string, options?: GoToOptions) => {
                 await page.goto(`${baseUrl}/${path}`, options)
             },
+            setDownloadPathToItemId: (id: string): string => {
+                const resolvedPath = path.join(downloadPath, id)
+                cdpSession.send('Browser.setDownloadBehavior', {
+                    behavior: 'allow',
+                    downloadPath: resolvedPath,
+                })
+                return resolvedPath
+            },
         })
 
     await login({ page: pageWithRelativeNavigation, username, password })
 
-    return pageWithRelativeNavigation
+    if (debug) {
+        page.on('console', (msg) => {
+            for (let i = 0; i < msg.args().length; ++i)
+                console.log(`${i}: ${msg.args()[i]}`)
+        })
+    }
+
+    return { page: pageWithRelativeNavigation, browser }
 }
