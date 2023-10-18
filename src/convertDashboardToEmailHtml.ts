@@ -1,6 +1,7 @@
 import { getDashboard } from './httpGetClient'
 import {
     clearDownloadDir,
+    createTimer,
     groupDashboardItemsByType,
     insertIntoEmailTemplate,
 } from './utils'
@@ -24,7 +25,7 @@ export const convertDashboardToEmailHtml = async ({
     username,
     debug = false,
 }: Options) => {
-    const startTimestamp = Date.now()
+    const timer = createTimer()
     console.log('Dashboard to email generation started')
     const htmlSnippets: Record<string, ConverterResult> = {}
     const { browser, page } = await createAuthenticatedBrowserPage({
@@ -76,8 +77,7 @@ export const convertDashboardToEmailHtml = async ({
         await clearDownloadDir()
     }
 
-    const duration = ((Date.now() - startTimestamp) / 1000).toFixed(2)
-    console.log(`Process completed in ${duration} seconds`)
+    console.log(`Process completed in ${timer.getElapsedTime()} seconds`)
 
     return insertIntoEmailTemplate(html, css)
 }

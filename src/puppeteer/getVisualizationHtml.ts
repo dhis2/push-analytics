@@ -1,4 +1,5 @@
-import type { ConverterFn } from '../types'
+import type { ConverterFn, ConverterResult } from '../types'
+import { insertIntoChartTemplate } from '../utils/insertIntoChartTemplate'
 // import { waitForFileToDownload } from '../utils'
 // import { base64EncodeFile } from '../utils/base64EncodeFile'
 import { clickButtonWithText } from './clickButtonWithText'
@@ -16,6 +17,7 @@ export const getVisualizationHtml: ConverterFn = async (
             'function `getVisualizationHtml` received a `dashboardItem` without a `visualization` object'
         )
     }
+    let result: ConverterResult = ''
     const { id, name, type } = dashboardItem.visualization
     const isPivotTable = type === 'PIVOT_TABLE'
 
@@ -40,11 +42,16 @@ export const getVisualizationHtml: ConverterFn = async (
             : target.url().startsWith('blob:')
     )
 
+    const downloadPage = await fileDownloadTarget.page()
+    if (!downloadPage) {
+        throw new Error(
+            `Could not find tab with ${
+                isPivotTable ? 'HTML table' : 'PNG file'
+            }`
+        )
+    }
+
     if (isPivotTable) {
-        const downloadPage = await fileDownloadTarget.page()
-        if (!downloadPage) {
-            throw new Error('Could not find tab with HTML and CSS output')
-        }
         const html =
             (await downloadPage.evaluate(
                 () => document.querySelector('body')?.innerHTML
@@ -53,36 +60,22 @@ export const getVisualizationHtml: ConverterFn = async (
             (await downloadPage.evaluate(
                 () => document.querySelector('style')?.innerHTML
             )) ?? ''
-        return { html, css }
+
+        result = { html, css }
     } else {
-        return 'Not done yet'
+        const img = await downloadPage.waitForSelector('img')
+        const base64 = await img?.screenshot({ encoding: 'base64' })
+        const base64Str = Buffer.isBuffer(base64)
+            ? base64.toString()
+            : base64 ?? ''
+        result = insertIntoChartTemplate(name, base64Str)
     }
 
-    // // Confirm download view is open by verifying this button's visibility
-    // await page.waitForXPath(
-    //     "//button[contains(text(), 'Exit download mode')]",
-    //     { visible: true }
-    // )
-    // // Some additional tiles may need to be fetched for the download view
-    // page.waitForNetworkIdle()
+    // Close the download tab and make sure the main tab is activated
+    await page.bringToFront()
+    await downloadPage.close()
+    // Log something for a sense of progress
+    console.log(`Converted ${isPivotTable ? 'pivot table' : 'chart'} "${name}"`)
 
-    // /* TODO: figure out a better solution than simply waiting.
-    //  * We need the map to be ready and this takes time.
-    //  * How much time is probably dependant on the host machine's
-    //  * specs. On my machine waiting any less than 1000ms produces
-    //  * maps that have not fully rendered. Obviously this could
-    //  * be vastly different on another machine, so we need to
-    //  * detect it some other way. */
-    // await waitMs(1600)
-    // // Click the next download button to trigger the actual download
-    // await clickButtonWithText('Download', page)
-    // // Wait until the file has downloaded and get the full path
-    // const fullFilePath = await waitForFileToDownload(downloadDir)
-    // // Convert to base64 encoded string
-    // const base64Str = base64EncodeFile(fullFilePath)
-    // // Show some progress so it's clear the process is not hanging
-    // logImageConversion('map', fullFilePath)
-
-    // return `<img src="data:image/png;base64,${base64Str}"></img>`
-    return `<pre>${JSON.stringify(dashboardItem, null, 4)}</pre>`
+    return result
 }
