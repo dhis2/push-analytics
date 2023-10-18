@@ -10,7 +10,8 @@
         "start:dev": "nodemon --exec ts-node -r dotenv/config src/index.ts",
         "start:prod": "npm run build && node build/index.js",
         "build": "rimraf ./build && tsc",
-        "format": ""
+        "lint": "d2-style check",
+        "format": "d2-style apply"
     },
     "devDependencies": {
         "@dhis2/cli-style": "^10.5.1",
