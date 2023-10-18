@@ -11,6 +11,9 @@ export const getMapHtml: ConverterFn = async (dashboardItem, page) => {
             'function `getMapHtml` received a `dashboardItem` without a `map` object'
         )
     }
+    // Make sure we download the exported a file to `./images/${dashboardId}`,
+    // which allows us to track the download process in a relatively sane way
+    const downloadDir = page.setDownloadPathToItemId(dashboardItem.map.id)
     // Open app and wait until all tiles have been fetched
     await page.gotoPath(`dhis-web-maps/?id=${dashboardItem.map.id}`, {
         waitUntil: 'networkidle2',
@@ -26,9 +29,6 @@ export const getMapHtml: ConverterFn = async (dashboardItem, page) => {
     )
     // Some additional tiles may need to be fetched for the download view
     page.waitForNetworkIdle()
-    // Make sure we download the exported a file to `./images/${dashboardId}`,
-    // which allows us to track the download process in a relatively sane way
-    const downloadDir = page.setDownloadPathToItemId(dashboardItem.map.id)
 
     /* TODO: figure out a better solution than simply waiting.
      * We need the map to be ready and this takes time.

@@ -1,4 +1,4 @@
-import { getMapHtml } from '../puppeteer'
+import { /*getMapHtml,*/ getVisualizationHtml } from '../puppeteer'
 import type {
     DashboardItem,
     DashboardItemGroup,
@@ -17,13 +17,17 @@ export const groupDashboardItemsByType = (dashboardItems: DashboardItem[]) =>
             return acc
         },
         {
-            VISUALIZATION: { dashboardItems: [], converter: defaultConverter },
+            VISUALIZATION: {
+                dashboardItems: [],
+                converter: getVisualizationHtml,
+            },
             EVENT_VISUALIZATION: {
                 dashboardItems: [],
                 converter: defaultConverter,
             },
             EVENT_CHART: { dashboardItems: [], converter: defaultConverter },
-            MAP: { dashboardItems: [], converter: getMapHtml },
+            // MAP: { dashboardItems: [], converter: getMapHtml },
+            MAP: { dashboardItems: [], converter: defaultConverter },
             EVENT_REPORT: { dashboardItems: [], converter: defaultConverter },
             USERS: { dashboardItems: [], converter: defaultConverter },
             REPORTS: { dashboardItems: [], converter: defaultConverter },

@@ -1,3 +1,4 @@
+import { Browser } from 'puppeteer'
 import { PageWithRelativeNavigation } from './Puppeteer'
 
 export type VisualizationType =
@@ -55,10 +56,13 @@ export type Dashboard = {
     dashboardItems: DashboardItem[]
 }
 
+export type ConverterResult = string | { html: string; css: string }
+
 export type ConverterFn = (
     dashboardItem: DashboardItem,
-    page: PageWithRelativeNavigation
-) => Promise<string>
+    page: PageWithRelativeNavigation,
+    browser: Browser
+) => Promise<ConverterResult>
 
 export type DashboardItemGroup = {
     dashboardItems: DashboardItem[]

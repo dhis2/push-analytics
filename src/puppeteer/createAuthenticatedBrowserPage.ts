@@ -19,7 +19,7 @@ export const createAuthenticatedBrowserPage = async ({
     baseUrl,
     username,
     password,
-    debug = false,
+    debug,
 }: Options): Promise<{
     page: PageWithRelativeNavigation
     browser: Browser
@@ -62,6 +62,7 @@ export const createAuthenticatedBrowserPage = async ({
     await login({ page: pageWithRelativeNavigation, username, password })
 
     if (debug) {
+        // Show browser log messages in the terminal in debug mode
         page.on('console', (msg) => {
             for (let i = 0; i < msg.args().length; ++i)
                 console.log(`${i}: ${msg.args()[i]}`)

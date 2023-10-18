@@ -5,6 +5,7 @@ import {
     insertIntoEmailTemplate,
 } from './utils'
 import { createAuthenticatedBrowserPage } from './puppeteer'
+import { ConverterResult } from './types'
 
 type Options = {
     apiVersion: string
@@ -12,6 +13,7 @@ type Options = {
     dashboardId: string
     password: string
     username: string
+    debug?: boolean
 }
 
 export const convertDashboardToEmailHtml = async ({
@@ -20,15 +22,16 @@ export const convertDashboardToEmailHtml = async ({
     dashboardId,
     password,
     username,
+    debug = false,
 }: Options) => {
     const startTimestamp = Date.now()
     console.log('Dashboard to email generation started')
-    const htmlSnippets: Record<string, string> = {}
+    const htmlSnippets: Record<string, ConverterResult> = {}
     const { browser, page } = await createAuthenticatedBrowserPage({
         baseUrl,
         username,
         password,
-        debug: false,
+        debug,
     })
     const { displayName, dashboardItems } = await getDashboard(
         apiVersion,
@@ -45,20 +48,36 @@ export const convertDashboardToEmailHtml = async ({
         for (const dashboardItem of dashboardItems) {
             htmlSnippets[dashboardItem.id] = await converter(
                 dashboardItem,
-                page
+                page,
+                browser
             )
         }
     }
-    const dashboardHtml = dashboardItems.reduce((html, { id }) => {
-        html += htmlSnippets[id] + ''
-        return html
-    }, `<h1>${displayName}</h1>`)
+    const { html, css } = dashboardItems.reduce(
+        (acc, { id }) => {
+            const htmlSnippet = htmlSnippets[id]
 
-    await browser.close()
-    await clearDownloadDir()
+            if (!htmlSnippet || typeof htmlSnippet === 'string') {
+                acc.html += htmlSnippet ?? ''
+            } else {
+                acc.html += htmlSnippet.html ?? ''
+                acc.css += htmlSnippet.css ?? ''
+            }
+            return acc
+        },
+        {
+            html: `<h1>${displayName}</h1>`,
+            css: '',
+        }
+    )
+
+    if (!debug) {
+        await browser.close()
+        await clearDownloadDir()
+    }
 
     const duration = ((Date.now() - startTimestamp) / 1000).toFixed(2)
     console.log(`Process completed in ${duration} seconds`)
 
-    return insertIntoEmailTemplate(dashboardHtml)
+    return insertIntoEmailTemplate(html, css)
 }

@@ -1,10 +1,6 @@
 import { ElementHandle } from 'puppeteer'
 import type { PageWithRelativeNavigation } from '../types'
-
-const escapeXpathString = (str: string) => {
-    const splitedQuotes = str.replace(/'/g, `', "'", '`)
-    return `concat('${splitedQuotes}', '')`
-}
+import { escapeXpathString } from './escapeXpathString'
 
 export const clickButtonWithText = async (
     text: string,

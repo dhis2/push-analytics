@@ -19,6 +19,7 @@ const server = http.createServer(async (req, res) => {
             apiVersion,
             username,
             password,
+            debug: false,
         })
         res.writeHead(200)
         res.end(html)
