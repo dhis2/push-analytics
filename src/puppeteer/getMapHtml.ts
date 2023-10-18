@@ -2,7 +2,7 @@ import type { ConverterFn } from '../types'
 import { waitForFileToDownload } from '../utils'
 import { base64EncodeFile } from '../utils/base64EncodeFile'
 import { clickButtonWithText } from './clickButtonWithText'
-import { logMapItemConversion } from './logMapItemConversion'
+import { logImageConversion } from './logImageConversion'
 import { waitMs } from './waitMs'
 
 export const getMapHtml: ConverterFn = async (dashboardItem, page) => {
@@ -45,7 +45,7 @@ export const getMapHtml: ConverterFn = async (dashboardItem, page) => {
     // Convert to base64 encoded string
     const base64Str = base64EncodeFile(fullFilePath)
     // Show some progress so it's clear the process is not hanging
-    logMapItemConversion(fullFilePath)
+    logImageConversion('map', fullFilePath)
 
     return `<img src="data:image/png;base64,${base64Str}"></img>`
 }
