@@ -106,7 +106,7 @@ const template = `
                 <table role="presentation" aria-hidden="true" cellspacing="0" cellpadding="0" border="0" align="center" width="750" class="container">
                     <tr>
                         <td>
-                            <table role="presentation" aria-hidden="true" cellspacing="0" cellpadding="0" border="0" align="left" width="100%">
+                            <table role="presentation" aria-hidden="true" cellspacing="0" cellpadding="0" border="0" align="center" width="100%">
                                 <tr>
                                     <td class="dashboard">
                                         {{html}}
