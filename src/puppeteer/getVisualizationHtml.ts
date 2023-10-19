@@ -1,11 +1,9 @@
 import type { ConverterFn, ConverterResult } from '../types'
+import { createTimer } from '../utils'
 import { insertIntoChartTemplate } from '../utils/insertIntoChartTemplate'
-// import { waitForFileToDownload } from '../utils'
-// import { base64EncodeFile } from '../utils/base64EncodeFile'
+import { logDashboardItemConversion } from '../utils/logDashboardItemConversion'
 import { clickButtonWithText } from './clickButtonWithText'
 import { clickHoverMenuItemWithText } from './clickHoverMenuItemWithText'
-// import { logImageConversion } from './logImageConversion'
-// import { waitMs } from './waitMs'
 
 export const getVisualizationHtml: ConverterFn = async (
     dashboardItem,
@@ -17,9 +15,11 @@ export const getVisualizationHtml: ConverterFn = async (
             'function `getVisualizationHtml` received a `dashboardItem` without a `visualization` object'
         )
     }
+    const timer = createTimer()
     let result: ConverterResult = ''
     const { id, name, type } = dashboardItem.visualization
     const isPivotTable = type === 'PIVOT_TABLE'
+    const visType = isPivotTable ? type : 'CHART'
 
     // Open app and wait until network traffic stops
     await page.gotoPath(`dhis-web-data-visualizer/#/${id}`, {
@@ -75,7 +75,7 @@ export const getVisualizationHtml: ConverterFn = async (
     await page.bringToFront()
     await downloadPage.close()
     // Log something for a sense of progress
-    console.log(`Converted ${isPivotTable ? 'pivot table' : 'chart'} "${name}"`)
+    logDashboardItemConversion(visType, name, timer.getElapsedTime())
 
     return result
 }

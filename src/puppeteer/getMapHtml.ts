@@ -1,8 +1,8 @@
 import type { ConverterFn } from '../types'
-import { waitForFileToDownload } from '../utils'
+import { createTimer, waitForFileToDownload } from '../utils'
 import { base64EncodeFile } from '../utils/base64EncodeFile'
+import { logDashboardItemConversion } from '../utils/logDashboardItemConversion'
 import { clickButtonWithText } from './clickButtonWithText'
-import { logImageConversion } from './logImageConversion'
 import { waitMs } from './waitMs'
 
 export const getMapHtml: ConverterFn = async (dashboardItem, page) => {
@@ -11,6 +11,7 @@ export const getMapHtml: ConverterFn = async (dashboardItem, page) => {
             'function `getMapHtml` received a `dashboardItem` without a `map` object'
         )
     }
+    const timer = createTimer()
     // Make sure we download the exported a file to `./images/${dashboardId}`,
     // which allows us to track the download process in a relatively sane way
     const downloadDir = page.setDownloadPathToItemId(dashboardItem.map.id)
@@ -45,7 +46,11 @@ export const getMapHtml: ConverterFn = async (dashboardItem, page) => {
     // Convert to base64 encoded string
     const base64Str = base64EncodeFile(fullFilePath)
     // Show some progress so it's clear the process is not hanging
-    logImageConversion('map', fullFilePath)
+    logDashboardItemConversion(
+        dashboardItem.type,
+        fullFilePath,
+        timer.getElapsedTime()
+    )
 
     return `<img src="data:image/png;base64,${base64Str}"></img>`
 }

@@ -77,7 +77,9 @@ export const convertDashboardToEmailHtml = async ({
         await clearDownloadDir()
     }
 
-    console.log(`Process completed in ${timer.getElapsedTime()} seconds`)
+    console.log(
+        `Dashboard email HTML generated in ${timer.getElapsedTime()} seconds`
+    )
 
     return insertIntoEmailTemplate(html, css)
 }
