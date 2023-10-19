@@ -3,10 +3,10 @@ import {
     clearDownloadDir,
     createTimer,
     groupDashboardItemsByType,
-    insertIntoEmailTemplate,
 } from './utils'
 import { createAuthenticatedBrowserPage } from './puppeteer'
 import { ConverterResult } from './types'
+import { insertIntoEmailTemplate } from './templates'
 
 type Options = {
     apiVersion: string

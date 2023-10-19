@@ -1,3 +1,4 @@
+import { insertIntoMapTemplate } from '../templates'
 import type { ConverterFn } from '../types'
 import { createTimer, waitForFileToDownload } from '../utils'
 import { base64EncodeFile } from '../utils/base64EncodeFile'
@@ -52,5 +53,5 @@ export const getMapHtml: ConverterFn = async (dashboardItem, page) => {
         timer.getElapsedTime()
     )
 
-    return `<img src="data:image/png;base64,${base64Str}"></img>`
+    return insertIntoMapTemplate(base64Str)
 }

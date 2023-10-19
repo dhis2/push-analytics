@@ -1,6 +1,9 @@
 import type { ConverterFn, ConverterResult } from '../types'
 import { createTimer } from '../utils'
-import { insertIntoChartTemplate } from '../utils/insertIntoChartTemplate'
+import {
+    insertIntoChartTemplate,
+    insertIntoPivotTableTemplate,
+} from '../templates'
 import { logDashboardItemConversion } from '../utils/logDashboardItemConversion'
 import { clickButtonWithText } from './clickButtonWithText'
 import { clickHoverMenuItemWithText } from './clickHoverMenuItemWithText'
@@ -52,7 +55,7 @@ export const getVisualizationHtml: ConverterFn = async (
     }
 
     if (isPivotTable) {
-        const html =
+        const tableHtml =
             (await downloadPage.evaluate(
                 () => document.querySelector('body')?.innerHTML
             )) ?? ''
@@ -61,7 +64,7 @@ export const getVisualizationHtml: ConverterFn = async (
                 () => document.querySelector('style')?.innerHTML
             )) ?? ''
 
-        result = { html, css }
+        result = { html: insertIntoPivotTableTemplate(name, tableHtml), css }
     } else {
         const img = await downloadPage.waitForSelector('img')
         const base64 = await img?.screenshot({ encoding: 'base64' })
