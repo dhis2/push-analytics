@@ -1,5 +1,5 @@
 import http from 'http'
-import { HttpResponseStatusError } from '../utils'
+import { HttpResponseStatusError } from './HttpResponseStatusError'
 
 export const doGetRequest = async <T>(
     options: http.RequestOptions

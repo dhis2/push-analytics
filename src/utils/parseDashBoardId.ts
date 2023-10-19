@@ -1,4 +1,4 @@
-import { HttpResponseStatusError } from './HttpResponseStatusError'
+import { HttpResponseStatusError } from '../httpGetClient'
 
 const UID_REGEX = /\/[a-zA-Z0-9]{11}/
 export const parseDashBoardId = (url = '') => {
