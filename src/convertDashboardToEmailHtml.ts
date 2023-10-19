@@ -1,12 +1,9 @@
+import { groupDashboardItemsByType } from './groupDashboardItemsByType'
 import { getDashboard } from './httpGetClient'
-import {
-    clearDownloadDir,
-    createTimer,
-    groupDashboardItemsByType,
-} from './utils'
+import { clearDownloadDir, createTimer } from './utils'
 import { createAuthenticatedBrowserPage } from './puppeteer'
-import { ConverterResult } from './types'
 import { insertIntoEmailTemplate } from './templates'
+import { ConverterResult } from './types'
 
 type Options = {
     apiVersion: string

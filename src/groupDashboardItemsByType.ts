@@ -1,9 +1,9 @@
-import { getMapHtml, getVisualizationHtml } from '../puppeteer'
+import { getMapHtml, getVisualizationHtml } from './puppeteer'
 import type {
     DashboardItem,
     DashboardItemGroup,
     DashboardItemType,
-} from '../types'
+} from './types'
 
 const defaultConverter = async (dashboardItem: DashboardItem) =>
     Promise.resolve(
