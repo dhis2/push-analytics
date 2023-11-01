@@ -30,10 +30,12 @@ export const getLineListHtml: ConverterFn = async (
     /* Customise the window.open method so that when the app opens the HTML+CSS
      * in a new tab, the page URL has the correct query params for a pageSize of
      * 50 instead of disabling paging. We do not want thousands of rows in an
-     * email and we don't want to put pressure on the server by requesting them. */
+     * email and we don't want to put pressure on the server by requesting them.
+     * NOTE: currently we are not restoring the original window and this is not
+     * causing any problems */
     await page.evaluateOnNewDocument((regexJsonStr) => {
         const regexObj = JSON.parse(regexJsonStr)
-        const pattern = new RegExp(regexObj.source, regexObj.flags)
+        const regex = new RegExp(regexObj.source, regexObj.flags)
 
         const originalWindowOpen = window.open
 
@@ -41,7 +43,7 @@ export const getLineListHtml: ConverterFn = async (
             const url =
                 (args[0] instanceof URL ? args[0].toString() : args[0]) ?? ''
 
-            if (pattern.test(url)) {
+            if (regex.test(url)) {
                 args[0] = url.replace(
                     '&paging=false&',
                     '&paging=true&pageSize=50&'
