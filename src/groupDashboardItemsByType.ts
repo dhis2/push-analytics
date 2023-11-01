@@ -1,6 +1,6 @@
 import {
+    getEventReportHtml,
     getLineListHtml,
-    // getEventVisualizationHtml,
     getMapHtml,
     getVisualizationHtml,
 } from './puppeteer'
@@ -40,8 +40,7 @@ export const groupDashboardItemsByType = (dashboardItems: DashboardItem[]) =>
             },
             EVENT_CHART: { dashboardItems: [], converter: debugConverter },
             MAP: { dashboardItems: [], converter: getMapHtml },
-            // MAP: { dashboardItems: [], converter: defaultConverter },
-            EVENT_REPORT: { dashboardItems: [], converter: debugConverter },
+            EVENT_REPORT: { dashboardItems: [], converter: getEventReportHtml },
             USERS: { dashboardItems: [], converter: unsupportedTypeConverter },
             REPORTS: { dashboardItems: [], converter: debugConverter },
             RESOURCES: { dashboardItems: [], converter: debugConverter },

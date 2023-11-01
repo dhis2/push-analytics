@@ -1,5 +1,6 @@
 export { insertIntoChartTemplate } from './insertIntoChartTemplate'
 export { insertIntoEmailTemplate } from './insertIntoEmailTemplate'
+export { insertIntoEventReportTemplate } from './insertIntoEventReportTemplate'
 export { insertIntoLineListTemplate } from './insertIntoLineListTemplate'
 export { insertIntoMapTemplate } from './insertIntoMapTemplate'
 export { insertIntoPivotTableTemplate } from './insertIntoPivotTableTemplate'
