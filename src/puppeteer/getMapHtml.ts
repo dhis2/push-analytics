@@ -3,7 +3,7 @@ import type { ConverterFn } from '../types'
 import { createTimer, waitForFileToDownload } from '../utils'
 import { base64EncodeFile } from '../utils/base64EncodeFile'
 import { logDashboardItemConversion } from '../utils/logDashboardItemConversion'
-import { clickButtonWithText } from './clickButtonWithText'
+import { clickElementWithText } from './clickElementWithText'
 import { waitMs } from './waitMs'
 
 export const getMapHtml: ConverterFn = async (dashboardItem, page) => {
@@ -23,7 +23,7 @@ export const getMapHtml: ConverterFn = async (dashboardItem, page) => {
     // Wait for canvas to be visible
     await page.waitForSelector('canvas', { visible: true })
     // Open download view
-    await clickButtonWithText('Download', page)
+    await clickElementWithText({ xpath: 'button', text: 'Download', page })
     // Confirm download view is open by verifying this button's visibility
     await page.waitForXPath(
         "//button[contains(text(), 'Exit download mode')]",
@@ -41,7 +41,7 @@ export const getMapHtml: ConverterFn = async (dashboardItem, page) => {
      * detect it some other way. */
     await waitMs(1600)
     // Click the next download button to trigger the actual download
-    await clickButtonWithText('Download', page)
+    await clickElementWithText({ xpath: 'button', text: 'Download', page })
     // Wait until the file has downloaded and get the full path
     const fullFilePath = await waitForFileToDownload(downloadDir)
     // Convert to base64 encoded string

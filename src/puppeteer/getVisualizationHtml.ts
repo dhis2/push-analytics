@@ -5,8 +5,7 @@ import {
     insertIntoPivotTableTemplate,
 } from '../templates'
 import { logDashboardItemConversion } from '../utils/logDashboardItemConversion'
-import { clickButtonWithText } from './clickButtonWithText'
-import { clickHoverMenuItemWithText } from './clickHoverMenuItemWithText'
+import { clickElementWithText } from './clickElementWithText'
 
 export const getVisualizationHtml: ConverterFn = async (
     dashboardItem,
@@ -35,9 +34,9 @@ export const getVisualizationHtml: ConverterFn = async (
         : '.highcharts-container'
     await page.waitForSelector(selectorForType, { visible: true })
     // Open download dropdown and select correct download type
-    await clickButtonWithText('Download', page)
-    const menuItemText = isPivotTable ? 'HTML (.html)' : 'Image (.png)'
-    await clickHoverMenuItemWithText(menuItemText, page)
+    await clickElementWithText({ xpath: 'button', text: 'Download', page })
+    const text = isPivotTable ? 'HTML (.html)' : 'Image (.png)'
+    await clickElementWithText({ xpath: 'li/span', text, page })
     // Capture the window the download is in
     const fileDownloadTarget = await browser.waitForTarget((target) =>
         isPivotTable

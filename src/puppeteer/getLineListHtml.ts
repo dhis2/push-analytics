@@ -2,8 +2,7 @@ import type { ConverterFn } from '../types'
 import { createTimer } from '../utils'
 import { insertIntoLineListTemplate } from '../templates'
 import { logDashboardItemConversion } from '../utils/logDashboardItemConversion'
-import { clickButtonWithText } from './clickButtonWithText'
-import { clickHoverMenuItemWithText } from './clickHoverMenuItemWithText'
+import { clickElementWithText } from './clickElementWithText'
 
 const DONWLOAD_PAGE_URL_PATTERN =
     /api\/analytics\/enrollments|events\/query\/[a-zA-Z0-9]{11}\.html\+css/
@@ -64,8 +63,12 @@ export const getLineListHtml: ConverterFn = async (
         visible: true,
     })
     // Open download dropdown and select correct download type
-    await clickButtonWithText('Download', page)
-    await clickHoverMenuItemWithText('HTML+CSS (.html+css)', page)
+    await clickElementWithText({ xpath: 'button', text: 'Download', page })
+    await clickElementWithText({
+        xpath: 'li/span',
+        text: 'HTML+CSS (.html+css)',
+        page,
+    })
 
     // Get the page target which will render the HTML + CSS
     const downloadTarget = await browser.waitForTarget((target) =>
