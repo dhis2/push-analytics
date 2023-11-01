@@ -17,6 +17,7 @@ const debugConverter = async (dashboardItem: DashboardItem) => {
     )
 }
 
+// Just return an empty string for dashboard item types we do not want in emails
 const unsupportedTypeConverter = async () => Promise.resolve('')
 
 export const groupDashboardItemsByType = (dashboardItems: DashboardItem[]) =>
