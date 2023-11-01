@@ -4,7 +4,7 @@ const containerTemplate = `
 <div class="dashboard-item">{{content}}</div>
 `
 const headertemplate = `
-<h4 class="dashboard-item-header">{{name}}</h4>
+<h2 class="dashboard-item-header">{{name}}</h2>
 `
 
 const trimNewlines = (str: string) => str.replace(/\n^/, '').replace(/\n$/, '')
