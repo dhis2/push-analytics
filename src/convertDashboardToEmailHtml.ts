@@ -59,7 +59,9 @@ export const convertDashboardToEmailHtml = async ({
                 acc.html += htmlSnippet ?? ''
             } else {
                 acc.html += htmlSnippet.html ?? ''
-                acc.css += htmlSnippet.css ?? ''
+                if (htmlSnippet.css && !acc.css.includes(htmlSnippet.css)) {
+                    acc.css += htmlSnippet.css
+                }
             }
             return acc
         },
