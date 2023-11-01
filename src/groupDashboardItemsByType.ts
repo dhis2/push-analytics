@@ -1,4 +1,5 @@
 import {
+    getEventChartHtml,
     getEventReportHtml,
     getLineListHtml,
     getMapHtml,
@@ -39,7 +40,7 @@ export const groupDashboardItemsByType = (dashboardItems: DashboardItem[]) =>
                  * `LINE_LIST` type, so that is the only supported one. */
                 converter: getLineListHtml,
             },
-            EVENT_CHART: { dashboardItems: [], converter: debugConverter },
+            EVENT_CHART: { dashboardItems: [], converter: getEventChartHtml },
             MAP: { dashboardItems: [], converter: getMapHtml },
             EVENT_REPORT: { dashboardItems: [], converter: getEventReportHtml },
             USERS: { dashboardItems: [], converter: unsupportedTypeConverter },

@@ -70,6 +70,12 @@ export type EventReport = {
     type: EventVisualizationType
 }
 
+export type EventChart = {
+    id: string
+    name: string
+    type: EventVisualizationType
+}
+
 export type DashboardItem = {
     id: string
     type: DashboardItemType
@@ -77,6 +83,7 @@ export type DashboardItem = {
     map?: Dhis2Map
     eventVisualization?: EventVisualization
     eventReport?: EventReport
+    eventChart?: EventChart
 }
 
 export type Dashboard = {
