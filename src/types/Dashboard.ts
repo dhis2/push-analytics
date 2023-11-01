@@ -8,16 +8,31 @@ export type VisualizationType =
     | 'STACKED_BAR'
     | 'LINE'
     | 'AREA'
+    | 'PIE'
+    | 'RADAR'
+    | 'GAUGE'
+    | 'YEAR_OVER_YEAR_LINE YEAR_OVER_YEAR_COLUMN'
+    | 'SINGLE_VALUE'
+    | 'PIVOT_TABLE'
+
+export type EventVisualizationType =
+    | 'COLUMN'
+    | 'STACKED_COLUMN'
+    | 'BAR'
+    | 'STACKED_BAR'
+    | 'LINE'
+    | 'LINE_LIST'
+    | 'AREA'
     | 'STACKED_AREA'
     | 'PIE'
     | 'RADAR'
     | 'GAUGE'
     | 'YEAR_OVER_YEAR_LINE'
     | 'YEAR_OVER_YEAR_COLUMN'
-    | 'SCATTER'
-    | 'BUBBLE'
     | 'SINGLE_VALUE'
     | 'PIVOT_TABLE'
+    | 'SCATTER'
+    | 'BUBBLE'
 
 export type DashboardItemType =
     | 'VISUALIZATION'
@@ -43,11 +58,18 @@ export type Visualization = {
     type: VisualizationType
 }
 
+export type EventVisualization = {
+    id: string
+    name: string
+    type: EventVisualizationType
+}
+
 export type DashboardItem = {
     id: string
     type: DashboardItemType
     visualization?: Visualization
     map?: Dhis2Map
+    eventVisualization?: EventVisualization
 }
 
 export type Dashboard = {

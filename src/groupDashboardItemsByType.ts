@@ -1,14 +1,23 @@
-import { getMapHtml, getVisualizationHtml } from './puppeteer'
+import {
+    getLineListHtml,
+    // getEventVisualizationHtml,
+    getMapHtml,
+    getVisualizationHtml,
+} from './puppeteer'
 import type {
     DashboardItem,
     DashboardItemGroup,
     DashboardItemType,
 } from './types'
 
-const defaultConverter = async (dashboardItem: DashboardItem) =>
-    Promise.resolve(
+const debugConverter = async (dashboardItem: DashboardItem) => {
+    // console.log(dashboardItem)
+    return Promise.resolve(
         `<h1>Converter not implemented for type "${dashboardItem.type}" (ID: ${dashboardItem.id})</h1>`
     )
+}
+
+const unsupportedTypeConverter = async () => Promise.resolve('')
 
 export const groupDashboardItemsByType = (dashboardItems: DashboardItem[]) =>
     dashboardItems.reduce<Record<DashboardItemType, DashboardItemGroup>>(
@@ -23,17 +32,24 @@ export const groupDashboardItemsByType = (dashboardItems: DashboardItem[]) =>
             },
             EVENT_VISUALIZATION: {
                 dashboardItems: [],
-                converter: defaultConverter,
+                /* A dashboard item of type `EVENT_VISUALIZATION` can have one of
+                 * several event visualization types (i.e. `BAR`, `LINE_LIST`, etc.).
+                 * However, the only one we realistically expect to encounter is the
+                 * `LINE_LIST` type, so that is the only supported one. */
+                converter: getLineListHtml,
             },
-            EVENT_CHART: { dashboardItems: [], converter: defaultConverter },
+            EVENT_CHART: { dashboardItems: [], converter: debugConverter },
             MAP: { dashboardItems: [], converter: getMapHtml },
             // MAP: { dashboardItems: [], converter: defaultConverter },
-            EVENT_REPORT: { dashboardItems: [], converter: defaultConverter },
-            USERS: { dashboardItems: [], converter: defaultConverter },
-            REPORTS: { dashboardItems: [], converter: defaultConverter },
-            RESOURCES: { dashboardItems: [], converter: defaultConverter },
-            TEXT: { dashboardItems: [], converter: defaultConverter },
-            MESSAGES: { dashboardItems: [], converter: defaultConverter },
-            APP: { dashboardItems: [], converter: defaultConverter },
+            EVENT_REPORT: { dashboardItems: [], converter: debugConverter },
+            USERS: { dashboardItems: [], converter: unsupportedTypeConverter },
+            REPORTS: { dashboardItems: [], converter: debugConverter },
+            RESOURCES: { dashboardItems: [], converter: debugConverter },
+            TEXT: { dashboardItems: [], converter: debugConverter },
+            MESSAGES: {
+                dashboardItems: [],
+                converter: unsupportedTypeConverter,
+            },
+            APP: { dashboardItems: [], converter: unsupportedTypeConverter },
         }
     )
