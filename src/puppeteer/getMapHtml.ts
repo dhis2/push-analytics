@@ -13,7 +13,7 @@ export const getMapHtml: ConverterFn = async (dashboardItem, page) => {
         )
     }
     const timer = createTimer()
-    // Make sure we download the exported a file to `./images/${dashboardId}`,
+    // Make sure we download the exported a file to `./images/${dashboardItemId}`,
     // which allows us to track the download process in a relatively sane way
     const downloadDir = page.setDownloadPathToItemId(dashboardItem.map.id)
     // Open app and wait until all tiles have been fetched
