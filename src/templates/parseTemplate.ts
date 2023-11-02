@@ -1,7 +1,9 @@
 type Interpolator = Record<string, string>
 
 const containerTemplate = `
-<div class="dashboard-item">{{content}}</div>
+<div class="dashboard-item">
+    <div class="dashboard-item-inner">{{content}}</div>
+</div>
 `
 const headertemplate = `
 <h2 class="dashboard-item-header">{{name}}</h2>

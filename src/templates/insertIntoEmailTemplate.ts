@@ -39,10 +39,12 @@ const template = `
         html,
         body,
         .document {
-            width: 100% !important;
-            height: 100% !important;
+            width: auto !important;
+            height: auto !important;
             margin: 0;
             padding: 0;
+            background-color: #f4f6f8;
+            font-family: sans-serif;
         }
         body {
             -webkit-font-smoothing: antialiased;
@@ -61,7 +63,7 @@ const template = `
             border-spacing: 0;
             border-collapse: collapse;
             table-layout: fixed;
-            margin: 0 auto;
+            margin: 0;
         }
         img {
             -ms-interpolation-mode: bicubic;
@@ -90,19 +92,21 @@ const template = `
                 width: 100%;
                 margin: auto;
             }
-            .stack {
-                display: block;
-                width: 100%;
-                max-width: 100%;
-            }
         }
-
+        .dashboard {
+            padding: 0 12px;
+        }
         .dashboard-item {
+            margin-bottom: 12px;
+            overflow: visible;
+        }
+        .dashboard-item-inner {
+            display: inline-block;
+            min-width: 750px;
             padding: 12px;
             background-color: #fff;
             border-radius: 3px;
             box-shadow: 0 0 3px 0 #999;
-            margin-bottom: 12px;
         }
 
         .dashboard-item .text {
@@ -115,10 +119,10 @@ const template = `
     <table role="presentation" aria-hidden="true" cellspacing="0" cellpadding="0" border="0" align="center" class="document">
         <tr>
             <td valign="top">
-                <table role="presentation" aria-hidden="true" cellspacing="0" cellpadding="0" border="0" align="center" width="750" class="container">
+                <table role="presentation" aria-hidden="true" cellspacing="0" cellpadding="0" border="0" align="center" width="auto" class="container">
                     <tr>
                         <td>
-                            <table role="presentation" aria-hidden="true" cellspacing="0" cellpadding="0" border="0" align="center" width="100%">
+                            <table role="presentation" aria-hidden="true" cellspacing="0" cellpadding="0" border="0" align="left" width="auto">
                                 <tr>
                                     <td class="dashboard">
                                         {{html}}
