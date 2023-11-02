@@ -51,25 +51,31 @@ export const convertDashboardToEmailHtml = async ({
             )
         }
     }
-    const { html, css } = dashboardItems.reduce(
-        (acc, { id }) => {
-            const htmlSnippet = htmlSnippets[id]
+    const { html, css } = dashboardItems
+        .sort(
+            (itemA, itemB) =>
+                (itemA.y ?? 0) - (itemB.y ?? 0) ||
+                (itemA.x ?? 0) - (itemB.x ?? 0)
+        )
+        .reduce(
+            (acc, { id }) => {
+                const htmlSnippet = htmlSnippets[id]
 
-            if (!htmlSnippet || typeof htmlSnippet === 'string') {
-                acc.html += htmlSnippet ?? ''
-            } else {
-                acc.html += htmlSnippet.html ?? ''
-                if (htmlSnippet.css && !acc.css.includes(htmlSnippet.css)) {
-                    acc.css += htmlSnippet.css
+                if (!htmlSnippet || typeof htmlSnippet === 'string') {
+                    acc.html += htmlSnippet ?? ''
+                } else {
+                    acc.html += htmlSnippet.html ?? ''
+                    if (htmlSnippet.css && !acc.css.includes(htmlSnippet.css)) {
+                        acc.css += htmlSnippet.css
+                    }
                 }
+                return acc
+            },
+            {
+                html: `<h1>${displayName}</h1>`,
+                css: '',
             }
-            return acc
-        },
-        {
-            html: `<h1>${displayName}</h1>`,
-            css: '',
-        }
-    )
+        )
 
     if (!debug) {
         await browser.close()

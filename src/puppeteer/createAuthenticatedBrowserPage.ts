@@ -31,6 +31,7 @@ export const createAuthenticatedBrowserPage = async ({
               devtools: true,
               defaultViewport,
               args: ['--window-size=2560,2160', '--window-position=4000,0'],
+              slowMo: 100,
           }
         : {
               headless: 'new',

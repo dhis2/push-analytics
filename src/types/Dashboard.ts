@@ -92,6 +92,8 @@ export type Resource = {
 export type DashboardItem = {
     id: string
     type: DashboardItemType
+    x: number
+    y: number
     eventChart?: EventChart
     eventReport?: EventReport
     eventVisualization?: EventVisualization
