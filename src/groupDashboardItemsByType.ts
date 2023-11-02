@@ -1,3 +1,4 @@
+import { parseReports, parseResources, parseText } from './parsers'
 import {
     getEventChartHtml,
     getEventReportHtml,
@@ -10,13 +11,6 @@ import type {
     DashboardItemGroup,
     DashboardItemType,
 } from './types'
-
-const debugConverter = async (dashboardItem: DashboardItem) => {
-    // console.log(dashboardItem)
-    return Promise.resolve(
-        `<h1>Converter not implemented for type "${dashboardItem.type}" (ID: ${dashboardItem.id})</h1>`
-    )
-}
 
 // Just return an empty string for dashboard item types we do not want in emails
 const unsupportedTypeConverter = async () => Promise.resolve('')
@@ -44,9 +38,9 @@ export const groupDashboardItemsByType = (dashboardItems: DashboardItem[]) =>
             MAP: { dashboardItems: [], converter: getMapHtml },
             EVENT_REPORT: { dashboardItems: [], converter: getEventReportHtml },
             USERS: { dashboardItems: [], converter: unsupportedTypeConverter },
-            REPORTS: { dashboardItems: [], converter: debugConverter },
-            RESOURCES: { dashboardItems: [], converter: debugConverter },
-            TEXT: { dashboardItems: [], converter: debugConverter },
+            REPORTS: { dashboardItems: [], converter: parseReports },
+            RESOURCES: { dashboardItems: [], converter: parseResources },
+            TEXT: { dashboardItems: [], converter: parseText },
             MESSAGES: {
                 dashboardItems: [],
                 converter: unsupportedTypeConverter,

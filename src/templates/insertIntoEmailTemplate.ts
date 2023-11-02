@@ -96,6 +96,18 @@ const template = `
                 max-width: 100%;
             }
         }
+
+        .dashboard-item {
+            padding: 12px;
+            background-color: #fff;
+            border-radius: 3px;
+            box-shadow: 0 0 3px 0 #999;
+            margin-bottom: 12px;
+        }
+
+        .dashboard-item .text {
+            white-space: pre-line;
+        }
         {{css}}
     </style>
 </head>

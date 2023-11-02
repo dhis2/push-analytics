@@ -57,6 +57,7 @@ export const createAuthenticatedBrowserPage = async ({
                 })
                 return resolvedPath
             },
+            getDhis2BaseUrl: (): string => baseUrl,
         })
 
     await login({ page: pageWithRelativeNavigation, username, password })

@@ -23,11 +23,14 @@ export const getDashboard = async (
             fields: [
                 'id',
                 'type',
-                { name: 'visualization', fields: ['id', 'name', 'type'] },
-                { name: 'eventVisualization', fields: ['id', 'name', 'type'] },
-                { name: 'eventReport', fields: ['id', 'name', 'type'] },
+                'text',
                 { name: 'eventChart', fields: ['id', 'name', 'type'] },
+                { name: 'eventReport', fields: ['id', 'name', 'type'] },
+                { name: 'eventVisualization', fields: ['id', 'name', 'type'] },
                 { name: 'map', fields: ['id', 'name'] },
+                { name: 'reports', fields: ['id', 'name', 'type'] },
+                { name: 'resources', fields: ['id', 'name'] },
+                { name: 'visualization', fields: ['id', 'name', 'type'] },
             ],
         },
     ]

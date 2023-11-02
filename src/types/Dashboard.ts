@@ -1,6 +1,19 @@
 import { Browser } from 'puppeteer'
 import { PageWithRelativeNavigation } from './Puppeteer'
 
+export type DashboardItemType =
+    | 'VISUALIZATION'
+    | 'EVENT_VISUALIZATION'
+    | 'EVENT_CHART'
+    | 'MAP'
+    | 'EVENT_REPORT'
+    | 'USERS'
+    | 'REPORTS'
+    | 'RESOURCES'
+    | 'TEXT'
+    | 'MESSAGES'
+    | 'APP'
+
 export type VisualizationType =
     | 'COLUMN'
     | 'STACKED_COLUMN'
@@ -34,18 +47,7 @@ export type EventVisualizationType =
     | 'SCATTER'
     | 'BUBBLE'
 
-export type DashboardItemType =
-    | 'VISUALIZATION'
-    | 'EVENT_VISUALIZATION'
-    | 'EVENT_CHART'
-    | 'MAP'
-    | 'EVENT_REPORT'
-    | 'USERS'
-    | 'REPORTS'
-    | 'RESOURCES'
-    | 'TEXT'
-    | 'MESSAGES'
-    | 'APP'
+export type ReportType = 'HTML' | 'JASPER_REPORT_TABLE' | 'JASPER_JDBC'
 
 export type Dhis2Map = {
     id: string
@@ -76,14 +78,28 @@ export type EventChart = {
     type: EventVisualizationType
 }
 
+export type Report = {
+    id: string
+    name: string
+    type: ReportType
+}
+
+export type Resource = {
+    id: string
+    name: string
+}
+
 export type DashboardItem = {
     id: string
     type: DashboardItemType
-    visualization?: Visualization
-    map?: Dhis2Map
-    eventVisualization?: EventVisualization
-    eventReport?: EventReport
     eventChart?: EventChart
+    eventReport?: EventReport
+    eventVisualization?: EventVisualization
+    map?: Dhis2Map
+    text?: string
+    visualization?: Visualization
+    reports?: Report[]
+    resources?: Resource[]
 }
 
 export type Dashboard = {
