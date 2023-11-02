@@ -23,6 +23,13 @@ export const getVisualizationHtml: ConverterFn = async (
     const isPivotTable = type === 'PIVOT_TABLE'
     const visType = isPivotTable ? type : 'CHART'
 
+    /* First visit the app without vis ID to ensure there is no chart on
+     * the page. This is to prevent the app downloading the previous chart
+     * instead of the current one */
+    await page.gotoPath(`dhis-web-data-visualizer/#/`, {
+        waitUntil: 'networkidle2',
+    })
+
     // Open app and wait until network traffic stops
     await page.gotoPath(`dhis-web-data-visualizer/#/${id}`, {
         waitUntil: 'networkidle2',
