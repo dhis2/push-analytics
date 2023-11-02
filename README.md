@@ -33,3 +33,10 @@ Run `yarn install`
 ### Using the application
 
 To start the application in development run `yarn start:dev`. To try out dashboard-to-email conversion, issue a GET request to `host:port/dashboardId` (i.e. with default environment variable values, and using a dashboard ID from the Sierra Leone database, the following URL would be valid `http://localhost:1337/JW7RlN5xafN`)
+
+## Roadmap
+
+-   [x] Implement converter for all supported dashboard item types (this excludes `USERS`, `APP` and `MESSAGES`)
+-   [ ] Optimise email HTML template. We need support for horizontally scrolling tables
+-   [ ] Add link to dashboard in the email header
+-   [ ] Discuss and implement a way for core instances to use this application. Currently it is implemented as a stand-alone service but this could easily be just a NodeJS script called by the DHIS2 Core instance.
