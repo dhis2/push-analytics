@@ -8,8 +8,8 @@ This app needs to establish an authenticated connection to a DHIS2 Core backend 
 
 | ENV variable name          | Default value           | Description                                                             |
 | -------------------------- | ----------------------- | ----------------------------------------------------------------------- |
-| `HOST`                     | `localhost`             | Host for the Http server                                                |
-| `PORT`                     | `1337`                  | Port for the Http server                                                |
+| `HOST`                     | `localhost`             | Host name for the HTTP server                                           |
+| `PORT`                     | `1337`                  | Port for the HTTP server                                                |
 | `DHIS2_CORE_URL`           | `http://localhost:8080` | Host of the DHIS2 Core instance                                         |
 | `DHIS2_CORE_MAJOR_VERSION` | `40`                    | API version to use when issuing API requests to the DHIS2 Core instance |
 | `DHIS2_CORE_USERNAME`      | `admin`                 | DHIS2 Core username                                                     |
