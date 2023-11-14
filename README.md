@@ -39,8 +39,8 @@ To start the application in development run `yarn start:dev`. To try out dashboa
 -   [x] Implement converter for all supported dashboard item types (this excludes `USERS`, `APP` and `MESSAGES`)
 -   [x] Optimise email HTML template. We need support for horizontally scrolling tables
 -   [x] Ensure items are displayed in the correct order
--   [ ] Add link to dashboard in the email header
--   [ ] Convert text-based element selection to DOM attribute based element selection
+-   [x] Add link to dashboard in the email header
+-   [ ] [BLOCKED] Convert text-based element selection to DOM attribute based element selection. _Currently there is no way to uniquely identify the download dropdown-button or the download-menu-items based on DOM attributes, so to implement this we would need to add unique selectors to all apps. **This is currently blocking producing localized content.**_
 -   [ ] [Maybe] Restructure folders so all converters are in one place
 -   [ ] Present initial implementation as a PR
 -   [ ] Discuss and implement a way for core instances to use this application. Currently it is implemented as a stand-alone service but this could easily be just a NodeJS script called by the DHIS2 Core instance.
