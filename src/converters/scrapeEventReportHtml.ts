@@ -1,20 +1,20 @@
 import type { ConverterFn } from '../types'
 import { createTimer } from '../utils'
 import { insertIntoEventReportTemplate } from '../templates'
-import { logDashboardItemConversion } from '../utils/logDashboardItemConversion'
-import { clickElementWithText } from './clickElementWithText'
+import { logDashboardItemConversion } from '../utils'
+import { clickElementWithText } from '../puppeteer-utils'
 
 const DONWLOAD_PAGE_URL_PATTERN =
     /api\/[0-9]{1,3}\/analytics\/events\/aggregate\/[a-zA-Z0-9]{11}\.html\+css/
 
-export const getEventReportHtml: ConverterFn = async (
+export const scrapeEventReportHtml: ConverterFn = async (
     dashboardItem,
     page,
     browser
 ) => {
     if (!dashboardItem.eventReport) {
         throw new Error(
-            'function `getEventReportHtml` received a `dashboardItem` without a `eventReport` object'
+            'function `scrapeEventReportHtml` received a `dashboardItem` without a `eventReport` object'
         )
     }
     const timer = createTimer()

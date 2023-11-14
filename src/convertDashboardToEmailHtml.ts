@@ -1,12 +1,10 @@
 import { groupDashboardItemsByType } from './groupDashboardItemsByType'
 import { getDashboard } from './httpGetClient'
 import { clearDownloadDir, createTimer } from './utils'
-import { createAuthenticatedBrowserPage } from './puppeteer'
-import {
-    insertIntoDashboardHeaderTemplate,
-    insertIntoEmailTemplate,
-} from './templates'
+import { createAuthenticatedBrowserPage } from './puppeteer-utils'
+import { insertIntoEmailTemplate } from './templates'
 import { ConverterResult } from './types'
+import { mergeDashboardItemHtmlAndCss } from './mergeDashboardItemHtmlAndCss'
 
 type Options = {
     apiVersion: string
@@ -54,35 +52,13 @@ export const convertDashboardToEmailHtml = async ({
             )
         }
     }
-    const { html, css } = dashboardItems
-        .sort(
-            (itemA, itemB) =>
-                (itemA.y ?? 0) - (itemB.y ?? 0) ||
-                (itemA.x ?? 0) - (itemB.x ?? 0)
-        )
-        .reduce(
-            (acc, { id }) => {
-                const htmlSnippet = htmlSnippets[id]
-
-                if (!htmlSnippet || typeof htmlSnippet === 'string') {
-                    acc.html += htmlSnippet ?? ''
-                } else {
-                    acc.html += htmlSnippet.html ?? ''
-                    if (htmlSnippet.css && !acc.css.includes(htmlSnippet.css)) {
-                        acc.css += htmlSnippet.css
-                    }
-                }
-                return acc
-            },
-            {
-                html: insertIntoDashboardHeaderTemplate(
-                    baseUrl,
-                    dashboardId,
-                    displayName
-                ),
-                css: '',
-            }
-        )
+    const { html, css } = mergeDashboardItemHtmlAndCss({
+        dashboardItems,
+        htmlSnippets,
+        baseUrl,
+        dashboardId,
+        displayName,
+    })
 
     if (!debug) {
         await browser.close()

@@ -4,17 +4,17 @@ import {
     insertIntoChartTemplate,
     insertIntoPivotTableTemplate,
 } from '../templates'
-import { logDashboardItemConversion } from '../utils/logDashboardItemConversion'
-import { clickElementWithText } from './clickElementWithText'
+import { logDashboardItemConversion } from '../utils'
+import { clickElementWithText } from '../puppeteer-utils'
 
-export const getVisualizationHtml: ConverterFn = async (
+export const scrapeVisualizationHtml: ConverterFn = async (
     dashboardItem,
     page,
     browser
 ) => {
     if (!dashboardItem.visualization) {
         throw new Error(
-            'function `getVisualizationHtml` received a `dashboardItem` without a `visualization` object'
+            'function `scrapeVisualizationHtml` received a `dashboardItem` without a `visualization` object'
         )
     }
     const timer = createTimer()

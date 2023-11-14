@@ -2,12 +2,15 @@ import type { ConverterFn } from '../types'
 import { base64EncodeFile, createTimer, waitForFileToDownload } from '../utils'
 import { insertIntoEventChartTemplate } from '../templates'
 import { logDashboardItemConversion } from '../utils/logDashboardItemConversion'
-import { clickElementWithText } from './clickElementWithText'
+import { clickElementWithText } from '../puppeteer-utils/clickElementWithText'
 
-export const getEventChartHtml: ConverterFn = async (dashboardItem, page) => {
+export const scrapeEventChartHtml: ConverterFn = async (
+    dashboardItem,
+    page
+) => {
     if (!dashboardItem.eventChart) {
         throw new Error(
-            'function `getEventChartHtml` received a `dashboardItem` without a `eventChart` object'
+            'function `scrapeEventChartHtml` received a `dashboardItem` without a `eventChart` object'
         )
     }
     const timer = createTimer()

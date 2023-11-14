@@ -1,11 +1,11 @@
-import { parseReports, parseResources, parseText } from './parsers'
+import { parseReports, parseResources, parseText } from './converters'
 import {
-    getEventChartHtml,
-    getEventReportHtml,
-    getLineListHtml,
-    getMapHtml,
-    getVisualizationHtml,
-} from './puppeteer'
+    scrapeEventChartHtml,
+    scrapeEventReportHtml,
+    scrapeLineListHtml,
+    scrapeMapHtml,
+    scrapeVisualizationHtml,
+} from './converters'
 import type {
     DashboardItem,
     DashboardItemGroup,
@@ -24,7 +24,7 @@ export const groupDashboardItemsByType = (dashboardItems: DashboardItem[]) =>
         {
             VISUALIZATION: {
                 dashboardItems: [],
-                converter: getVisualizationHtml,
+                converter: scrapeVisualizationHtml,
             },
             EVENT_VISUALIZATION: {
                 dashboardItems: [],
@@ -32,11 +32,17 @@ export const groupDashboardItemsByType = (dashboardItems: DashboardItem[]) =>
                  * several event visualization types (i.e. `BAR`, `LINE_LIST`, etc.).
                  * However, the only one we realistically expect to encounter is the
                  * `LINE_LIST` type, so that is the only supported one. */
-                converter: getLineListHtml,
+                converter: scrapeLineListHtml,
             },
-            EVENT_CHART: { dashboardItems: [], converter: getEventChartHtml },
-            MAP: { dashboardItems: [], converter: getMapHtml },
-            EVENT_REPORT: { dashboardItems: [], converter: getEventReportHtml },
+            EVENT_CHART: {
+                dashboardItems: [],
+                converter: scrapeEventChartHtml,
+            },
+            MAP: { dashboardItems: [], converter: scrapeMapHtml },
+            EVENT_REPORT: {
+                dashboardItems: [],
+                converter: scrapeEventReportHtml,
+            },
             USERS: { dashboardItems: [], converter: unsupportedTypeConverter },
             REPORTS: { dashboardItems: [], converter: parseReports },
             RESOURCES: { dashboardItems: [], converter: parseResources },

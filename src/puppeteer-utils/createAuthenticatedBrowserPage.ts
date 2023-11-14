@@ -4,7 +4,7 @@ import puppeteer, {
     PuppeteerLaunchOptions,
 } from 'puppeteer'
 import { login } from './login'
-import { PageWithRelativeNavigation } from '../types/Puppeteer'
+import { PageWithRelativeNavigation } from '../types'
 import { downloadPath } from '../utils'
 import path from 'path'
 

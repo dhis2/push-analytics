@@ -1,20 +1,20 @@
 import type { ConverterFn } from '../types'
 import { createTimer } from '../utils'
 import { insertIntoLineListTemplate } from '../templates'
-import { logDashboardItemConversion } from '../utils/logDashboardItemConversion'
-import { clickElementWithText } from './clickElementWithText'
+import { logDashboardItemConversion } from '../utils'
+import { clickElementWithText } from '../puppeteer-utils'
 
 const DONWLOAD_PAGE_URL_PATTERN =
     /api\/analytics\/enrollments|events\/query\/[a-zA-Z0-9]{11}\.html\+css/
 
-export const getLineListHtml: ConverterFn = async (
+export const scrapeLineListHtml: ConverterFn = async (
     dashboardItem,
     page,
     browser
 ) => {
     if (!dashboardItem.eventVisualization) {
         throw new Error(
-            'function `getLineListHtml` received a `dashboardItem` without an `eventVisualization` object'
+            'function `scrapeLineListHtml` received a `dashboardItem` without an `eventVisualization` object'
         )
     }
 

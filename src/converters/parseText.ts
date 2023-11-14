@@ -1,6 +1,6 @@
 import MdParser from '@dhis2/d2-ui-rich-text/parser/MdParser'
 import { ConverterFn } from '../types'
-import { insertIntoTextTemplate } from '../templates/insertIntoTextTemplate'
+import { insertIntoTextTemplate } from '../templates'
 import { createTimer } from '../utils'
 
 export const parseText: ConverterFn = (dashboardItem) => {

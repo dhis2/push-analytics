@@ -2,14 +2,13 @@ import { insertIntoMapTemplate } from '../templates'
 import type { ConverterFn } from '../types'
 import { createTimer, waitForFileToDownload } from '../utils'
 import { base64EncodeFile } from '../utils/base64EncodeFile'
-import { logDashboardItemConversion } from '../utils/logDashboardItemConversion'
-import { clickElementWithText } from './clickElementWithText'
-import { waitMs } from './waitMs'
+import { logDashboardItemConversion } from '../utils'
+import { clickElementWithText, waitMs } from '../puppeteer-utils'
 
-export const getMapHtml: ConverterFn = async (dashboardItem, page) => {
+export const scrapeMapHtml: ConverterFn = async (dashboardItem, page) => {
     if (!dashboardItem.map) {
         throw new Error(
-            'function `getMapHtml` received a `dashboardItem` without a `map` object'
+            'function `scrapeMapHtml` received a `dashboardItem` without a `map` object'
         )
     }
     const timer = createTimer()
