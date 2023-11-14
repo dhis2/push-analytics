@@ -1,4 +1,5 @@
 export { insertIntoChartTemplate } from './insertIntoChartTemplate'
+export { insertIntoDashboardHeaderTemplate } from './insertIntoDashboardHeaderTemplate'
 export { insertIntoEmailTemplate } from './insertIntoEmailTemplate'
 export { insertIntoEventChartTemplate } from './insertIntoEventChartTemplate'
 export { insertIntoEventReportTemplate } from './insertIntoEventReportTemplate'

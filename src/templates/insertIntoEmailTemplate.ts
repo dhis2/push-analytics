@@ -112,6 +112,10 @@ const template = `
         .dashboard-item .text {
             white-space: pre-line;
         }
+        .dashboard-header > .dashboard-link {
+            color: inherit;
+            text-decoration: none;
+        }
         {{css}}
     </style>
 </head>

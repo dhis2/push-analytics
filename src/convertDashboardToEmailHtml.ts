@@ -2,7 +2,10 @@ import { groupDashboardItemsByType } from './groupDashboardItemsByType'
 import { getDashboard } from './httpGetClient'
 import { clearDownloadDir, createTimer } from './utils'
 import { createAuthenticatedBrowserPage } from './puppeteer'
-import { insertIntoEmailTemplate } from './templates'
+import {
+    insertIntoDashboardHeaderTemplate,
+    insertIntoEmailTemplate,
+} from './templates'
 import { ConverterResult } from './types'
 
 type Options = {
@@ -72,7 +75,11 @@ export const convertDashboardToEmailHtml = async ({
                 return acc
             },
             {
-                html: `<h1>${displayName}</h1>`,
+                html: insertIntoDashboardHeaderTemplate(
+                    baseUrl,
+                    dashboardId,
+                    displayName
+                ),
                 css: '',
             }
         )
