@@ -34,7 +34,7 @@ Run `yarn install`
 
 To start the application in development run `yarn start:dev`. To try out dashboard-to-email conversion, issue a GET request to `host:port/dashboardId` (i.e. with default environment variable values, and using a dashboard ID from the Sierra Leone database, the following URL would be valid `http://localhost:1337/JW7RlN5xafN`)
 
-## Roadmap
+## TODO
 
 -   [x] Implement converter for all supported dashboard item types (this excludes `USERS`, `APP` and `MESSAGES`)
 -   [x] Optimise email HTML template. We need support for horizontally scrolling tables
@@ -43,6 +43,7 @@ To start the application in development run `yarn start:dev`. To try out dashboa
 -   [ ] Convert text-based element selection to DOM attribute based element selection
 -   [ ] [Maybe] Restructure folders so all converters are in one place
 -   [ ] Discuss and implement a way for core instances to use this application. Currently it is implemented as a stand-alone service but this could easily be just a NodeJS script called by the DHIS2 Core instance.
+-   [ ] Add tests. Since the conversion from dashboard to email HTML is fully linear, the simplest way to add a good level of test coverage would be to simply see if for a given dashboard we produce the same HTML output. In the long term it would be advisable to run this test on a daily basis and send a Slack notification once it starts failing. This app will break if things change too much in the web API or in one of the apps that Puppeteer visits. We can also consider adding unit tests for each individual function, but IMO that's probably not required because testing if a known input produces the correct output implicitly tests the underlying functions too.
 
 ## How things work
 
