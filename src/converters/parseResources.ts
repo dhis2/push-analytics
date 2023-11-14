@@ -3,7 +3,6 @@ import { ConverterFn } from '../types'
 import { createTimer } from '../utils'
 
 // See https://github.com/dhis2/dashboard-app/blob/master/src/modules/itemTypes.js
-
 export const parseResources: ConverterFn = (dashboardItem, page) => {
     const resources = dashboardItem?.resources
 
