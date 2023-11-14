@@ -1,5 +1,3 @@
-//
-
 import { parseTemplate } from './parseTemplate'
 
 const template = `
