@@ -9,5 +9,6 @@ const parseField = (field: Field): string => {
         throw new Error('Could not parse fields')
     }
 }
-export const fieldsArrayToQueryParam = (fields: Field[]) =>
-    `fields=${fields.map(parseField).join()}`
+
+export const fieldsArrayToQueryString = (fields: Field[]): string =>
+    fields.map(parseField).join()

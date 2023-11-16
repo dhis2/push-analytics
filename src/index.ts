@@ -5,7 +5,7 @@ import { parseDashBoardId, readEnv, validateRequest } from './utils'
 
 const { host, port, baseUrl, apiVersion, username, password } = readEnv()
 
-const server = http.createServer(async (req, res) => {
+http.createServer(async (req, res) => {
     try {
         validateRequest(req)
         const dashboardId = parseDashBoardId(req.url)
@@ -31,8 +31,7 @@ const server = http.createServer(async (req, res) => {
             res.end('An unknown error occurred')
         }
     }
-})
-server.listen(port, parseInt(host), () => {
+}).listen(port, parseInt(host), () => {
     console.log(
         `DHIS2 Push Analytics server is running on http://${host}:${port}`
     )
