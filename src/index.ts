@@ -1,14 +1,14 @@
 import http from 'http'
 import { convertDashboardToEmailHtml } from './convertDashboardToEmailHtml'
 import { HttpResponseStatusError } from './httpGetClient'
-import { parseDashBoardId, readEnv, validateRequest } from './utils'
+import { parseDashboardId, readEnv, validateRequest } from './utils'
 
 const { host, port, baseUrl, apiVersion, username, password } = readEnv()
 
 http.createServer(async (req, res) => {
     try {
         validateRequest(req)
-        const dashboardId = parseDashBoardId(req.url)
+        const dashboardId = parseDashboardId(req.url)
         const html = await convertDashboardToEmailHtml({
             dashboardId,
             baseUrl,
