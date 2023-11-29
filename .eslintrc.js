@@ -4,4 +4,12 @@ module.exports = {
     parser: '@typescript-eslint/parser',
     plugins: ['@typescript-eslint'],
     root: true,
+    rules: {
+        '@typescript-eslint/no-var-requires': 'off',
+    },
+    env: {
+        browser: true,
+        node: true,
+        es6: true,
+    },
 }
