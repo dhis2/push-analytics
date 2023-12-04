@@ -5,7 +5,7 @@ import { createAuthenticatedBrowserPage } from './puppeteer-utils'
 import { insertIntoEmailTemplate } from './templates'
 import { ConverterResult } from './types'
 import { mergeDashboardItemHtmlAndCss } from './mergeDashboardItemHtmlAndCss'
-import { convertDashboardItems } from './converterPool'
+// import { convertDashboardItems } from './converterPool'
 
 // type Options = {
 //     apiVersion: string
@@ -97,5 +97,5 @@ export const convertDashboardToEmailHtml = async ({
         password,
         username
     )
-    convertDashboardItems(dashboardItems)
+    // convertDashboardItems(dashboardItems)
 }

@@ -4,6 +4,7 @@
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         "lib": ["es2021", "dom"],
+        "target": "es2021",
         "module": "commonjs",
         "noImplicitAny": true,
         "outDir": "build",
