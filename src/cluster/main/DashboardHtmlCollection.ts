@@ -1,4 +1,4 @@
-import { OnCompleteFn } from './types'
+import { OnCompleteFn } from '../types'
 
 export class DashboardHtmlCollection {
     #items: Map<string, { html: string; css: string }>

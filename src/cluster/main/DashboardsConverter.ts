@@ -7,7 +7,7 @@ import type {
     ConverterReadyMessage,
     ConversionRequestMessage,
     ConversionResultMessage,
-} from './types'
+} from '../types'
 import { DashboardsHtmlStore } from './DashboardsHtmlStore'
 
 export class DashboardsConverter {

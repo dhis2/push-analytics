@@ -1,7 +1,7 @@
 // import { DashboardHtmlCollection } from './types'
 
 import { DashboardHtmlCollection } from './DashboardHtmlCollection'
-import { OnCompleteFn } from './types'
+import { OnCompleteFn } from '../types'
 
 type CreateDashboardHtmlCollectionOptions = {
     username: string

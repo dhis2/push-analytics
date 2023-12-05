@@ -1,4 +1,4 @@
-import type { DashboardItem } from '../../types'
+import type { DashboardItem } from '../types'
 
 export type OnCompleteFn = (html: string) => void
 

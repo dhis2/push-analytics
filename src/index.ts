@@ -16,7 +16,7 @@ import type {
     ConversionResultMessage,
     QueueItem,
     ConvertedItem,
-} from './cluster/main/types'
+} from './cluster/types'
 
 const init = async () => {
     const { host, port, baseUrl, apiVersion } = readEnv()
@@ -26,7 +26,7 @@ const init = async () => {
 
         http.createServer(async (req, res) => {
             try {
-                console.log('Received request')
+                console.log('Starting dashboard to email HTML conversion')
                 const timer = createTimer()
                 validateRequest(req)
                 const { dashboardId, username, password } = parseQueryString(
