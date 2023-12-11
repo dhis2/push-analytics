@@ -1,4 +1,3 @@
-import { clickElementWithText } from '../../../puppeteer-utils'
 import { insertIntoLineListTemplate } from '../../../templates'
 import { createTimer, logDashboardItemConversion } from '../../../utils'
 import { ConverterResultObject, QueueItem } from '../../types'
@@ -63,15 +62,13 @@ export class LineListScraper extends DashboardItemScraper<ConverterResultObject>
             visible: true,
         })
         // Open download dropdown and select correct download type
-        await clickElementWithText({
+        await this.clickElementWithText({
             xpath: 'button',
             text: 'Download',
-            page: this.page,
         })
-        await clickElementWithText({
+        await this.clickElementWithText({
             xpath: 'li/span',
             text: 'HTML+CSS (.html+css)',
-            page: this.page,
         })
 
         // Get the page target which will render the HTML + CSS

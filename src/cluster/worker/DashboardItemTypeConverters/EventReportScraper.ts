@@ -1,4 +1,3 @@
-import { clickElementWithText } from '../../../puppeteer-utils'
 import { insertIntoEventReportTemplate } from '../../../templates'
 import { createTimer, logDashboardItemConversion } from '../../../utils'
 import { ConverterResultObject, QueueItem } from '../../types'
@@ -26,15 +25,13 @@ export class EventReportScraper extends DashboardItemScraper<ConverterResultObje
         // Wait for key HTML element to be visible
         await this.page.waitForSelector('table.pivot', { visible: true })
         // Open download dropdown and select correct download type
-        await clickElementWithText({
+        await this.clickElementWithText({
             xpath: 'button/span',
             text: 'Download',
-            page: this.page,
         })
-        await clickElementWithText({
+        await this.clickElementWithText({
             xpath: 'a/span',
             text: 'HTML (.html)',
-            page: this.page,
         })
 
         // Get the page target which will render the HTML + CSS
@@ -65,15 +62,13 @@ export class EventReportScraper extends DashboardItemScraper<ConverterResultObje
     }
 
     async #clearPage() {
-        await clickElementWithText({
+        await this.clickElementWithText({
             xpath: 'button/span',
             text: 'Favorites',
-            page: this.page,
         })
-        await clickElementWithText({
+        await this.clickElementWithText({
             xpath: 'a/span',
             text: 'New',
-            page: this.page,
         })
     }
 }

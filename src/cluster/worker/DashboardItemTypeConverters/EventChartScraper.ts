@@ -1,5 +1,4 @@
 import fs from 'node:fs/promises'
-import { clickElementWithText } from '../../../puppeteer-utils'
 import { insertIntoEventChartTemplate } from '../../../templates'
 import {
     base64EncodeFile,
@@ -37,15 +36,13 @@ export class EventChartScraper extends DashboardItemScraper<string> {
             visible: true,
         })
         // Open download dropdown and select correct download type
-        await clickElementWithText({
+        await this.clickElementWithText({
             xpath: 'button/span',
             text: 'Download',
-            page: this.page,
         })
-        await clickElementWithText({
+        await this.clickElementWithText({
             xpath: 'a/span',
             text: 'Image (.png)',
-            page: this.page,
         })
 
         // Wait until the file has downloaded and get the full path
@@ -61,15 +58,13 @@ export class EventChartScraper extends DashboardItemScraper<string> {
     }
 
     async #clearPage() {
-        await clickElementWithText({
+        await this.clickElementWithText({
             xpath: 'button/span',
             text: 'Favorites',
-            page: this.page,
         })
-        await clickElementWithText({
+        await this.clickElementWithText({
             xpath: 'a/span',
             text: 'New',
-            page: this.page,
         })
     }
 }

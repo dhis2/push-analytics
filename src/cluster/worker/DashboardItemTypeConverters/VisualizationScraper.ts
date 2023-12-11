@@ -1,4 +1,3 @@
-import { clickElementWithText } from '../../../puppeteer-utils'
 import {
     insertIntoChartTemplate,
     insertIntoPivotTableTemplate,
@@ -40,13 +39,9 @@ export class VisualizationScraper extends DashboardItemScraper<ConverterResultOb
             : '.highcharts-container'
         await this.page.waitForSelector(selectorForType, { visible: true })
         // Open download dropdown and select correct download type
-        await clickElementWithText({
-            xpath: 'button',
-            text: 'Download',
-            page: this.page,
-        })
+        await this.clickElementWithText({ xpath: 'button', text: 'Download' })
         const text = isPivotTable ? 'HTML (.html)' : 'Image (.png)'
-        await clickElementWithText({ xpath: 'li/span', text, page: this.page })
+        await this.clickElementWithText({ xpath: 'li/span', text })
         const downloadPage = await this.getDownloadPage(id)
 
         if (isPivotTable) {

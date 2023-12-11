@@ -1,5 +1,4 @@
 import fs from 'node:fs/promises'
-import { clickElementWithText, waitMs } from '../../../puppeteer-utils'
 import { insertIntoMapTemplate } from '../../../templates'
 import {
     base64EncodeFile,
@@ -9,6 +8,15 @@ import {
 } from '../../../utils'
 import { QueueItem } from '../../types'
 import { DashboardItemScraper } from './DashboardItemScraper'
+
+/* TODO: remove this when the maps app disables the download
+ * button while rendering and has routes */
+const waitMs = async (ms: number): Promise<void> =>
+    new Promise((resolve) => {
+        setTimeout(() => {
+            resolve()
+        }, ms)
+    })
 
 export class MapScraper extends DashboardItemScraper<string> {
     async convert(queueItem: QueueItem) {
@@ -29,10 +37,9 @@ export class MapScraper extends DashboardItemScraper<string> {
         // Wait for canvas to be visible
         await this.page.waitForSelector('canvas', { visible: true })
         // Open download view
-        await clickElementWithText({
+        await this.clickElementWithText({
             xpath: 'button',
             text: 'Download',
-            page: this.page,
         })
         // Confirm download view is open by verifying this button's visibility
         await this.page.waitForXPath(
@@ -51,10 +58,9 @@ export class MapScraper extends DashboardItemScraper<string> {
          * detect it some other way. */
         await waitMs(1600)
         // Click the next download button to trigger the actual download
-        await clickElementWithText({
+        await this.clickElementWithText({
             xpath: 'button',
             text: 'Download',
-            page: this.page,
         })
         // Wait until the file has downloaded and get the full path
         const fullFilePath = await waitForFileToDownload(downloadDir)
@@ -72,16 +78,14 @@ export class MapScraper extends DashboardItemScraper<string> {
         return insertIntoMapTemplate(base64Str)
     }
 
-    async #clearPage() {
-        await clickElementWithText({
-            xpath: 'button',
-            text: 'Exit download mode',
-            page: this.page,
-        })
-        await clickElementWithText({
-            xpath: 'a/span',
-            text: 'New',
-            page: this.page,
-        })
-    }
+    // async #clearPage() {
+    //     await this.clickElementWithText({
+    //         xpath: 'button',
+    //         text: 'Exit download mode',
+    //     })
+    //     await this.clickElementWithText({
+    //         xpath: 'a/span',
+    //         text: 'New',
+    //     })
+    // }
 }

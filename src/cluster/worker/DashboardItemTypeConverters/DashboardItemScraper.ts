@@ -109,7 +109,6 @@ export class DashboardItemScraper<T extends ConverterResult>
     }: {
         xpath?: string
         text?: string
-        page: Page
     }) {
         const escapedText = escapeXpathString(text)
         const elHandles = await this.page.$x(
