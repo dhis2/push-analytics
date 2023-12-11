@@ -1,11 +1,10 @@
-import { ElementHandle } from 'puppeteer'
-import type { PageWithRelativeNavigation } from '../types'
-import { escapeXpathString } from './escapeXpathString'
+import { ElementHandle, Page } from 'puppeteer'
+import { escapeXpathString } from '../utils/escapeXpathString'
 
 type Options = {
     xpath?: string
     text?: string
-    page: PageWithRelativeNavigation
+    page: Page
 }
 
 export const clickElementWithText = async ({

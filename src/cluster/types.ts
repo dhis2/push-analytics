@@ -1,3 +1,4 @@
+import { Browser } from 'puppeteer'
 import type { DashboardItem } from '../types'
 
 export type OnCompleteFn = (html: string) => void
@@ -35,17 +36,12 @@ export type QueueItem = {
     password: string
 }
 
-export type MessageType =
-    | 'ITEM_CONVERTER_READY'
-    | 'ITEM_CONVERSION_REQUEST'
-    | 'ITEM_CONVERSION_RESULT'
+export type MessageType = 'ITEM_CONVERSION_REQUEST' | 'ITEM_CONVERSION_RESULT'
 
 export type Message<T extends MessageType, P> = {
     type: T
     payload?: P
 }
-
-export type ConverterReadyMessage = Message<'ITEM_CONVERTER_READY', undefined>
 
 export type ConversionRequestMessage = Message<
     'ITEM_CONVERSION_REQUEST',
@@ -56,3 +52,14 @@ export type ConversionResultMessage = Message<
     'ITEM_CONVERSION_RESULT',
     ConvertedItem
 >
+
+export type ConverterResultObject = {
+    html: string
+    css: string
+}
+export type ConverterResult = string | ConverterResultObject
+
+export interface Converter<T extends ConverterResult> {
+    convert: (queueItem: QueueItem) => Promise<T>
+    init?: (browser: Browser) => Promise<void>
+}

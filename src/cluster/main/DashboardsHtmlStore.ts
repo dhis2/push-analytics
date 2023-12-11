@@ -4,6 +4,7 @@ import { DashboardHtmlCollection } from './DashboardHtmlCollection'
 import { OnCompleteFn } from '../types'
 
 type CreateDashboardHtmlCollectionOptions = {
+    baseUrl: string
     username: string
     dashboardId: string
     displayName: string
@@ -21,6 +22,7 @@ export class DashboardsHtmlStore {
     }
 
     public createDashboardHtmlCollection({
+        baseUrl,
         username,
         dashboardId,
         displayName,
@@ -30,10 +32,12 @@ export class DashboardsHtmlStore {
             onComplete(html)
             this.#store.delete(createKey(dashboardId, username))
         }
-        const dashboardHtmlCollection = new DashboardHtmlCollection(
+        const dashboardHtmlCollection = new DashboardHtmlCollection({
+            baseUrl,
+            dashboardId,
             displayName,
-            onCompleteWithDelete
-        )
+            onComplete: onCompleteWithDelete,
+        })
 
         this.#store.set(
             createKey(dashboardId, username),

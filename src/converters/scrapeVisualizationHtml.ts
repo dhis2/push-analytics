@@ -1,17 +1,10 @@
 import type { ConverterFn, ConverterResult } from '../types'
 import { createTimer } from '../utils'
-import {
-    insertIntoChartTemplate,
-    insertIntoPivotTableTemplate,
-} from '../templates'
+import { insertIntoChartTemplate, insertIntoPivotTableTemplate } from '../templates'
 import { logDashboardItemConversion } from '../utils'
 import { clickElementWithText } from '../puppeteer-utils'
 
-export const scrapeVisualizationHtml: ConverterFn = async (
-    dashboardItem,
-    page,
-    browser
-) => {
+export const scrapeVisualizationHtml: ConverterFn = async (dashboardItem, page, browser) => {
     if (!dashboardItem.visualization) {
         throw new Error(
             'function `scrapeVisualizationHtml` received a `dashboardItem` without a `visualization` object'
@@ -45,38 +38,29 @@ export const scrapeVisualizationHtml: ConverterFn = async (
     const text = isPivotTable ? 'HTML (.html)' : 'Image (.png)'
     await clickElementWithText({ xpath: 'li/span', text, page })
     // Capture the window the download is in
-    const fileDownloadTarget = await browser.waitForTarget((target) =>
-        isPivotTable
+    const fileDownloadTarget = await browser.waitForTarget((target) => {
+        console.log('target url: ', target)
+        return isPivotTable
             ? target.url().includes('/analytics.html+css')
             : target.url().startsWith('blob:')
-    )
+    })
 
     const downloadPage = await fileDownloadTarget.page()
     if (!downloadPage) {
-        throw new Error(
-            `Could not find tab with ${
-                isPivotTable ? 'HTML table' : 'PNG file'
-            }`
-        )
+        throw new Error(`Could not find tab with ${isPivotTable ? 'HTML table' : 'PNG file'}`)
     }
 
     if (isPivotTable) {
         const tableHtml =
-            (await downloadPage.evaluate(
-                () => document.querySelector('body')?.innerHTML
-            )) ?? ''
+            (await downloadPage.evaluate(() => document.querySelector('body')?.innerHTML)) ?? ''
         const css =
-            (await downloadPage.evaluate(
-                () => document.querySelector('style')?.innerHTML
-            )) ?? ''
+            (await downloadPage.evaluate(() => document.querySelector('style')?.innerHTML)) ?? ''
 
         result = { html: insertIntoPivotTableTemplate(name, tableHtml), css }
     } else {
         const img = await downloadPage.waitForSelector('img')
         const base64 = await img?.screenshot({ encoding: 'base64' })
-        const base64Str = Buffer.isBuffer(base64)
-            ? base64.toString()
-            : base64 ?? ''
+        const base64Str = Buffer.isBuffer(base64) ? base64.toString() : base64 ?? ''
         result = insertIntoChartTemplate(name, base64Str)
     }
 

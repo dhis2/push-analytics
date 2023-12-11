@@ -1,15 +1,30 @@
-import { OnCompleteFn } from '../types'
+import {
+    insertIntoDashboardHeaderTemplate,
+    insertIntoEmailTemplate,
+} from '../../templates'
+import { ConverterResult, OnCompleteFn } from '../types'
+
+type Options = {
+    baseUrl: string
+    dashboardId: string
+    displayName: string
+    onComplete: OnCompleteFn
+}
 
 export class DashboardHtmlCollection {
+    #baseUrl: string
+    #dashboardId: string
+    #displayName: string
     #items: Map<string, { html: string; css: string }>
     #completedCount: number
-    #displayName: string
     #onComplete: OnCompleteFn
 
-    constructor(displayName: string, onComplete: OnCompleteFn) {
+    constructor({ baseUrl, dashboardId, displayName, onComplete }: Options) {
+        this.#baseUrl = baseUrl
+        this.#dashboardId = dashboardId
+        this.#displayName = displayName
         this.#items = new Map()
         this.#completedCount = 0
-        this.#displayName = displayName
         this.#onComplete = onComplete
     }
 
@@ -29,7 +44,28 @@ export class DashboardHtmlCollection {
         ++this.#completedCount
 
         if (this.#completedCount === this.#items.size) {
-            this.#onComplete('<h1>All the combined HTML</h1>')
+            const { html, css } = Array.from(this.#items.values()).reduce(
+                (acc, result: ConverterResult) => {
+                    if (!result || typeof result === 'string') {
+                        acc.html += result ?? ''
+                    } else {
+                        acc.html += result.html ?? ''
+                        if (result.css && !acc.css.includes(result.css)) {
+                            acc.css += result.css
+                        }
+                    }
+                    return acc
+                },
+                {
+                    html: insertIntoDashboardHeaderTemplate(
+                        this.#baseUrl,
+                        this.#dashboardId,
+                        this.#displayName
+                    ),
+                    css: '',
+                }
+            )
+            this.#onComplete(insertIntoEmailTemplate(html, css))
         }
     }
 }

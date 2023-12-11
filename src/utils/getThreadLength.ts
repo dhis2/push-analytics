@@ -1,11 +1,14 @@
 import { availableParallelism } from 'node:os'
 
 export const getThreadLength = () => {
+    const availableThreads = availableParallelism()
+
     if (process.env.MAX_THREADS) {
+        if ((process.env.MAX_THREADS ?? '').toLowerCase() === 'max') {
+            return availableThreads
+        }
         return parseInt(process.env.MAX_THREADS)
     }
-
-    const availableThreads = availableParallelism()
 
     if (availableThreads < 4) {
         return availableThreads
