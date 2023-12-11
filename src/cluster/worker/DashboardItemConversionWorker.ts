@@ -66,7 +66,7 @@ export class DashboardItemConversionWorker {
             'dhis-web-data-visualizer',
             false
         )
-        // this.#addConversionRequestListener()
+        this.#addConversionRequestListener()
     }
 
     get browser() {

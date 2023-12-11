@@ -9,12 +9,6 @@ import {
     validateRequest,
 } from './utils'
 import { DashboardsConverter } from './cluster/main'
-import type {
-    ConversionRequestMessage,
-    ConversionResultMessage,
-    QueueItem,
-    ConvertedItem,
-} from './cluster/types'
 import { DashboardItemConversionWorker } from './cluster'
 
 const init = async () => {
@@ -77,43 +71,10 @@ const init = async () => {
             )
         })
     } else {
-        console.log(`Worker ${process.pid} started`)
-
-        const converter = new DashboardItemConversionWorker(baseUrl, false)
-
-        process.on('message', async (message: ConversionRequestMessage) => {
-            try {
-                if (
-                    message?.type !== 'ITEM_CONVERSION_REQUEST' ||
-                    !message.payload
-                ) {
-                    throw new Error(
-                        `Received unexpected message with type "${message?.type}"`
-                    )
-                }
-                const queueItem: QueueItem = message.payload
-                const convertedItem: ConvertedItem = await converter.convert(
-                    queueItem
-                )
-
-                if (!process?.send) {
-                    throw new Error(
-                        'Cannont send message from worker to main thread'
-                    )
-                }
-                process.send({
-                    type: 'ITEM_CONVERSION_RESULT',
-                    payload: convertedItem,
-                } as ConversionResultMessage)
-            } catch (error) {
-                console.log(error)
-                if (error instanceof Error) {
-                    throw new Error(`CONVERSION ERROR: ${error.message}`)
-                } else {
-                    throw new Error('UNKNOW ERROR')
-                }
-            }
-        })
+        console.log(
+            `Starting dashboard-item conversion worker on PID ${process.pid}`
+        )
+        return new DashboardItemConversionWorker(baseUrl, false)
     }
 }
 
