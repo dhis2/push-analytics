@@ -15,12 +15,12 @@ export class DashboardsConverter {
     #dashboardItemsQueue: QueueItem[]
     #idleWorkerIds: Set<number>
 
-    constructor(baseUrl: string) {
+    constructor(baseUrl: string, maxThreads: string) {
         this.#baseUrl = baseUrl
         this.#dashboardsHtmlStore = new DashboardsHtmlStore()
         this.#dashboardItemsQueue = []
         this.#idleWorkerIds = new Set()
-        this.#createWorkers()
+        this.#createWorkers(maxThreads)
     }
 
     public addDashboard({
@@ -83,8 +83,8 @@ export class DashboardsConverter {
         return this.#dashboardItemsQueue.shift()
     }
 
-    #createWorkers() {
-        const threadLength = getThreadLength()
+    #createWorkers(maxThreads: string) {
+        const threadLength = getThreadLength(maxThreads)
         for (let i = 0; i < threadLength; i++) {
             const worker = cluster.fork()
             this.#idleWorkerIds.add(worker.id)

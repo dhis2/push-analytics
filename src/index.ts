@@ -12,10 +12,10 @@ import {
 import { DashboardItemConversionWorker } from './worker'
 
 const initializeCluster = async () => {
-    const { host, port, baseUrl, apiVersion } = readEnv()
+    const { host, port, baseUrl, apiVersion, maxThreads } = readEnv()
 
     if (cluster.isPrimary) {
-        const dashboardsConverter = new DashboardsConverter(baseUrl)
+        const dashboardsConverter = new DashboardsConverter(baseUrl, maxThreads)
 
         http.createServer(async (req, res) => {
             try {

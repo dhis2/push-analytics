@@ -3,12 +3,14 @@ type EnvVariableName =
     | 'PORT'
     | 'DHIS2_CORE_URL'
     | 'DHIS2_CORE_MAJOR_VERSION'
+    | 'MAX_THREADS'
 
 const envVariableDefaults: Record<EnvVariableName, string> = {
     HOST: 'localhost',
     PORT: '1337',
     DHIS2_CORE_URL: 'http://localhost:8080',
     DHIS2_CORE_MAJOR_VERSION: '40',
+    MAX_THREADS: 'max',
 }
 
 const readEnvVariable = (name: EnvVariableName): string => {
@@ -27,4 +29,5 @@ export const readEnv = () => ({
     port: readEnvVariable('PORT'),
     baseUrl: readEnvVariable('DHIS2_CORE_URL'),
     apiVersion: readEnvVariable('DHIS2_CORE_MAJOR_VERSION'),
+    maxThreads: readEnvVariable('MAX_THREADS'),
 })
