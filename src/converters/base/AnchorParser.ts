@@ -1,4 +1,4 @@
-import { Converter, QueueItem } from '../../types'
+import { Converter, QueueItem } from '../../types/ConverterCluster'
 
 export class AnchorParser implements Converter<string> {
     #baseUrl: string

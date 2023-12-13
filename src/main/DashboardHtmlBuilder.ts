@@ -1,23 +1,26 @@
 import {
     insertIntoDashboardHeaderTemplate,
     insertIntoEmailTemplate,
-} from '../../templates'
-import { ConverterResult, OnCompleteFn } from '../types'
+} from '../templates'
+import {
+    ConverterResult,
+    OnConversionCompleteFn,
+} from '../types/ConverterCluster'
 
 type Options = {
     baseUrl: string
     dashboardId: string
     displayName: string
-    onComplete: OnCompleteFn
+    onComplete: OnConversionCompleteFn
 }
 
-export class DashboardHtmlCollection {
+export class DashboardHtmlBuilder {
     #baseUrl: string
     #dashboardId: string
     #displayName: string
     #items: Map<string, { html: string; css: string }>
     #completedCount: number
-    #onComplete: OnCompleteFn
+    #onComplete: OnConversionCompleteFn
 
     constructor({ baseUrl, dashboardId, displayName, onComplete }: Options) {
         this.#baseUrl = baseUrl

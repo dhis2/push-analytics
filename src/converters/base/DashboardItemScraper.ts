@@ -1,8 +1,11 @@
 import path from 'path'
 import { Browser, CDPSession, ElementHandle, Page } from 'puppeteer'
-import { downloadPath } from '../../../utils'
-import { Converter, ConverterResult, QueueItem } from '../../types'
-import { escapeXpathString } from '../../../utils'
+import {
+    Converter,
+    ConverterResult,
+    QueueItem,
+} from '../../types/ConverterCluster'
+import { downloadPath, escapeXpathString } from '../../utils'
 
 export class DashboardItemScraper<T extends ConverterResult>
     implements Converter<T>

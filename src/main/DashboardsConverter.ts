@@ -1,12 +1,12 @@
 import cluster from 'node:cluster'
-import { getThreadLength } from '../../utils'
 import type {
     AddDashboardOptions,
-    ConvertedItem,
-    QueueItem,
     ConversionRequestMessage,
     ConversionResultMessage,
-} from '../types'
+    ConvertedItem,
+    QueueItem,
+} from '../types/ConverterCluster'
+import { getThreadLength } from '../utils'
 import { DashboardsHtmlStore } from './DashboardsHtmlStore'
 
 export class DashboardsConverter {

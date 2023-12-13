@@ -1,21 +1,19 @@
-// import { DashboardHtmlCollection } from './types'
-
-import { DashboardHtmlCollection } from './DashboardHtmlCollection'
-import { OnCompleteFn } from '../types'
+import { OnConversionCompleteFn } from '../types/ConverterCluster'
+import { DashboardHtmlBuilder } from './DashboardHtmlBuilder'
 
 type CreateDashboardHtmlCollectionOptions = {
     baseUrl: string
     username: string
     dashboardId: string
     displayName: string
-    onComplete: OnCompleteFn
+    onComplete: OnConversionCompleteFn
 }
 
 const createKey = (dashboardId: string, username: string): string =>
     `${dashboardId}_${username}`
 
 export class DashboardsHtmlStore {
-    #store: Map<string, DashboardHtmlCollection>
+    #store: Map<string, DashboardHtmlBuilder>
 
     constructor() {
         this.#store = new Map()
@@ -32,7 +30,7 @@ export class DashboardsHtmlStore {
             onComplete(html)
             this.#store.delete(createKey(dashboardId, username))
         }
-        const dashboardHtmlCollection = new DashboardHtmlCollection({
+        const dashboardHtmlCollection = new DashboardHtmlBuilder({
             baseUrl,
             dashboardId,
             displayName,
@@ -50,7 +48,7 @@ export class DashboardsHtmlStore {
     public getDashboardHtmlCollection(
         dashboardId: string,
         username: string
-    ): DashboardHtmlCollection | undefined {
+    ): DashboardHtmlBuilder | undefined {
         return this.#store.get(createKey(dashboardId, username))
     }
 }

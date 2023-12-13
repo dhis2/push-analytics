@@ -1,10 +1,14 @@
 import {
     insertIntoChartTemplate,
     insertIntoPivotTableTemplate,
-} from '../../../templates'
-import { createTimer, logDashboardItemConversion } from '../../../utils'
-import { ConverterResult, ConverterResultObject, QueueItem } from '../../types'
-import { DashboardItemScraper } from './DashboardItemScraper'
+} from '../templates'
+import {
+    ConverterResult,
+    ConverterResultObject,
+    QueueItem,
+} from '../types/ConverterCluster'
+import { createTimer, logDashboardItemConversion } from '../utils'
+import { DashboardItemScraper } from './base/DashboardItemScraper'
 
 export class VisualizationScraper extends DashboardItemScraper<ConverterResultObject> {
     async convert(queueItem: QueueItem) {

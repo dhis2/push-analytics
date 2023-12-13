@@ -1,13 +1,13 @@
 import fs from 'node:fs/promises'
-import { insertIntoMapTemplate } from '../../../templates'
+import { insertIntoMapTemplate } from '../templates'
+import { QueueItem } from '../types/ConverterCluster'
 import {
     base64EncodeFile,
     createTimer,
     logDashboardItemConversion,
     waitForFileToDownload,
-} from '../../../utils'
-import { QueueItem } from '../../types'
-import { DashboardItemScraper } from './DashboardItemScraper'
+} from '../utils'
+import { DashboardItemScraper } from './base/DashboardItemScraper'
 
 /* TODO: remove this when the maps app disables the download
  * button while rendering and has routes */

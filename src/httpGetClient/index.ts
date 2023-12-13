@@ -1,2 +1,2 @@
-export { getDashboard } from './getDashboard'
 export { HttpResponseStatusError } from './HttpResponseStatusError'
+export { getDashboard } from './getDashboard'

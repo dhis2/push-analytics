@@ -1,7 +1,7 @@
-import { insertIntoResourcesTemplate } from '../../../templates'
-import { createTimer } from '../../../utils'
-import type { QueueItem } from '../../types'
-import { AnchorParser } from './AnchorParser'
+import { insertIntoResourcesTemplate } from '../templates'
+import type { QueueItem } from '../types/ConverterCluster'
+import { createTimer } from '../utils'
+import { AnchorParser } from './base/AnchorParser'
 
 export class ResourcesParser extends AnchorParser {
     // See https://github.com/dhis2/dashboard-app/blob/master/src/modules/itemTypes.js

@@ -1,6 +1,3 @@
-import { Browser } from 'puppeteer'
-import { PageWithRelativeNavigation } from './Puppeteer'
-
 export type DashboardItemType =
     | 'VISUALIZATION'
     | 'EVENT_VISUALIZATION'
@@ -108,17 +105,4 @@ export type Dashboard = {
     displayName: string
     itemCount: number
     dashboardItems: DashboardItem[]
-}
-
-export type ConverterResult = string | { html: string; css: string }
-
-export type ConverterFn = (
-    dashboardItem: DashboardItem,
-    page: PageWithRelativeNavigation,
-    browser: Browser
-) => Promise<ConverterResult>
-
-export type DashboardItemGroup = {
-    dashboardItems: DashboardItem[]
-    converter: ConverterFn
 }

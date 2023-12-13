@@ -1,5 +1,4 @@
 export { base64EncodeFile } from './base64EncodeFile'
-export { clearDownloadDir } from './clearDownloadDir'
 export { createTimer } from './createTimer'
 export { downloadPath } from './downloadPath'
 export { escapeXpathString } from './escapeXpathString'

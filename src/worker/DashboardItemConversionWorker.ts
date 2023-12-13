@@ -1,13 +1,6 @@
 import process from 'node:process'
 import puppeteer, { Browser, PuppeteerLaunchOptions } from 'puppeteer'
 import {
-    ConversionRequestMessage,
-    ConversionResultMessage,
-    ConvertedItem,
-    QueueItem,
-} from '../types'
-import { LoginPage } from './LoginPage'
-import {
     EventChartScraper,
     EventReportScraper,
     LineListScraper,
@@ -17,7 +10,14 @@ import {
     TextParser,
     UnsupportedTypeConverter,
     VisualizationScraper,
-} from './DashboardItemTypeConverters'
+} from '../converters'
+import {
+    ConversionRequestMessage,
+    ConversionResultMessage,
+    ConvertedItem,
+    QueueItem,
+} from '../types/ConverterCluster'
+import { LoginPage } from './LoginPage'
 
 export class DashboardItemConversionWorker {
     #initialized: boolean

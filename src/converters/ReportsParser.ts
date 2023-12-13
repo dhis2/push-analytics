@@ -1,8 +1,8 @@
-import { insertIntoReportsTemplate } from '../../../templates'
-import { ReportType } from '../../../types'
-import { createTimer } from '../../../utils'
-import type { QueueItem } from '../../types'
-import { AnchorParser } from './AnchorParser'
+import { insertIntoReportsTemplate } from '../templates'
+import { ReportType } from '../types'
+import type { QueueItem } from '../types/ConverterCluster'
+import { createTimer } from '../utils'
+import { AnchorParser } from './base/AnchorParser'
 
 export class ReportsParser extends AnchorParser {
     #path(id: string, type: ReportType) {

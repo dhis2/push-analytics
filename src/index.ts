@@ -2,16 +2,16 @@ import cluster from 'node:cluster'
 import http from 'node:http'
 import process from 'node:process'
 import { HttpResponseStatusError, getDashboard } from './httpGetClient'
+import { DashboardsConverter } from './main'
 import {
     createTimer,
     parseQueryString,
     readEnv,
     validateRequest,
 } from './utils'
-import { DashboardsConverter } from './cluster/main'
-import { DashboardItemConversionWorker } from './cluster'
+import { DashboardItemConversionWorker } from './worker'
 
-const init = async () => {
+const initializeCluster = async () => {
     const { host, port, baseUrl, apiVersion } = readEnv()
 
     if (cluster.isPrimary) {
@@ -78,4 +78,4 @@ const init = async () => {
     }
 }
 
-init()
+initializeCluster()

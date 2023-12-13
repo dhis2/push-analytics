@@ -1,13 +1,13 @@
 import fs from 'node:fs/promises'
-import { insertIntoEventChartTemplate } from '../../../templates'
+import { insertIntoEventChartTemplate } from '../templates'
+import { QueueItem } from '../types/ConverterCluster'
 import {
     base64EncodeFile,
     createTimer,
     logDashboardItemConversion,
     waitForFileToDownload,
-} from '../../../utils'
-import { QueueItem } from '../../types'
-import { DashboardItemScraper } from './DashboardItemScraper'
+} from '../utils'
+import { DashboardItemScraper } from './base/DashboardItemScraper'
 
 export class EventChartScraper extends DashboardItemScraper<string> {
     async convert(queueItem: QueueItem) {

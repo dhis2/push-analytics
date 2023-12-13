@@ -1,7 +1,7 @@
-import { insertIntoLineListTemplate } from '../../../templates'
-import { createTimer, logDashboardItemConversion } from '../../../utils'
-import { ConverterResultObject, QueueItem } from '../../types'
-import { DashboardItemScraper } from './DashboardItemScraper'
+import { insertIntoLineListTemplate } from '../templates'
+import { ConverterResultObject, QueueItem } from '../types/ConverterCluster'
+import { createTimer, logDashboardItemConversion } from '../utils'
+import { DashboardItemScraper } from './base/DashboardItemScraper'
 
 const DONWLOAD_PAGE_URL_PATTERN =
     /api\/analytics\/enrollments|events\/query\/[a-zA-Z0-9]{11}\.html\+css/

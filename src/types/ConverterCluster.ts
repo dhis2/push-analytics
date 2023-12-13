@@ -1,7 +1,7 @@
 import { Browser } from 'puppeteer'
-import type { DashboardItem } from '../types'
+import type { DashboardItem } from '.'
 
-export type OnCompleteFn = (html: string) => void
+export type OnConversionCompleteFn = (html: string) => void
 
 export type AddDashboardOptions = {
     dashboardId: string
@@ -9,7 +9,7 @@ export type AddDashboardOptions = {
     password: string
     displayName: string
     dashboardItems: DashboardItem[]
-    onComplete: OnCompleteFn
+    onComplete: OnConversionCompleteFn
 }
 
 export type ConvertedItem = {
@@ -19,15 +19,6 @@ export type ConvertedItem = {
     html: string
     css: string
 }
-
-export type DashboardHtmlCollection = {
-    items: Map<string, { html: string; css: string }>
-    completedCount: number
-    displayName: string
-    onComplete: OnCompleteFn
-}
-
-export type DashboardsHtmlStore = Map<string, DashboardHtmlCollection>
 
 export type QueueItem = {
     dashboardId: string

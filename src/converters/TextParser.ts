@@ -1,7 +1,7 @@
 import MdParser from '@dhis2/d2-ui-rich-text/parser/MdParser'
-import { insertIntoTextTemplate } from '../../../templates'
-import { createTimer } from '../../../utils'
-import { Converter, QueueItem } from '../../types'
+import { insertIntoTextTemplate } from '../templates'
+import { Converter, QueueItem } from '../types/ConverterCluster'
+import { createTimer } from '../utils'
 
 export class TextParser implements Converter<string> {
     async convert(queueItem: QueueItem) {
