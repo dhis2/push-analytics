@@ -66,8 +66,7 @@ export class MapScraper extends DashboardItemScraper<string> {
         const fullFilePath = await waitForFileToDownload(downloadDir)
         // Convert to base64 encoded string
         const base64Str = base64EncodeFile(fullFilePath)
-        // await this.#clearPage()
-        await this.page.goto(this.appUrl)
+        await this.#clearPage()
         await fs.rm(downloadDir, { recursive: true, force: true })
         // Show some progress so it's clear the process is not hanging
         logDashboardItemConversion(
@@ -78,14 +77,18 @@ export class MapScraper extends DashboardItemScraper<string> {
         return insertIntoMapTemplate(base64Str)
     }
 
-    // async #clearPage() {
-    //     await this.clickElementWithText({
-    //         xpath: 'button',
-    //         text: 'Exit download mode',
-    //     })
-    //     await this.clickElementWithText({
-    //         xpath: 'a/span',
-    //         text: 'New',
-    //     })
-    // }
+    async #clearPage() {
+        await this.clickElementWithText({
+            xpath: 'button',
+            text: 'Exit download mode',
+        })
+        await this.clickElementWithText({
+            xpath: 'button',
+            text: 'File',
+        })
+        await this.clickElementWithText({
+            xpath: 'a/span',
+            text: 'New',
+        })
+    }
 }
