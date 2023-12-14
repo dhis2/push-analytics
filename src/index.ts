@@ -19,12 +19,12 @@ const initializeCluster = async () => {
 
         http.createServer(async (req, res) => {
             try {
-                console.log(req.url)
                 if (req.url === '/favicon.ico') {
                     res.writeHead(200)
                     res.end('')
                     return
                 }
+                console.log('Conversion process started')
                 const timer = createTimer()
                 validateRequest(req)
                 const { dashboardId, username, password } = parseQueryString(
