@@ -21,6 +21,7 @@ export class DashboardsConverter {
         this.#dashboardItemsQueue = []
         this.#idleWorkerIds = new Set()
         this.#createWorkers(maxThreads)
+        this.#addOnExitListener()
     }
 
     public addDashboard({
@@ -131,5 +132,26 @@ export class DashboardsConverter {
                 payload: queueItem,
             } as ConversionRequestMessage)
         }
+    }
+
+    #addOnExitListener() {
+        cluster.on('exit', (worker, code, signal) => {
+            console.log(
+                `Worker ${worker.process.pid} died (${
+                    signal ?? code
+                }). Going to terminate all workers and the main process.`
+            )
+            for (const id in cluster.workers) {
+                const worker = cluster.workers[id]
+
+                const pid = worker?.process.pid
+                worker?.kill()
+
+                if (pid) {
+                    process.kill(pid)
+                }
+            }
+            process.exit(1)
+        })
     }
 }
