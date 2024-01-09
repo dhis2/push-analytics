@@ -1,3 +1,4 @@
+import fs from 'fs'
 import path from 'path'
 import { Browser, CDPSession, ElementHandle, Page } from 'puppeteer'
 import {
@@ -54,6 +55,25 @@ export class DashboardItemScraper<T extends ConverterResult>
         } else {
             return this.#page
         }
+    }
+
+    public async takeErrorScreenShot(queueItem: QueueItem) {
+        const dir = './error-screenshots'
+        const id =
+            queueItem.dashboardItem.eventChart?.id ??
+            queueItem.dashboardItem.eventReport?.id ??
+            queueItem.dashboardItem.eventVisualization?.id ??
+            queueItem.dashboardItem.map?.id ??
+            queueItem.dashboardItem.visualization?.id ??
+            'UNKNOWN_VIZ_ID'
+
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir)
+        }
+
+        await this.page.screenshot({
+            path: path.resolve(dir, `${id}.png`),
+        })
     }
 
     #getItemUrl(id: string) {

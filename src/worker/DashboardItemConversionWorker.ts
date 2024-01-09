@@ -18,6 +18,8 @@ import {
     QueueItem,
 } from '../types/ConverterCluster'
 import { LoginPage } from './LoginPage'
+import { DashboardItemType } from '../types'
+import { insertIntoConversionErrorTemplate } from '../templates'
 
 export class DashboardItemConversionWorker {
     #initialized: boolean
@@ -131,30 +133,50 @@ export class DashboardItemConversionWorker {
     }
 
     async #convertItemType(queueItem: QueueItem) {
-        switch (queueItem.dashboardItem.type) {
+        const itemTypeConverter = this.#getConverterForItemType(
+            queueItem.dashboardItem.type
+        )
+        try {
+            const result = await itemTypeConverter.convert(queueItem)
+            return result
+        } catch (error) {
+            // @ts-ignore
+            if (typeof itemTypeConverter.takeErrorScreenShot === 'function') {
+                // @ts-ignore
+                await itemTypeConverter.takeErrorScreenShot(queueItem)
+            }
+
+            return Promise.resolve(
+                insertIntoConversionErrorTemplate(queueItem, error)
+            )
+        }
+    }
+
+    #getConverterForItemType(dashboardItemType: DashboardItemType) {
+        switch (dashboardItemType) {
             case 'VISUALIZATION':
-                return await this.#visualizationScraper.convert(queueItem)
+                return this.#visualizationScraper
             case 'EVENT_VISUALIZATION':
-                return await this.#lineListScraper.convert(queueItem)
+                return this.#lineListScraper
             case 'EVENT_CHART':
-                return await this.#eventChartScraper.convert(queueItem)
+                return this.#eventChartScraper
             case 'MAP':
-                return await this.#mapScraper.convert(queueItem)
+                return this.#mapScraper
             case 'EVENT_REPORT':
-                return await this.#eventReportScraper.convert(queueItem)
+                return this.#eventReportScraper
             case 'REPORTS':
-                return await this.#reportsParser.convert(queueItem)
+                return this.#reportsParser
             case 'RESOURCES':
-                return await this.#resourcesParser.convert(queueItem)
+                return this.#resourcesParser
             case 'TEXT':
-                return await this.#textParser.convert(queueItem)
+                return this.#textParser
             case 'APP':
             case 'MESSAGES':
             case 'USERS':
-                return await this.#unsupportedTypeConverter.convert()
+                return this.#unsupportedTypeConverter
             default:
                 throw new Error(
-                    `Encountered unknown dashboard item type ${queueItem.dashboardItem.type}`
+                    `Encountered unknown dashboard item type ${dashboardItemType}`
                 )
         }
     }

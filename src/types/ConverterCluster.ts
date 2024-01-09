@@ -53,4 +53,5 @@ export type ConverterResult = string | ConverterResultObject
 export interface Converter<T extends ConverterResult> {
     convert: (queueItem: QueueItem) => Promise<T>
     init?: (browser: Browser) => Promise<void>
+    takeErrorScreenShot?: (queueItem: QueueItem) => Promise<void>
 }
