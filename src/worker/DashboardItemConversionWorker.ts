@@ -144,6 +144,10 @@ export class DashboardItemConversionWorker {
                 await itemTypeConverter.takeErrorScreenShot(queueItem)
             }
 
+            console.log(
+                `Conversion failed for dashboard-item-id "${queueItem.dashboardItem.id}" using converter "${itemTypeConverter.constructor.name}" with PID "${process.pid}"`
+            )
+
             return Promise.resolve(
                 insertIntoConversionErrorTemplate(queueItem, error)
             )
