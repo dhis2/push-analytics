@@ -140,9 +140,7 @@ export class DashboardItemConversionWorker {
             const result = await itemTypeConverter.convert(queueItem)
             return result
         } catch (error) {
-            // @ts-ignore
-            if (typeof itemTypeConverter.takeErrorScreenShot === 'function') {
-                // @ts-ignore
+            if ('takeErrorScreenShot' in itemTypeConverter) {
                 await itemTypeConverter.takeErrorScreenShot(queueItem)
             }
 
