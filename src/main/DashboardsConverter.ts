@@ -55,6 +55,11 @@ export class DashboardsConverter {
                     password,
                 })
             })
+        console.log(
+            `** Adding ${
+                this.#dashboardItemsQueue.length
+            } items to queue from dashboard "${displayName}"`
+        )
         this.#notifyIdleWorkers()
     }
 
