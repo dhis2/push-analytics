@@ -20,6 +20,7 @@ import {
 import { LoginPage } from './LoginPage'
 import { DashboardItemType } from '../types'
 import { insertIntoConversionErrorTemplate } from '../templates'
+import { DashboardItemScraper } from '../converters/base/DashboardItemScraper'
 
 export class DashboardItemConversionWorker {
     #initialized: boolean
@@ -140,8 +141,14 @@ export class DashboardItemConversionWorker {
             const result = await itemTypeConverter.convert(queueItem)
             return result
         } catch (error) {
-            if ('takeErrorScreenShot' in itemTypeConverter) {
-                await itemTypeConverter.takeErrorScreenShot(queueItem)
+            if (itemTypeConverter instanceof DashboardItemScraper) {
+                try {
+                    await itemTypeConverter.takeErrorScreenShot(queueItem)
+                } catch (error) {
+                    console.log(
+                        `Error screenshot failed for dashboard-item-id "${queueItem.dashboardItem.id}"`
+                    )
+                }
             }
 
             console.log(
