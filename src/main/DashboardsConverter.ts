@@ -105,6 +105,7 @@ export class DashboardsConverter {
                         type: 'ITEM_CONVERSION_REQUEST',
                         payload: nextItem,
                     }
+                    this.#idleWorkerIds.delete(worker.id)
                     worker.send(message)
                 } else {
                     this.#idleWorkerIds.add(worker.id)
