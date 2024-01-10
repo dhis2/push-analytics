@@ -92,16 +92,16 @@ export class DashboardItemConversionWorker {
         if (!process?.send) {
             throw new Error('Cannont send message from worker to main thread')
         }
-        if (!this.#initialized) {
-            // Note that this also logs in, hence the else
-            await this.#init(queueItem.username, queueItem.password)
-        } else {
-            /* TODO: if we keep this way of logging in we'll need
-             * to check if this is conversion is for a new user,
-             * in which case we need to login as that new
-             * user. If it's for the same user we need to (somehow)
-             * check if the session is still valid and login if not */
-        }
+        // if (!this.#initialized) {
+        //     // Note that this also logs in, hence the else
+        //     await this.#init(queueItem.username, queueItem.password)
+        // } else {
+        //     /* TODO: if we keep this way of logging in we'll need
+        //      * to check if this is conversion is for a new user,
+        //      * in which case we need to login as that new
+        //      * user. If it's for the same user we need to (somehow)
+        //      * check if the session is still valid and login if not */
+        // }
 
         const result = await this.#convertItemType(queueItem)
 
@@ -114,7 +114,7 @@ export class DashboardItemConversionWorker {
         } as ConvertedItem
     }
 
-    async #init(username: string, password: string) {
+    async init(username: string, password: string) {
         this.#browser = await this.#createBrowser()
         const [firstBlankPage] = await this.#browser.pages()
         this.#loginPage = new LoginPage(firstBlankPage, this.#baseUrl)

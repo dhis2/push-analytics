@@ -11,6 +11,9 @@ import {
 } from './utils'
 import { DashboardItemConversionWorker } from './worker'
 
+const BASE_USER = 'admin'
+const BASE_PASSWORD = 'district'
+
 const initializeCluster = async () => {
     const { host, port, baseUrl, apiVersion, maxThreads } = readEnv()
 
@@ -74,7 +77,11 @@ const initializeCluster = async () => {
         console.log(
             `Starting dashboard-item conversion worker on PID ${process.pid}`
         )
-        return new DashboardItemConversionWorker(baseUrl, false)
+        const conversionWorker = new DashboardItemConversionWorker(
+            baseUrl,
+            false
+        )
+        await conversionWorker.init(BASE_USER, BASE_PASSWORD)
     }
 }
 
