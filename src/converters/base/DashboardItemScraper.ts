@@ -59,13 +59,7 @@ export class DashboardItemScraper<T extends ConverterResult>
 
     public async takeErrorScreenShot(queueItem: QueueItem) {
         const dir = './error-screenshots'
-        const id =
-            queueItem.dashboardItem.eventChart?.id ??
-            queueItem.dashboardItem.eventReport?.id ??
-            queueItem.dashboardItem.eventVisualization?.id ??
-            queueItem.dashboardItem.map?.id ??
-            queueItem.dashboardItem.visualization?.id ??
-            'UNKNOWN_VIZ_ID'
+        const id = queueItem.dashboardItem.id
 
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir)
