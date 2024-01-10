@@ -87,7 +87,7 @@ export class MapScraper extends DashboardItemScraper<string> {
             text: 'File',
         })
         await this.clickElementWithText({
-            xpath: 'a/span',
+            xpath: 'span',
             text: 'New',
         })
     }
