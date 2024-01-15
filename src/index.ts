@@ -10,6 +10,7 @@ import {
     validateRequest,
 } from './utils'
 import { DashboardItemConversionWorker } from './worker'
+import { RequestQueue } from './RequestQueue'
 
 const BASE_USER = 'admin'
 const BASE_PASSWORD = 'district'
@@ -18,6 +19,8 @@ const initializeCluster = async () => {
     const { host, port, baseUrl, apiVersion, maxThreads } = readEnv()
 
     if (cluster.isPrimary) {
+        // TODO: figure out why things break when requests are not queued, in theory it should not be needed
+        const requestQueue = new RequestQueue()
         const dashboardsConverter = new DashboardsConverter(baseUrl, maxThreads)
 
         http.createServer(async (req, res) => {
@@ -28,33 +31,35 @@ const initializeCluster = async () => {
                     return
                 }
                 console.log('Conversion process started')
-                const timer = createTimer()
-                validateRequest(req)
-                const { dashboardId, username, password } = parseQueryString(
-                    req.url,
-                    baseUrl
-                )
-                const { displayName, dashboardItems } = await getDashboard(
-                    apiVersion,
-                    baseUrl,
-                    dashboardId,
-                    password,
-                    username
-                )
-                dashboardsConverter.addDashboard({
-                    dashboardId,
-                    displayName,
-                    dashboardItems,
-                    username,
-                    password,
-                    onComplete: (html: string) => {
-                        console.log(
-                            `Converted dashboard "${displayName}" (${dashboardId}) in ${timer.getElapsedTime()} seconds`
-                        )
-                        res.writeHead(200)
-                        res.end(html)
-                    },
-                })
+                const requestHandler = async () => {
+                    const timer = createTimer()
+                    validateRequest(req)
+                    const { dashboardId, username, password } =
+                        parseQueryString(req.url, baseUrl)
+                    const { displayName, dashboardItems } = await getDashboard(
+                        apiVersion,
+                        baseUrl,
+                        dashboardId,
+                        password,
+                        username
+                    )
+                    dashboardsConverter.addDashboard({
+                        dashboardId,
+                        displayName,
+                        dashboardItems,
+                        username,
+                        password,
+                        onComplete: (html: string) => {
+                            console.log(
+                                `Converted dashboard "${displayName}" (${dashboardId}) in ${timer.getElapsedTime()} seconds`
+                            )
+                            res.writeHead(200)
+                            res.end(html)
+                            requestQueue.onCompleted()
+                        },
+                    })
+                }
+                requestQueue.enqueue(requestHandler)
             } catch (error) {
                 console.log(error)
                 if (error instanceof HttpResponseStatusError) {
