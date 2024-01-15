@@ -146,13 +146,13 @@ export class DashboardItemConversionWorker {
                     await itemTypeConverter.takeErrorScreenShot(queueItem)
                 } catch (error) {
                     console.log(
-                        `Error screenshot failed for dashboard-item-id "${queueItem.dashboardItem.id}"`
+                        `Error screenshot failed for item-id "${queueItem.dashboardItem.id}"`
                     )
                 }
             }
 
             console.log(
-                `Conversion failed for dashboard-item-id "${queueItem.dashboardItem.id}" using converter "${itemTypeConverter.constructor.name}" with PID "${process.pid}"`
+                `Conversion failed for dashboard-id ${queueItem.dashboardId} item-id "${queueItem.dashboardItem.id}" using converter "${itemTypeConverter.constructor.name}" with PID "${process.pid}"`
             )
 
             return Promise.resolve(
