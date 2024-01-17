@@ -14,31 +14,11 @@ export class LoginPage {
 
     async login(username: string, password: string): Promise<void> {
         try {
-            // await this.#page.bringToFront()
-            // await this.#page.goto(this.#baseUrl + LOGIN_PATH)
-            // await this.#page.type('#j_username', username)
-            // await this.#page.type('#j_password', password)
-            // await this.#page.click('#submit')
-            const options = {
-                loginUrl: this.#baseUrl + LOGIN_PATH,
-                username: encodeURIComponent(username),
-                password: encodeURIComponent(password),
-            }
-            console.log('Going to login', options)
-            const loginResponse = await this.#page.evaluate((options) => {
-                return fetch(options.loginUrl, {
-                    method: 'POST',
-                    body: `j_username=${options.username}&j_password=${options.password}`,
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                })
-                    .then((response) => response.json().then((r) => r))
-                    .catch((err) => {
-                        return err.message
-                    })
-            }, options)
-            console.log('loginResponse: ', loginResponse)
+            await this.#page.bringToFront()
+            await this.#page.goto(this.#baseUrl + LOGIN_PATH)
+            await this.#page.type('#j_username', username)
+            await this.#page.type('#j_password', password)
+            await this.#page.click('#submit')
         } catch (error) {
             throw new Error(
                 'Pupetteer could not login to the DHIS2 Core instance'
