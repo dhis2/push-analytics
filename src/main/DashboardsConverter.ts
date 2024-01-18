@@ -27,7 +27,6 @@ export class DashboardsConverter {
     public addDashboard({
         dashboardId,
         username,
-        password,
         displayName,
         dashboardItems,
         onComplete,
@@ -52,13 +51,12 @@ export class DashboardsConverter {
                     dashboardId,
                     dashboardItem,
                     username,
-                    password,
                 })
             })
         console.log(
-            `** Adding ${
+            `**** Adding ${
                 this.#dashboardItemsQueue.length
-            } items to queue from dashboard "${displayName}"`
+            } items to queue from dashboard "${displayName}" ****`
         )
         this.#notifyIdleWorkers()
     }

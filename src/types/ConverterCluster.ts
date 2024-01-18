@@ -24,7 +24,6 @@ export type QueueItem = {
     dashboardId: string
     dashboardItem: DashboardItem
     username: string
-    password: string
 }
 
 export type MessageType = 'ITEM_CONVERSION_REQUEST' | 'ITEM_CONVERSION_RESULT'

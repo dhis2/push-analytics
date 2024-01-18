@@ -17,17 +17,36 @@ import {
     ConvertedItem,
     QueueItem,
 } from '../types/ConverterCluster'
-import { LoginPage } from './LoginPage'
+import { Authenticator } from './Authenticator'
 import { DashboardItemType } from '../types'
 import { insertIntoConversionErrorTemplate } from '../templates'
 import { DashboardItemScraper } from '../converters/base/DashboardItemScraper'
 
+/**
+ * TODO
+ * Sort out initialisation (don't start conversions while this is initializing)
+ */
+
+type DashboardItemConversionWorkerOptions = {
+    debug: boolean
+    baseUrl: string
+    apiVersion: string
+    adminUsername: string
+    adminPassword: string
+    sessionTimeout: string
+}
+
 export class DashboardItemConversionWorker {
     #initialized: boolean
-    #baseUrl: string
+    #conversionInProgress: boolean
     #debug: boolean
+    #baseUrl: string
+    #apiVersion: string
+    #adminUsername: string
+    #adminPassword: string
+    #sessionTimeout: string
     #browser: Browser | null
-    #loginPage: LoginPage | null
+    #authenticator: Authenticator | null
     #eventChartScraper: EventChartScraper
     #eventReportScraper: EventReportScraper
     #lineListScraper: LineListScraper
@@ -38,12 +57,24 @@ export class DashboardItemConversionWorker {
     #unsupportedTypeConverter: UnsupportedTypeConverter
     #visualizationScraper: VisualizationScraper
 
-    constructor(baseUrl: string, debug: boolean) {
+    constructor({
+        baseUrl,
+        apiVersion,
+        debug,
+        adminUsername,
+        adminPassword,
+        sessionTimeout,
+    }: DashboardItemConversionWorkerOptions) {
         this.#initialized = false
+        this.#conversionInProgress = false
         this.#baseUrl = baseUrl
+        this.#apiVersion = apiVersion
+        this.#adminUsername = adminUsername
+        this.#adminPassword = adminPassword
+        this.#sessionTimeout = sessionTimeout
         this.#debug = debug
         this.#browser = null
-        this.#loginPage = null
+        this.#authenticator = null
         this.#eventChartScraper = new EventChartScraper(
             baseUrl,
             'dhis-web-event-visualizer',
@@ -80,28 +111,23 @@ export class DashboardItemConversionWorker {
         }
     }
 
-    get loginPage() {
-        if (!this.#loginPage) {
-            throw new Error('Login page has not been initialized')
-        } else {
-            return this.#loginPage
-        }
+    get isConverting() {
+        /* This is a hack to avoid the following error:
+         * `Cannot read private member from an object whose class did not declare it`
+         * This approach has been chosen because the `#conversionInProgress` property
+         * is a primitive/boolean, so it cannot be passed to other classes to read the
+         * current conversion status. Instead we need to pass a method that reads the
+         * current status and returns it. However, when implementing this public method
+         * in the expected way `isConverting() { return this.#conversionInProgress }`,
+         * the error above is thrown. This getter that returns a function and works as
+         * expected and does not cause errors. */
+        return () => this.#conversionInProgress
     }
 
     public async convert(queueItem: QueueItem) {
         if (!process?.send) {
             throw new Error('Cannont send message from worker to main thread')
         }
-        // if (!this.#initialized) {
-        //     // Note that this also logs in, hence the else
-        //     await this.#init(queueItem.username, queueItem.password)
-        // } else {
-        //     /* TODO: if we keep this way of logging in we'll need
-        //      * to check if this is conversion is for a new user,
-        //      * in which case we need to login as that new
-        //      * user. If it's for the same user we need to (somehow)
-        //      * check if the session is still valid and login if not */
-        // }
 
         const result = await this.#convertItemType(queueItem)
 
@@ -114,11 +140,19 @@ export class DashboardItemConversionWorker {
         } as ConvertedItem
     }
 
-    async init(username: string, password: string) {
+    async init() {
         this.#browser = await this.#createBrowser()
         const [firstBlankPage] = await this.#browser.pages()
-        this.#loginPage = new LoginPage(firstBlankPage, this.#baseUrl)
-        await this.#loginPage.login(username, password)
+        this.#authenticator = new Authenticator({
+            page: firstBlankPage,
+            baseUrl: this.#baseUrl,
+            apiVersion: this.#apiVersion,
+            adminUsername: this.#adminUsername,
+            adminPassword: this.#adminPassword,
+            sessionTimeout: this.#sessionTimeout,
+            isConverting: this.isConverting,
+        })
+        await this.#authenticator.establishNonExpiringAdminSession()
 
         /* Scrapers need to be initialised with the browser instance
          * but Parsers are ready to convert after initialisation */
@@ -134,10 +168,15 @@ export class DashboardItemConversionWorker {
     }
 
     async #convertItemType(queueItem: QueueItem) {
+        if (!this.#authenticator) {
+            throw new Error('Authenticator not initialized')
+        }
+        this.#conversionInProgress = true
         const itemTypeConverter = this.#getConverterForItemType(
             queueItem.dashboardItem.type
         )
         try {
+            await this.#authenticator.impersonateUser(queueItem.username)
             const result = await itemTypeConverter.convert(queueItem)
             return result
         } catch (error) {
@@ -158,6 +197,8 @@ export class DashboardItemConversionWorker {
             return Promise.resolve(
                 insertIntoConversionErrorTemplate(queueItem, error)
             )
+        } finally {
+            this.#conversionInProgress = false
         }
     }
 
