@@ -6,7 +6,6 @@ export type OnConversionCompleteFn = (html: string) => void
 export type AddDashboardOptions = {
     dashboardId: string
     username: string
-    password: string
     displayName: string
     dashboardItems: DashboardItem[]
     onComplete: OnConversionCompleteFn

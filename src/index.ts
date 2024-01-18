@@ -46,8 +46,10 @@ const initializeCluster = async () => {
                 const requestHandler = async () => {
                     const timer = createTimer()
                     validateRequest(req)
-                    const { dashboardId, username, password } =
-                        parseQueryString(req.url, baseUrl)
+                    const { dashboardId, username } = parseQueryString(
+                        req.url,
+                        baseUrl
+                    )
                     const { displayName, dashboardItems } = await getDashboard(
                         dashboardId
                     )
@@ -56,7 +58,6 @@ const initializeCluster = async () => {
                         displayName,
                         dashboardItems,
                         username,
-                        password,
                         onComplete: (html: string) => {
                             console.log(
                                 `++++ Converted dashboard "${displayName}" (${dashboardId}) in ${timer.getElapsedTime()} seconds ++++`

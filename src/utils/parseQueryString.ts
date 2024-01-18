@@ -8,7 +8,7 @@ const isNonEmptyString = (str: string) =>
 
 export const parseQueryString = (url = '', baseUrl: string) => {
     const { searchParams } = new URL(url, baseUrl)
-    const { dashboardId, username, password } = Object.fromEntries(searchParams)
+    const { dashboardId, username } = Object.fromEntries(searchParams)
 
     if (!isValidUid(dashboardId)) {
         throw new HttpResponseStatusError('Invalid dashhboard UID', 400)
@@ -18,9 +18,5 @@ export const parseQueryString = (url = '', baseUrl: string) => {
         throw new HttpResponseStatusError('Invalid username', 400)
     }
 
-    if (!isNonEmptyString(password)) {
-        throw new HttpResponseStatusError('Invalid password', 400)
-    }
-
-    return { dashboardId, username, password }
+    return { dashboardId, username }
 }
