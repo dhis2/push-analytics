@@ -63,9 +63,11 @@ export class Authenticator {
     }
 
     async impersonateUser(username: string) {
-        await this.#doAuthenticatedGetRequestFromPage(
+        console.log(`Going to impersonate user "${username}"`)
+        const statusCode = await this.#doAuthenticatedGetRequestFromPage(
             `/impersonate?username=${username}`
         )
+        console.log(`Impersonation request response code: ${statusCode}`)
     }
 
     async #preventSessionExpiry() {
@@ -82,8 +84,9 @@ export class Authenticator {
 
             await this.#page.bringToFront()
 
+            const url = `/api/${this.#apiVersion}/system/ping`
             const httpStatusCode =
-                await this.#doAuthenticatedGetRequestFromPage('/system/ping')
+                await this.#doAuthenticatedGetRequestFromPage(url)
 
             if (httpStatusCode !== 200) {
                 clearInterval(intervalId)
@@ -93,7 +96,7 @@ export class Authenticator {
     }
 
     async #doAuthenticatedGetRequestFromPage(
-        resource: string,
+        url: string,
         toJson: boolean = false
     ) {
         if (!this.#cookie) {
@@ -103,7 +106,7 @@ export class Authenticator {
         }
 
         const options = {
-            url: `/api/${this.#apiVersion}${resource}`,
+            url,
             host: this.#baseUrl,
             cookie: {
                 name: this.#cookie.name,
