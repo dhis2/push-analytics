@@ -16,6 +16,7 @@ import {
     ConversionResultMessage,
     ConvertedItem,
     QueueItem,
+    WorkerInitializedMessage,
 } from '../types/ConverterCluster'
 import { Authenticator } from './Authenticator'
 import { DashboardItemType } from '../types'
@@ -37,7 +38,6 @@ type DashboardItemConversionWorkerOptions = {
 }
 
 export class DashboardItemConversionWorker {
-    #initialized: boolean
     #conversionInProgress: boolean
     #debug: boolean
     #baseUrl: string
@@ -65,7 +65,6 @@ export class DashboardItemConversionWorker {
         adminPassword,
         sessionTimeout,
     }: DashboardItemConversionWorkerOptions) {
-        this.#initialized = false
         this.#conversionInProgress = false
         this.#baseUrl = baseUrl
         this.#apiVersion = apiVersion
@@ -161,10 +160,9 @@ export class DashboardItemConversionWorker {
         await this.#lineListScraper.init(this.#browser)
         await this.#mapScraper.init(this.#browser)
         await this.#visualizationScraper.init(this.#browser)
-
-        this.#initialized = true
-
-        return this.#initialized
+        this.#notifyMainProcess({
+            type: 'WORKER_INITIALIZED',
+        } as WorkerInitializedMessage)
     }
 
     async #convertItemType(queueItem: QueueItem) {
@@ -250,10 +248,6 @@ export class DashboardItemConversionWorker {
     }
 
     #addConversionRequestListener() {
-        if (!process?.send) {
-            throw new Error('Cannont send message from worker to main thread')
-        }
-
         process.on('message', async (message: ConversionRequestMessage) => {
             try {
                 if (
@@ -269,12 +263,7 @@ export class DashboardItemConversionWorker {
                     queueItem
                 )
 
-                if (!process?.send) {
-                    throw new Error(
-                        'Cannont send message from worker to main thread'
-                    )
-                }
-                process.send({
+                this.#notifyMainProcess({
                     type: 'ITEM_CONVERSION_RESULT',
                     payload: convertedItem,
                 } as ConversionResultMessage)
@@ -283,5 +272,14 @@ export class DashboardItemConversionWorker {
                 throw error
             }
         })
+    }
+
+    #notifyMainProcess(
+        message: ConversionResultMessage | WorkerInitializedMessage
+    ) {
+        if (!process?.send) {
+            throw new Error('Cannont send message from worker to main thread')
+        }
+        process.send(message)
     }
 }

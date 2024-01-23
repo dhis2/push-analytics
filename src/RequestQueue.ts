@@ -4,7 +4,7 @@ export class RequestQueue {
     #queue: RequestHandler[]
 
     constructor() {
-        this.#idle = true
+        this.#idle = false
         this.#queue = []
     }
 
@@ -14,6 +14,11 @@ export class RequestQueue {
         if (this.#idle) {
             this.#dequeue()
         }
+    }
+
+    onStartupCompleted() {
+        this.#idle = true
+        this.#dequeue()
     }
 
     onCompleted() {

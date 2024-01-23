@@ -25,7 +25,10 @@ export type QueueItem = {
     username: string
 }
 
-export type MessageType = 'ITEM_CONVERSION_REQUEST' | 'ITEM_CONVERSION_RESULT'
+export type MessageType =
+    | 'WORKER_INITIALIZED'
+    | 'ITEM_CONVERSION_REQUEST'
+    | 'ITEM_CONVERSION_RESULT'
 
 export type Message<T extends MessageType, P> = {
     type: T
@@ -41,6 +44,8 @@ export type ConversionResultMessage = Message<
     'ITEM_CONVERSION_RESULT',
     ConvertedItem
 >
+
+export type WorkerInitializedMessage = Message<'WORKER_INITIALIZED', undefined>
 
 export type ConverterResultObject = {
     html: string

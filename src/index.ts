@@ -27,7 +27,14 @@ const initializeCluster = async () => {
     if (cluster.isPrimary) {
         // TODO: figure out why things break when requests are not queued, in theory it should not be needed
         const requestQueue = new RequestQueue()
-        const dashboardsConverter = new DashboardsConverter(baseUrl, maxThreads)
+        const onStartUpCompleted = () => {
+            requestQueue.onStartupCompleted()
+        }
+        const dashboardsConverter = new DashboardsConverter(
+            baseUrl,
+            maxThreads,
+            onStartUpCompleted
+        )
         const getDashboard = createDashboardGetter({
             apiVersion,
             baseUrl,
