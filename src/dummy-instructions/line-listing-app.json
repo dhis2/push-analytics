@@ -1,0 +1,31 @@
+{
+    "version": "0.0.1",
+    "showVisualization": {
+        "strategy": "navigateToUrl",
+        "steps": [
+            { "goto": "{{appUrl}}#/{{id}}" },
+            { "waitForSelector": ".dhis2-line-list-table" }
+        ]
+    },
+    "triggerDownload": {
+        "strategy": "useUiElements",
+        "steps": [
+            { "click": "button.downloadmenuitem" },
+            { "click": "li > span.htmlandcss" }
+        ]
+    },
+    "obtainDownloadArtifact": {
+        "strategy": "scrapeDownloadPage",
+        "modifyDownloadUrl": {
+            "searchValue": "&paging=false&",
+            "replaceValue": "&paging=true&pageSize=50&"
+        },
+        "openerUrl": "{{appUrl}}#/{{id}}",
+        "htmlSelector": "body",
+        "cssSelector": "style"
+    },
+    "clearVisualization": {
+        "strategy": "navigateToUrl",
+        "steps": [{ "goto": "{{appUrl}}#/new" }]
+    }
+}
