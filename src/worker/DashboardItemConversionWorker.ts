@@ -23,11 +23,6 @@ import { DashboardItemType } from '../types'
 import { insertIntoConversionErrorTemplate } from '../templates'
 import { DashboardItemScraper } from '../converters/base/DashboardItemScraper'
 
-/**
- * TODO
- * Sort out initialisation (don't start conversions while this is initializing)
- */
-
 type DashboardItemConversionWorkerOptions = {
     debug: boolean
     baseUrl: string
