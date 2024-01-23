@@ -18,7 +18,8 @@ export class Authenticator {
     #adminPassword: string
     #sessionTimeout: string
     #isConverting: () => boolean
-    #cookie: Protocol.Network.Cookie | null
+    #sessionCookie: Protocol.Network.Cookie | null
+    #isImpersonatingUser: boolean
 
     constructor({
         page,
@@ -36,7 +37,8 @@ export class Authenticator {
         this.#adminPassword = adminPassword
         this.#sessionTimeout = sessionTimeout
         this.#isConverting = isConverting
-        this.#cookie = null
+        this.#sessionCookie = null
+        this.#isImpersonatingUser = false
     }
 
     async establishNonExpiringAdminSession(): Promise<void> {
@@ -48,12 +50,7 @@ export class Authenticator {
             await this.#page.type('#j_username', this.#adminUsername)
             await this.#page.type('#j_password', this.#adminPassword)
             await this.#page.click('#submit')
-            const cookies = await this.#page.cookies()
-            this.#cookie =
-                cookies.find(
-                    (cookie: Protocol.Network.Cookie) =>
-                        cookie.name === 'JSESSIONID'
-                ) ?? null
+            await this.#setSessionCookie()
             this.#preventSessionExpiry()
         } catch (error) {
             throw new Error(
@@ -63,11 +60,27 @@ export class Authenticator {
     }
 
     async impersonateUser(username: string) {
-        console.log(`Going to impersonate user "${username}"`)
-        const statusCode = await this.#doAuthenticatedGetRequestFromPage(
-            `/impersonate?username=${username}`
-        )
-        console.log(`Impersonation request response code: ${statusCode}`)
+        if (this.#isImpersonatingUser) {
+            const exitImpersonateStatusCode =
+                await this.#doAuthenticatedGetRequestFromPage(
+                    '/impersonateExit',
+                    'POST'
+                )
+            if (exitImpersonateStatusCode !== 200) {
+                throw new Error('Could not exit impersonation mode')
+            }
+        }
+        const impersonateStatusCode =
+            await this.#doAuthenticatedGetRequestFromPage(
+                `/impersonate?username=${username}`,
+                'POST'
+            )
+        if (impersonateStatusCode !== 200) {
+            throw new Error('Could not impersonate user')
+        } else {
+            this.#isImpersonatingUser = true
+            await this.#setSessionCookie()
+        }
     }
 
     async #preventSessionExpiry() {
@@ -95,11 +108,20 @@ export class Authenticator {
         }, intervalInMs)
     }
 
-    async #doAuthenticatedGetRequestFromPage(
-        url: string,
-        toJson: boolean = false
-    ) {
-        if (!this.#cookie) {
+    async #setSessionCookie() {
+        const cookies = await this.#page.cookies()
+        const sessionCookie = cookies.find(
+            (cookie: Protocol.Network.Cookie) => cookie.name === 'JSESSIONID'
+        )
+        if (!sessionCookie) {
+            throw new Error('Could not find session cookie')
+        }
+
+        this.#sessionCookie = sessionCookie
+    }
+
+    async #doAuthenticatedGetRequestFromPage(url: string, method = 'GET') {
+        if (!this.#sessionCookie) {
             throw new Error(
                 'Cookie not found, cannot issue an authenticated request'
             )
@@ -109,15 +131,15 @@ export class Authenticator {
             url,
             host: this.#baseUrl,
             cookie: {
-                name: this.#cookie.name,
-                value: this.#cookie.value,
+                name: this.#sessionCookie.name,
+                value: this.#sessionCookie.value,
             },
-            toJson,
+            method,
         }
 
-        const responseData = await this.#page.evaluate((options) => {
+        return await this.#page.evaluate((options) => {
             return fetch(options.url, {
-                method: 'GET',
+                method: options.method,
                 headers: {
                     Accept: '*/*',
                     'Accept-Encoding': 'gzip, deflate, br',
@@ -131,26 +153,8 @@ export class Authenticator {
                     'x-requested-with': 'XMLHttpRequest',
                 },
             })
-                .then((response) => {
-                    if (options.toJson) {
-                        return response.json()
-                    } else {
-                        return response.status
-                    }
-                })
-                .catch((error) => {
-                    if (options.toJson) {
-                        return { isError: true, message: error.message }
-                    } else {
-                        return 500
-                    }
-                })
+                .then((response) => response.status)
+                .catch(() => 500)
         }, options)
-
-        if (typeof responseData === 'object' && responseData.isError) {
-            throw new Error(responseData.message)
-        } else {
-            return responseData
-        }
     }
 }
