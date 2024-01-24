@@ -1,7 +1,7 @@
 import cluster from 'node:cluster'
 import http from 'node:http'
 import process from 'node:process'
-import { HttpResponseStatusError, getDashboard } from './httpGetClient'
+import { HttpResponseStatusError, createDashboardGetter } from './httpGetClient'
 import { DashboardsConverter } from './main'
 import {
     createTimer,
@@ -12,16 +12,35 @@ import {
 import { DashboardItemConversionWorker } from './worker'
 import { RequestQueue } from './RequestQueue'
 
-const BASE_USER = 'admin'
-const BASE_PASSWORD = 'district'
-
 const initializeCluster = async () => {
-    const { host, port, baseUrl, apiVersion, maxThreads } = readEnv()
+    const {
+        host,
+        port,
+        baseUrl,
+        apiVersion,
+        adminUsername,
+        adminPassword,
+        maxThreads,
+        sessionTimeout,
+    } = readEnv()
 
     if (cluster.isPrimary) {
         // TODO: figure out why things break when requests are not queued, in theory it should not be needed
         const requestQueue = new RequestQueue()
-        const dashboardsConverter = new DashboardsConverter(baseUrl, maxThreads)
+        const onStartUpCompleted = () => {
+            requestQueue.onStartupCompleted()
+        }
+        const dashboardsConverter = new DashboardsConverter(
+            baseUrl,
+            maxThreads,
+            onStartUpCompleted
+        )
+        const getDashboard = createDashboardGetter({
+            apiVersion,
+            baseUrl,
+            username: adminUsername,
+            password: adminPassword,
+        })
 
         http.createServer(async (req, res) => {
             try {
@@ -34,24 +53,21 @@ const initializeCluster = async () => {
                 const requestHandler = async () => {
                     const timer = createTimer()
                     validateRequest(req)
-                    const { dashboardId, username, password } =
-                        parseQueryString(req.url, baseUrl)
+                    const { dashboardId, username } = parseQueryString(
+                        req.url,
+                        baseUrl
+                    )
                     const { displayName, dashboardItems } = await getDashboard(
-                        apiVersion,
-                        baseUrl,
-                        dashboardId,
-                        password,
-                        username
+                        dashboardId
                     )
                     dashboardsConverter.addDashboard({
                         dashboardId,
                         displayName,
                         dashboardItems,
                         username,
-                        password,
                         onComplete: (html: string) => {
                             console.log(
-                                `Converted dashboard "${displayName}" (${dashboardId}) in ${timer.getElapsedTime()} seconds`
+                                `++++ Converted dashboard "${displayName}" (${dashboardId}) in ${timer.getElapsedTime()} seconds ++++`
                             )
                             res.writeHead(200)
                             res.end(html)
@@ -82,11 +98,15 @@ const initializeCluster = async () => {
         console.log(
             `Starting dashboard-item conversion worker on PID ${process.pid}`
         )
-        const conversionWorker = new DashboardItemConversionWorker(
+        const conversionWorker = new DashboardItemConversionWorker({
+            debug: false,
             baseUrl,
-            false
-        )
-        await conversionWorker.init(BASE_USER, BASE_PASSWORD)
+            apiVersion,
+            adminUsername,
+            adminPassword,
+            sessionTimeout,
+        })
+        await conversionWorker.init()
     }
 }
 

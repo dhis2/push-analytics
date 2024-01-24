@@ -6,7 +6,6 @@ export type OnConversionCompleteFn = (html: string) => void
 export type AddDashboardOptions = {
     dashboardId: string
     username: string
-    password: string
     displayName: string
     dashboardItems: DashboardItem[]
     onComplete: OnConversionCompleteFn
@@ -24,10 +23,12 @@ export type QueueItem = {
     dashboardId: string
     dashboardItem: DashboardItem
     username: string
-    password: string
 }
 
-export type MessageType = 'ITEM_CONVERSION_REQUEST' | 'ITEM_CONVERSION_RESULT'
+export type MessageType =
+    | 'WORKER_INITIALIZED'
+    | 'ITEM_CONVERSION_REQUEST'
+    | 'ITEM_CONVERSION_RESULT'
 
 export type Message<T extends MessageType, P> = {
     type: T
@@ -43,6 +44,8 @@ export type ConversionResultMessage = Message<
     'ITEM_CONVERSION_RESULT',
     ConvertedItem
 >
+
+export type WorkerInitializedMessage = Message<'WORKER_INITIALIZED', undefined>
 
 export type ConverterResultObject = {
     html: string

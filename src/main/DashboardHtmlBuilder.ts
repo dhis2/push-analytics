@@ -46,12 +46,6 @@ export class DashboardHtmlBuilder {
 
         ++this.#completedCount
 
-        console.log(
-            `Adding HTML to dashboard "${this.#displayName}" (${
-                this.#completedCount
-            } of ${this.#items.size})`
-        )
-
         if (this.#completedCount === this.#items.size) {
             const { html, css } = Array.from(this.#items.values()).reduce(
                 (acc, result: ConverterResult) => {

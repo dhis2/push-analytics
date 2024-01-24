@@ -24,20 +24,27 @@ const FIELDS = [
     },
 ]
 
-export const getDashboard = async (
-    apiVersion: string,
-    baseUrl: string,
-    dashboardId: string,
-    password: string,
+type CreateDashboardGetterOptions = {
+    apiVersion: string
+    baseUrl: string
+    password: string
     username: string
-) => {
-    const url = `${baseUrl}/api/${apiVersion}/dashboards/${dashboardId}`
-    const options = {
-        params: {
-            fields: fieldsArrayToQueryString(FIELDS),
-        },
-        auth: { username, password },
-    }
-    const result = await axios.get<Dashboard>(url, options)
-    return result.data
 }
+export const createDashboardGetter =
+    ({
+        apiVersion,
+        baseUrl,
+        password,
+        username,
+    }: CreateDashboardGetterOptions) =>
+    async (dashboardId: string) => {
+        const url = `${baseUrl}/api/${apiVersion}/dashboards/${dashboardId}`
+        const options = {
+            params: {
+                fields: fieldsArrayToQueryString(FIELDS),
+            },
+            auth: { username, password },
+        }
+        const result = await axios.get<Dashboard>(url, options)
+        return result.data
+    }

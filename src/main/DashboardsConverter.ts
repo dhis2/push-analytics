@@ -5,6 +5,7 @@ import type {
     ConversionResultMessage,
     ConvertedItem,
     QueueItem,
+    WorkerInitializedMessage,
 } from '../types/ConverterCluster'
 import { getThreadLength } from '../utils'
 import { DashboardsHtmlStore } from './DashboardsHtmlStore'
@@ -15,19 +16,22 @@ export class DashboardsConverter {
     #dashboardItemsQueue: QueueItem[]
     #idleWorkerIds: Set<number>
 
-    constructor(baseUrl: string, maxThreads: string) {
+    constructor(
+        baseUrl: string,
+        maxThreads: string,
+        onStartupCompleted: () => void
+    ) {
         this.#baseUrl = baseUrl
         this.#dashboardsHtmlStore = new DashboardsHtmlStore()
         this.#dashboardItemsQueue = []
         this.#idleWorkerIds = new Set()
-        this.#createWorkers(maxThreads)
+        this.#createWorkers(maxThreads, onStartupCompleted)
         this.#addOnExitListener()
     }
 
     public addDashboard({
         dashboardId,
         username,
-        password,
         displayName,
         dashboardItems,
         onComplete,
@@ -52,13 +56,12 @@ export class DashboardsConverter {
                     dashboardId,
                     dashboardItem,
                     username,
-                    password,
                 })
             })
         console.log(
-            `** Adding ${
+            `**** Adding ${
                 this.#dashboardItemsQueue.length
-            } items to queue from dashboard "${displayName}"`
+            } items to queue from dashboard "${displayName}" ****`
         )
         this.#notifyIdleWorkers()
     }
@@ -89,33 +92,51 @@ export class DashboardsConverter {
         return this.#dashboardItemsQueue.shift()
     }
 
-    #createWorkers(maxThreads: string) {
+    #createWorkers(maxThreads: string, onStartupCompleted: () => void) {
         const threadLength = getThreadLength(maxThreads)
+        let inializedWorkerCount = 0
         for (let i = 0; i < threadLength; i++) {
             const worker = cluster.fork()
             this.#idleWorkerIds.add(worker.id)
-            worker.on('message', (message: ConversionResultMessage) => {
-                if (
-                    message.type !== 'ITEM_CONVERSION_RESULT' ||
-                    !message.payload
-                ) {
-                    throw new Error(
-                        `Received unexpected message with type "${message?.type}" from worker with ID "${worker.id}"`
-                    )
-                }
-                this.#addDashboardItemHtml(message.payload as ConvertedItem)
-                const nextItem = this.#takeItemFromQueue()
-                if (nextItem) {
-                    const message: ConversionRequestMessage = {
-                        type: 'ITEM_CONVERSION_REQUEST',
-                        payload: nextItem,
+            worker.on(
+                'message',
+                (
+                    message: WorkerInitializedMessage | ConversionResultMessage
+                ) => {
+                    const isWorkerInitializedMessage =
+                        message.type === 'WORKER_INITIALIZED' &&
+                        !message.payload
+                    const isItemConversionMessage =
+                        message.type === 'ITEM_CONVERSION_RESULT' &&
+                        message.payload
+
+                    if (isWorkerInitializedMessage) {
+                        ++inializedWorkerCount
+                        if (inializedWorkerCount === threadLength) {
+                            onStartupCompleted()
+                        }
+                    } else if (isItemConversionMessage) {
+                        this.#addDashboardItemHtml(
+                            message.payload as ConvertedItem
+                        )
+                        const nextItem = this.#takeItemFromQueue()
+                        if (nextItem) {
+                            const message: ConversionRequestMessage = {
+                                type: 'ITEM_CONVERSION_REQUEST',
+                                payload: nextItem,
+                            }
+                            this.#idleWorkerIds.delete(worker.id)
+                            worker.send(message)
+                        } else {
+                            this.#idleWorkerIds.add(worker.id)
+                        }
+                    } else {
+                        throw new Error(
+                            `Received unexpected message with type "${message?.type}" from worker with ID "${worker.id}"`
+                        )
                     }
-                    this.#idleWorkerIds.delete(worker.id)
-                    worker.send(message)
-                } else {
-                    this.#idleWorkerIds.add(worker.id)
                 }
-            })
+            )
         }
     }
 
