@@ -1,0 +1,53 @@
+{
+    "version": "0.0.1",
+    "showVisualization": {
+        "strategy": "navigateToUrl",
+        "steps": [
+            { "goto": "{{appUrl}}#/{{id}}" },
+            {
+                "waitForSelectorConditionally": [
+                    {
+                        "dashboardItemProperty": "visualization.type",
+                        "value": "PIVOT_TABLE",
+                        "selector": ".pivot-table-container > table"
+                    },
+                    {
+                        "dashboardItemProperty": "visualization.type",
+                        "value": "CHART",
+                        "selector": ".highcharts-container"
+                    }
+                ]
+            }
+        ]
+    },
+    "triggerDownload": {
+        "strategy": "useUiElements",
+        "steps": [
+            { "click": ".push-analytics-download-dropdown-menu-button" },
+            { "click": ".push-analytics-download-menu-item" }
+        ]
+    },
+    "obtainDownloadArtifactConditionally": [
+        {
+            "dashboardItemProperty": "visualization.type",
+            "value": "PIVOT_TABLE",
+            "strategy": "scrapeDownloadPage",
+            "openerUrl": "{{appUrl}}#/{{id}}",
+            "htmlSelector": "body",
+            "cssSelector": "style",
+            "template": "pivotTable"
+        },
+        {
+            "dashboardItemProperty": "visualization.type",
+            "value": "CHART",
+            "strategy": "screenShotImgOnDownloadPage",
+            "openerUrl": "{{appUrl}}#/{{id}}",
+            "selector": "img",
+            "template": "chart"
+        }
+    ],
+    "clearVisualization": {
+        "strategy": "navigateToUrl",
+        "steps": [{ "goto": "{{appUrl}}#/new" }]
+    }
+}
