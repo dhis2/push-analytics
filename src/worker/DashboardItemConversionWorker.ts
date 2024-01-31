@@ -1,6 +1,7 @@
 import process from 'node:process'
 import puppeteer, { Browser, PuppeteerLaunchOptions } from 'puppeteer'
 import {
+    // AppScraper,
     EventChartScraper,
     EventReportScraper,
     LineListScraper,
@@ -42,6 +43,7 @@ export class DashboardItemConversionWorker {
     #sessionTimeout: string
     #browser: Browser | null
     #authenticator: Authenticator | null
+    // #appScraper: AppScraper
     #eventChartScraper: EventChartScraper
     #eventReportScraper: EventReportScraper
     #lineListScraper: LineListScraper
@@ -69,6 +71,7 @@ export class DashboardItemConversionWorker {
         this.#debug = debug
         this.#browser = null
         this.#authenticator = null
+        // this.#appScraper = new AppScraper(baseUrl)
         this.#eventChartScraper = new EventChartScraper(
             baseUrl,
             'dhis-web-event-visualizer',

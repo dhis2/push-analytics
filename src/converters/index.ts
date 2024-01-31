@@ -1,3 +1,4 @@
+export { AppScraper } from './AppScraper'
 export { EventChartScraper } from './EventChartScraper'
 export { EventReportScraper } from './EventReportScraper'
 export { LineListScraper } from './LineListScraper'
