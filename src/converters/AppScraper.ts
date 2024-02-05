@@ -15,8 +15,7 @@ import {
     Steps,
     StepKind,
 } from '../types'
-import { parseTemplate } from '../templates/parseTemplate'
-import { insertIntoLineListTemplate } from '../templates'
+import { insertIntoDiv, parseTemplate } from '../templates'
 
 const DONWLOAD_PAGE_URL_PATTERN =
     /api\/analytics\/enrollments|events\/query\/[a-zA-Z0-9]{11}\.html\+css/
@@ -278,7 +277,7 @@ export class AppScraper implements Converter<ConverterResultObject> {
                 (await downloadPage.evaluate(
                     () => document.querySelector('body')?.innerHTML
                 )) ?? ''
-            result.html = insertIntoLineListTemplate(name, rawHtml)
+            result.html = insertIntoDiv(rawHtml, name)
             result.css =
                 (await downloadPage.evaluate(
                     () => document.querySelector('style')?.innerHTML
