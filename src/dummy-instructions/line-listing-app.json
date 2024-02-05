@@ -20,9 +20,8 @@
             "searchValue": "&paging=false&",
             "replaceValue": "&paging=true&pageSize=50&"
         },
-        "openerUrl": "{{appUrl}}#/{{id}}",
         "htmlSelector": "body",
-        "template": "lineList",
+        "htmlOutput": "table",
         "cssSelector": "style"
     },
     "clearVisualization": {

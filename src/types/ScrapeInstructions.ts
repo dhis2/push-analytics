@@ -11,7 +11,8 @@ type Step =
     | 'waitForSelectorConditionally'
     | 'click'
 
-type ConditionalSelector = {
+export type HtmlOutput = 'image' | 'table'
+
     dashboardItemProperty: string
     value: string
     selector: string

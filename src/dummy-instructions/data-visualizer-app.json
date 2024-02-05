@@ -35,7 +35,7 @@
             "openerUrl": "{{appUrl}}#/{{id}}",
             "htmlSelector": "body",
             "cssSelector": "style",
-            "template": "pivotTable"
+            "htmlOutput": "table"
         },
         {
             "dashboardItemProperty": "visualization.type",
@@ -43,7 +43,7 @@
             "strategy": "screenShotImgOnDownloadPage",
             "openerUrl": "{{appUrl}}#/{{id}}",
             "selector": "img",
-            "template": "chart"
+            "htmlOutput": "image"
         }
     ],
     "clearVisualization": {
