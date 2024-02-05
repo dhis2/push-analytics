@@ -49,6 +49,7 @@ export type ReportType = 'HTML' | 'JASPER_REPORT_TABLE' | 'JASPER_JDBC'
 export type Dhis2Map = {
     id: string
     name: string
+    type: undefined
 }
 
 export type Visualization = {
@@ -101,7 +102,7 @@ export type DashboardItem = {
     resources?: Resource[]
 }
 
-export type ScrapeVisualization =
+export type AnyVisualization =
     | EventChart
     | EventReport
     | EventVisualization

@@ -15,8 +15,7 @@
         ]
     },
     "obtainDownloadArtifact": {
-        "strategy": "interceptFileDownload",
-        "htmlOutput": "image"
+        "strategy": "interceptFileDownload"
     },
     "clearVisualization": {
         "strategy": "useUiElements",

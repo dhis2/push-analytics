@@ -13,15 +13,15 @@ export type StepKind =
 
 export type HtmlOutput = 'image' | 'table'
 
-export type ConditionalSelector = {
+export type ConditionalSelector = Array<{
     dashboardItemProperty: string
     value: string
     selector: string
-}
+}>
 
 export type Steps = Record<StepKind, string | ConditionalSelector>[]
 
-type DownloadInstructions = {
+export type DownloadInstructions = {
     strategy: Strategy
     HtmlOutput: HtmlOutput
     openerUrl?: string

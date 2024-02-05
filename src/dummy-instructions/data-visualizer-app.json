@@ -3,7 +3,7 @@
     "showVisualization": {
         "strategy": "navigateToUrl",
         "steps": [
-            { "goto": "{{appUrl}}#/{{id}}" },
+            { "goto": "{{appUrl}}/#/{{id}}" },
             {
                 "waitForSelectorConditionally": [
                     {
@@ -32,22 +32,20 @@
             "dashboardItemProperty": "visualization.type",
             "value": "PIVOT_TABLE",
             "strategy": "scrapeDownloadPage",
-            "openerUrl": "{{appUrl}}#/{{id}}",
+            "openerUrl": "{{appUrl}}/#/{{id}}",
             "htmlSelector": "body",
-            "cssSelector": "style",
-            "htmlOutput": "table"
+            "cssSelector": "style"
         },
         {
             "dashboardItemProperty": "visualization.type",
             "value": "CHART",
             "strategy": "screenShotImgOnDownloadPage",
-            "openerUrl": "{{appUrl}}#/{{id}}",
-            "selector": "img",
-            "htmlOutput": "image"
+            "openerUrl": "{{appUrl}}/#/{{id}}",
+            "selector": "img"
         }
     ],
     "clearVisualization": {
         "strategy": "navigateToUrl",
-        "steps": [{ "goto": "{{appUrl}}#/new" }]
+        "steps": [{ "goto": "{{appUrl}}/#/new" }]
     }
 }

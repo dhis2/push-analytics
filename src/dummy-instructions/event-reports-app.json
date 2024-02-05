@@ -18,8 +18,7 @@
         "strategy": "scrapeDownloadPage",
         "openerUrl": "{{appUrl}}?id={{id}}",
         "htmlSelector": "body",
-        "cssSelector": "style",
-        "htmlOutput": "table"
+        "cssSelector": "style"
     },
     "clearVisualization": {
         "strategy": "useUiElements",

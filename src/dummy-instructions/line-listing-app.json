@@ -21,11 +21,10 @@
             "replaceValue": "&paging=true&pageSize=50&"
         },
         "htmlSelector": "body",
-        "htmlOutput": "table",
         "cssSelector": "style"
     },
     "clearVisualization": {
         "strategy": "navigateToUrl",
-        "steps": [{ "goto": "{{appUrl}}#/new" }]
+        "steps": [{ "goto": "{{appUrl}}/#/new" }]
     }
 }
