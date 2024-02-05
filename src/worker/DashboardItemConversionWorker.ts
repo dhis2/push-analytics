@@ -201,8 +201,8 @@ export class DashboardItemConversionWorker {
 
     #getConverterForItemType(dashboardItemType: DashboardItemType) {
         switch (dashboardItemType) {
+            // return this.#visualizationScraper
             case 'VISUALIZATION':
-                return this.#visualizationScraper
             case 'EVENT_VISUALIZATION':
                 return this.#appScraper
             case 'EVENT_CHART':
