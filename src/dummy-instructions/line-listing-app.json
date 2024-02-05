@@ -3,7 +3,7 @@
     "showVisualization": {
         "strategy": "navigateToUrl",
         "steps": [
-            { "goto": "{{appUrl}}#/{{id}}" },
+            { "goto": "{{appUrl}}/#/{{id}}" },
             { "waitForSelector": ".push-analytics-linelist-table" }
         ]
     },

@@ -101,6 +101,13 @@ export type DashboardItem = {
     resources?: Resource[]
 }
 
+export type ScrapeVisualization =
+    | EventChart
+    | EventReport
+    | EventVisualization
+    | Dhis2Map
+    | Visualization
+
 export type Dashboard = {
     displayName: string
     itemCount: number

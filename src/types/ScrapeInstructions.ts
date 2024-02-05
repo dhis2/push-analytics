@@ -5,7 +5,7 @@ type Strategy =
     | 'interceptFileDownload'
     | 'screenShotImgOnDownloadPage'
 
-type Step =
+export type StepKind =
     | 'goto'
     | 'waitForSelector'
     | 'waitForSelectorConditionally'
@@ -13,16 +13,19 @@ type Step =
 
 export type HtmlOutput = 'image' | 'table'
 
+export type ConditionalSelector = {
     dashboardItemProperty: string
     value: string
     selector: string
 }
 
+export type Steps = Record<StepKind, string | ConditionalSelector>[]
+
 type DownloadInstructions = {
     strategy: Strategy
+    HtmlOutput: HtmlOutput
     openerUrl?: string
     htmlSelector?: string
-    template?: string
     cssSelector?: string
     modifyDownloadUrl?: {
         searchValue: string
@@ -40,16 +43,16 @@ export type ScrapeInstructions = {
     appUrl: string
     showVisualization: {
         strategy: Strategy
-        steps: Record<Step, string | ConditionalSelector>[]
+        steps: Steps
     }
     triggerDownload: {
         strategy: Strategy
-        steps: Record<Step, string>[]
+        steps: Steps
     }
     obtainDownloadArtifact: DownloadInstructions
     obtainDownloadArtifactConditionally: ConditionalDownloadInstructions[]
     clearVisualization: {
         strategy: Strategy
-        steps: Record<Step, string>[]
+        steps: Steps
     }
 }

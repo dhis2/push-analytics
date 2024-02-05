@@ -32,7 +32,9 @@ export class ScrapeConfigCache {
         this.#cachedConfigs = new Map()
     }
 
-    async getScrapeConfig(dashboardItem: DashboardItem) {
+    async getScrapeConfig(
+        dashboardItem: DashboardItem
+    ): Promise<ScrapeInstructions> {
         const appPath = APP_PATH_LOOKUP[dashboardItem.type]
 
         if (!appPath) {
@@ -41,17 +43,24 @@ export class ScrapeConfigCache {
             )
         }
 
-        if (this.#cachedConfigs.has(appPath)) {
-            return Promise.resolve(this.#cachedConfigs.get(appPath))
-        } else {
-            // TODO: switch to this method once JSON files have been migrated
-            // return this.#fetchJsonInstructions(appPath)
-            return Promise.resolve(this.#addLocalInstructions(appPath))
+        // TODO: switch to this method once JSON files have been migrated
+        const scrapeConfig =
+            this.#cachedConfigs.get(appPath) ??
+            (await this.#addLocalInstructions(appPath))
+
+        if (!scrapeConfig) {
+            throw new Error(
+                `Could not get config for dashboard-item-type "${dashboardItem.type}"`
+            )
         }
+
+        return scrapeConfig
     }
 
-    #addLocalInstructions(appPath: string) {
-        const instructions = { appUrl: `${this.#baseUrl}/${appPath}` }
+    async #addLocalInstructions(appPath: string) {
+        const instructions = {
+            appUrl: `${this.#baseUrl}/${appPath}`,
+        } as ScrapeInstructions
 
         if (appPath === 'dhis-web-event-visualizer') {
             Object.assign(instructions, eventChartsInstructions)
@@ -62,8 +71,9 @@ export class ScrapeConfigCache {
         } else if (appPath === 'dhis-web-data-visualizer') {
             Object.assign(instructions, dataVisualizerInstructions)
         }
-        this.#cachedConfigs.set(appPath, instructions as ScrapeInstructions)
-        return instructions
+        this.#cachedConfigs.set(appPath, instructions)
+
+        return Promise.resolve(instructions)
     }
 
     // async #fetchJsonInstructions(appPath: string) {

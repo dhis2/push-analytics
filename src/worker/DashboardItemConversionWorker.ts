@@ -1,7 +1,7 @@
 import process from 'node:process'
 import puppeteer, { Browser, PuppeteerLaunchOptions } from 'puppeteer'
 import {
-    // AppScraper,
+    AppScraper,
     EventChartScraper,
     EventReportScraper,
     LineListScraper,
@@ -43,7 +43,7 @@ export class DashboardItemConversionWorker {
     #sessionTimeout: string
     #browser: Browser | null
     #authenticator: Authenticator | null
-    // #appScraper: AppScraper
+    #appScraper: AppScraper
     #eventChartScraper: EventChartScraper
     #eventReportScraper: EventReportScraper
     #lineListScraper: LineListScraper
@@ -71,7 +71,7 @@ export class DashboardItemConversionWorker {
         this.#debug = debug
         this.#browser = null
         this.#authenticator = null
-        // this.#appScraper = new AppScraper(baseUrl)
+        this.#appScraper = new AppScraper(baseUrl)
         this.#eventChartScraper = new EventChartScraper(
             baseUrl,
             'dhis-web-event-visualizer',
@@ -150,6 +150,7 @@ export class DashboardItemConversionWorker {
             isConverting: this.isConverting,
         })
         await this.#authenticator.establishNonExpiringAdminSession()
+        await this.#appScraper.init(this.#browser)
 
         /* Scrapers need to be initialised with the browser instance
          * but Parsers are ready to convert after initialisation */
@@ -203,7 +204,7 @@ export class DashboardItemConversionWorker {
             case 'VISUALIZATION':
                 return this.#visualizationScraper
             case 'EVENT_VISUALIZATION':
-                return this.#lineListScraper
+                return this.#appScraper
             case 'EVENT_CHART':
                 return this.#eventChartScraper
             case 'MAP':
@@ -235,7 +236,7 @@ export class DashboardItemConversionWorker {
                   devtools: true,
                   defaultViewport,
                   args: ['--window-size=2560,2160', '--window-position=4000,0'],
-                  slowMo: 100,
+                  //   slowMo: 100,
               }
             : {
                   headless: 'new',
