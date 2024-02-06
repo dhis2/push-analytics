@@ -2,7 +2,6 @@ import process from 'node:process'
 import puppeteer, { Browser, PuppeteerLaunchOptions } from 'puppeteer'
 import {
     AppScraper,
-    EventChartScraper,
     EventReportScraper,
     LineListScraper,
     MapScraper,
@@ -44,7 +43,6 @@ export class DashboardItemConversionWorker {
     #browser: Browser | null
     #authenticator: Authenticator | null
     #appScraper: AppScraper
-    #eventChartScraper: EventChartScraper
     #eventReportScraper: EventReportScraper
     #lineListScraper: LineListScraper
     #mapScraper: MapScraper
@@ -72,11 +70,6 @@ export class DashboardItemConversionWorker {
         this.#browser = null
         this.#authenticator = null
         this.#appScraper = new AppScraper(baseUrl)
-        this.#eventChartScraper = new EventChartScraper(
-            baseUrl,
-            'dhis-web-event-visualizer',
-            true
-        )
         this.#eventReportScraper = new EventReportScraper(
             baseUrl,
             'dhis-web-event-reports',
@@ -154,7 +147,6 @@ export class DashboardItemConversionWorker {
 
         /* Scrapers need to be initialised with the browser instance
          * but Parsers are ready to convert after initialisation */
-        await this.#eventChartScraper.init(this.#browser)
         await this.#eventReportScraper.init(this.#browser)
         await this.#lineListScraper.init(this.#browser)
         await this.#mapScraper.init(this.#browser)
@@ -205,9 +197,8 @@ export class DashboardItemConversionWorker {
             // return this.#visualizationScraper
             case 'VISUALIZATION':
             case 'EVENT_VISUALIZATION':
-                return this.#appScraper
             case 'EVENT_CHART':
-                return this.#eventChartScraper
+                return this.#appScraper
             case 'MAP':
                 return this.#mapScraper
             case 'EVENT_REPORT':
@@ -237,7 +228,7 @@ export class DashboardItemConversionWorker {
                   devtools: true,
                   defaultViewport,
                   args: ['--window-size=2560,2160', '--window-position=4000,0'],
-                  //   slowMo: 100,
+                  slowMo: 100,
               }
             : {
                   headless: 'new',

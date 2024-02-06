@@ -1,4 +1,5 @@
 import fs from 'fs'
+import fsPromises from 'node:fs/promises'
 import path from 'path'
 import { Browser, CDPSession, Page } from 'puppeteer'
 import {
@@ -6,9 +7,15 @@ import {
     ConverterResultObject,
     QueueItem,
 } from '../types/ConverterCluster'
-import { createTimer, downloadPath, logDashboardItemConversion } from '../utils'
+import {
+    base64EncodeFile,
+    createTimer,
+    downloadPath,
+    logDashboardItemConversion,
+    waitForFileToDownload,
+} from '../utils'
 import { ScrapeConfigCache } from './ScrapeConfigCache'
-import { ParsedScrapeInstructions, Steps } from '../types'
+import { AnyVisualization, ParsedScrapeInstructions, Steps } from '../types'
 import { insertIntoDiv, insertIntoImage } from '../templates'
 import {
     filterStepValuesByKind,
@@ -106,14 +113,15 @@ export class AppScraper implements Converter<ConverterResultObject> {
             queueItem.dashboardItem
         )
 
-        // console.log('CONFIG', JSON.stringify(config, null, 4))
-
+        // Make sure we download the exported file to `./images/${dashboardItemId}`,
+        // which allows us to track the download process in a relatively sane way
+        await this.#setDownloadPathToItemId(visualization.id)
         await this.#modifyDownloadUrl(config)
         await this.#showVisualization(config)
         await this.#triggerDownload(config)
         const { html, css } = await this.#obtainDownloadArtifact(
             config,
-            visualization.name
+            visualization
         )
         await this.#clearVisualization(config)
 
@@ -200,7 +208,7 @@ export class AppScraper implements Converter<ConverterResultObject> {
 
     async #obtainDownloadArtifact(
         config: ParsedScrapeInstructions,
-        name: string
+        visualization: AnyVisualization
     ): Promise<ConverterResultObject> {
         const { strategy, htmlSelector, cssSelector } =
             config.obtainDownloadArtifact
@@ -222,7 +230,7 @@ export class AppScraper implements Converter<ConverterResultObject> {
                         document.querySelector(selector ?? '')?.innerHTML,
                     htmlSelector
                 )) ?? ''
-            result.html = insertIntoDiv(rawHtml, name)
+            result.html = insertIntoDiv(rawHtml, visualization.name)
             result.css =
                 (await downloadPage.evaluate(
                     (selector) =>
@@ -235,7 +243,16 @@ export class AppScraper implements Converter<ConverterResultObject> {
             const base64Str = Buffer.isBuffer(base64)
                 ? base64.toString()
                 : base64 ?? ''
-            result.html = insertIntoImage(base64Str, name)
+            result.html = insertIntoImage(base64Str, visualization.name)
+        } else if (strategy === 'interceptFileDownload') {
+            const downloadDir = this.#getItemDownloadPath(visualization.id)
+            // Wait until the file has downloaded and get the full path
+            const fullFilePath = await waitForFileToDownload(downloadDir)
+            // Convert to base64 encoded string
+            const base64Str = base64EncodeFile(fullFilePath)
+            // Clear dir for next time
+            await fsPromises.rm(downloadDir, { recursive: true, force: true })
+            result.html = insertIntoImage(base64Str, visualization.name)
         }
 
         if (usesDownloadPage) {
@@ -279,14 +296,14 @@ export class AppScraper implements Converter<ConverterResultObject> {
             throw new Error('CDP Session has not been initialized')
         }
 
-        const itemDownloadPath = path.join(downloadPath, id)
-
         await this.#cdpSession.send('Browser.setDownloadBehavior', {
             behavior: 'allow',
-            downloadPath: itemDownloadPath,
+            downloadPath: this.#getItemDownloadPath(id),
         })
+    }
 
-        return itemDownloadPath
+    #getItemDownloadPath(id: string) {
+        return path.join(downloadPath, id)
     }
 
     async #executeUiElementClickSteps(steps: Steps) {

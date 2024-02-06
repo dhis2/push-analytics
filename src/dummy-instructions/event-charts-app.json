@@ -4,7 +4,7 @@
         "strategy": "navigateToUrl",
         "steps": [
             { "goto": "{{appUrl}}?id={{id}}" },
-            { "waitForSelector": ".svg.highcharts-root" }
+            { "waitForSelector": "svg.highcharts-root" }
         ]
     },
     "triggerDownload": {
