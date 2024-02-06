@@ -4,7 +4,7 @@
         "strategy": "navigateToUrl",
         "steps": [
             { "goto": "{{appUrl}}?id={{id}}" },
-            { "waitForSelector": ".linelist-table" }
+            { "waitForSelector": "table.pivot" }
         ]
     },
     "triggerDownload": {

@@ -2,7 +2,6 @@ import process from 'node:process'
 import puppeteer, { Browser, PuppeteerLaunchOptions } from 'puppeteer'
 import {
     AppScraper,
-    EventReportScraper,
     MapScraper,
     ReportsParser,
     ResourcesParser,
@@ -41,7 +40,6 @@ export class DashboardItemConversionWorker {
     #browser: Browser | null
     #authenticator: Authenticator | null
     #appScraper: AppScraper
-    #eventReportScraper: EventReportScraper
     #mapScraper: MapScraper
     #reportsParser: ReportsParser
     #resourcesParser: ResourcesParser
@@ -66,11 +64,6 @@ export class DashboardItemConversionWorker {
         this.#browser = null
         this.#authenticator = null
         this.#appScraper = new AppScraper(baseUrl)
-        this.#eventReportScraper = new EventReportScraper(
-            baseUrl,
-            'dhis-web-event-reports',
-            true
-        )
         this.#mapScraper = new MapScraper(baseUrl, 'dhis-web-maps', true)
         this.#reportsParser = new ReportsParser(baseUrl)
         this.#resourcesParser = new ResourcesParser(baseUrl)
@@ -181,11 +174,10 @@ export class DashboardItemConversionWorker {
             case 'VISUALIZATION':
             case 'EVENT_VISUALIZATION':
             case 'EVENT_CHART':
+            case 'EVENT_REPORT':
                 return this.#appScraper
             case 'MAP':
                 return this.#mapScraper
-            case 'EVENT_REPORT':
-                return this.#eventReportScraper
             case 'REPORTS':
                 return this.#reportsParser
             case 'RESOURCES':

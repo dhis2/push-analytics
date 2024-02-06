@@ -183,18 +183,17 @@ export class AppScraper implements Converter<ConverterResultObject> {
 
     async #showVisualization(config: ParsedScrapeInstructions) {
         if (config.showVisualization.strategy === 'navigateToUrl') {
-            await this.#navigateToVisualization(config)
+            const url = findStepValueByKind(
+                config.showVisualization.steps,
+                'goto'
+            )
+            const selector = findStepValueByKind(
+                config.showVisualization.steps,
+                'waitForSelector'
+            )
+            await this.page.goto(url, { waitUntil: 'networkidle2' })
+            await this.page.waitForSelector(selector, { visible: true })
         }
-    }
-
-    async #navigateToVisualization(config: ParsedScrapeInstructions) {
-        const url = findStepValueByKind(config.showVisualization.steps, 'goto')
-        const selector = findStepValueByKind(
-            config.showVisualization.steps,
-            'waitForSelector'
-        )
-        await this.page.goto(url, { waitUntil: 'networkidle2' })
-        await this.page.waitForSelector(selector, { visible: true })
     }
 
     async #triggerDownload(config: ParsedScrapeInstructions) {
@@ -285,9 +284,11 @@ export class AppScraper implements Converter<ConverterResultObject> {
                 config.clearVisualization.steps,
                 'goto'
             )
-            this.page.goto(url)
+            await this.page.goto(url)
         } else if (config.clearVisualization.strategy === 'useUiElements') {
-            this.#executeUiElementClickSteps(config.clearVisualization.steps)
+            await this.#executeUiElementClickSteps(
+                config.clearVisualization.steps
+            )
         }
     }
 
