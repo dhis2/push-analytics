@@ -126,7 +126,7 @@ export class ScrapeConfigCache {
                     }
 
                     // Pupulate template with values for dashboardItem
-                    if (step.goto && step.goto === 'string') {
+                    if (step.goto && typeof step.goto === 'string') {
                         return {
                             goto: parseTemplate(step.goto, {
                                 appUrl: scrapeConfig.appUrl,
@@ -150,7 +150,7 @@ export class ScrapeConfigCache {
                 strategy: scrapeConfig.clearVisualization.strategy,
                 steps: scrapeConfig.clearVisualization.steps.map((step) =>
                     // Populate template with values for dashboardItem
-                    step.goto && step.goto === 'string'
+                    step.goto && typeof step.goto === 'string'
                         ? {
                               goto: parseTemplate(step.goto, {
                                   appUrl: scrapeConfig.appUrl,
