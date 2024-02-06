@@ -190,6 +190,7 @@ export class DashboardItemConversionWorker {
             console.log(
                 `Conversion failed for dashboard-id ${queueItem.dashboardId} item-id "${queueItem.dashboardItem.id}" using converter "${itemTypeConverter.constructor.name}" with PID "${process.pid}"`
             )
+            console.log(error)
 
             return Promise.resolve(
                 insertIntoConversionErrorTemplate(queueItem, error)
