@@ -9,18 +9,17 @@ import {
 import { createTimer, downloadPath, logDashboardItemConversion } from '../utils'
 import { ScrapeConfigCache } from './ScrapeConfigCache'
 import {
-    SelectorConditions,
     ParsedScrapeInstructions,
     AnyVisualization,
     Steps,
-    StepKind,
     EventChart,
     EventReport,
     EventVisualization,
     Dhis2Map,
     Visualization,
 } from '../types'
-import { insertIntoDiv, insertIntoImage, parseTemplate } from '../templates'
+import { insertIntoDiv, insertIntoImage } from '../templates'
+import { filterStepValuesByKind, findStepValueByKind } from './configUtils'
 
 const DONWLOAD_PAGE_URL_PATTERN =
     /api\/analytics\/enrollments|events\/query\/[a-zA-Z0-9]{11}\.html\+css/
@@ -112,7 +111,7 @@ export class AppScraper implements Converter<ConverterResultObject> {
         )
 
         await this.#modifyDownloadUrl(config)
-        await this.#showVisualization(config, visualization)
+        await this.#showVisualization(config)
         await this.#triggerDownload(config)
         const { html, css } = await this.#obtainDownloadArtifact(
             config,
@@ -198,32 +197,19 @@ export class AppScraper implements Converter<ConverterResultObject> {
         )
     }
 
-    async #showVisualization(
-        config: ParsedScrapeInstructions,
-        visualization: AnyVisualization
-    ) {
+    async #showVisualization(config: ParsedScrapeInstructions) {
         if (config.showVisualization.strategy === 'navigateToUrl') {
-            await this.#navigateToVisualization(config, visualization)
+            await this.#navigateToVisualization(config)
         }
     }
 
-    async #navigateToVisualization(
-        config: ParsedScrapeInstructions,
-        visualization: AnyVisualization
-    ) {
-        const urlTemplate = ensureIsString(
-            findStepValueByKind(config.showVisualization.steps, 'goto')
-        )
-        const url = parseTemplate(urlTemplate, {
-            appUrl: config.appUrl,
-            id: visualization.id,
-        })
-        await this.page.goto(url, { waitUntil: 'networkidle2' })
-
+    async #navigateToVisualization(config: ParsedScrapeInstructions) {
+        const url = findStepValueByKind(config.showVisualization.steps, 'goto')
         const selector = findStepValueByKind(
             config.showVisualization.steps,
             'waitForSelector'
         )
+        await this.page.goto(url, { waitUntil: 'networkidle2' })
         await this.page.waitForSelector(selector, { visible: true })
     }
 
@@ -232,14 +218,7 @@ export class AppScraper implements Converter<ConverterResultObject> {
             /* For now we simply assume all UI element interactions
              * are clicks. If use cases present themselves where this
              * is not the case we will need to add complexity here */
-            const clickSelectors = filterStepValuesByKind(
-                config.triggerDownload.steps,
-                'click'
-            ).map((payload) => ensureIsString(payload))
-
-            for (const selector of clickSelectors) {
-                await this.page.click(selector)
-            }
+            await this.#executeUiElementClickSteps(config.triggerDownload.steps)
         }
     }
 
@@ -309,11 +288,13 @@ export class AppScraper implements Converter<ConverterResultObject> {
 
     async #clearVisualization(config: ParsedScrapeInstructions) {
         if (config.clearVisualization.strategy === 'navigateToUrl') {
-            const urlTemplate = ensureIsString(
-                findStepValueByKind(config.clearVisualization.steps, 'goto')
+            const url = findStepValueByKind(
+                config.clearVisualization.steps,
+                'goto'
             )
-            const url = parseTemplate(urlTemplate, { appUrl: config.appUrl })
             this.page.goto(url)
+        } else if (config.clearVisualization.strategy === 'useUiElements') {
+            this.#executeUiElementClickSteps(config.clearVisualization.steps)
         }
     }
 
@@ -331,35 +312,12 @@ export class AppScraper implements Converter<ConverterResultObject> {
 
         return itemDownloadPath
     }
-}
 
-function findStepValueByKind(steps: Steps, kind: StepKind): string {
-    const step = steps.find((step) => !!step[kind])
+    async #executeUiElementClickSteps(steps: Steps) {
+        const selectors = filterStepValuesByKind(steps, 'click')
 
-    if (typeof step?.[kind] !== 'string') {
-        throw new Error(`Could not find step of kind "${kind}`)
+        for (const selector of selectors) {
+            await this.page.click(selector)
+        }
     }
-
-    return step[kind]
-}
-
-function filterStepValuesByKind(
-    steps: Steps,
-    kind: StepKind
-): Array<string | SelectorConditions> {
-    const payloads = steps
-        .filter((step) => !!step[kind])
-        .map((step) => step[kind])
-
-    if (payloads.length === 0) {
-        throw new Error(`Could not find any steps of kind "${kind}"`)
-    }
-    return payloads
-}
-
-function ensureIsString(value: unknown): string {
-    if (typeof value !== 'string') {
-        throw new Error('Could not read goto url from config')
-    }
-    return value
 }
