@@ -1,4 +1,15 @@
-import { DashboardItem, DashboardItemType, ScrapeInstructions } from '../types'
+import {
+    ConditionalDownloadInstructions,
+    DashboardItem,
+    DashboardItemType,
+    DownloadInstructions,
+    ParsedScrapeInstructions,
+    ScrapeInstructions,
+    SelectorCondition,
+    SelectorConditions,
+    Step,
+    Steps,
+} from '../types'
 import dataVisualizerInstructions from '../dummy-instructions/data-visualizer-app.json'
 import eventChartsInstructions from '../dummy-instructions/event-charts-app.json'
 import eventReportsInstructions from '../dummy-instructions/event-reports-app.json'
@@ -34,7 +45,7 @@ export class ScrapeConfigCache {
 
     async getScrapeConfig(
         dashboardItem: DashboardItem
-    ): Promise<ScrapeInstructions> {
+    ): Promise<ParsedScrapeInstructions> {
         const appPath = APP_PATH_LOOKUP[dashboardItem.type]
 
         if (!appPath) {
@@ -54,7 +65,7 @@ export class ScrapeConfigCache {
             )
         }
 
-        return scrapeConfig
+        return this.#parse(scrapeConfig, dashboardItem)
     }
 
     async #addLocalInstructions(appPath: string) {
@@ -93,4 +104,118 @@ export class ScrapeConfigCache {
     //         )
     //     }
     // }
+
+    // Resolve conditional parts of the config file for the current dashboardItem
+    #parse(
+        scrapeConfig: ScrapeInstructions,
+        dashboardItem: DashboardItem
+    ): ParsedScrapeInstructions {
+        return {
+            version: scrapeConfig.version,
+            appUrl: scrapeConfig.appUrl,
+            showVisualization: {
+                strategy: scrapeConfig.showVisualization.strategy,
+                steps: scrapeConfig.showVisualization.steps.map((step) =>
+                    step.waitForSelectorConditionally
+                        ? pickConditionalSelectorForDashboardItem(
+                              step.waitForSelectorConditionally as SelectorConditions,
+                              dashboardItem
+                          )
+                        : step
+                ) as Steps,
+            },
+            triggerDownload: scrapeConfig.triggerDownload,
+            obtainDownloadArtifact:
+                scrapeConfig.obtainDownloadArtifact ??
+                pickConditionalDownloadInstructionsForDashboardItem(
+                    scrapeConfig.obtainDownloadArtifactConditionally,
+                    dashboardItem
+                ),
+            clearVisualization: scrapeConfig.clearVisualization,
+        }
+    }
+}
+
+function pickConditionalSelectorForDashboardItem(
+    conditions: SelectorConditions,
+    dashboardItem: DashboardItem
+): Pick<Step, 'waitForSelector'> {
+    const condition = conditions.find((condition) =>
+        isConditionForDashboardItem(condition, dashboardItem)
+    )
+
+    if (!condition?.selector) {
+        throw new Error(
+            `Could identify conditional for selector dashboard item of type ${dashboardItem.type}`
+        )
+    }
+
+    return { waitForSelector: condition?.selector }
+}
+
+function pickConditionalDownloadInstructionsForDashboardItem(
+    conditions: ConditionalDownloadInstructions[],
+    dashboardItem: DashboardItem
+): DownloadInstructions {
+    const condition = conditions.find((condition) =>
+        isConditionForDashboardItem(condition, dashboardItem)
+    )
+
+    if (!condition?.strategy) {
+        throw new Error(
+            `Could identify conditional download instructions for dashboard item of type ${dashboardItem.type}`
+        )
+    }
+
+    return {
+        strategy: condition.strategy,
+        HtmlOutput: condition.HtmlOutput,
+        openerUrl: condition.openerUrl,
+        htmlSelector: condition.htmlSelector,
+        cssSelector: condition.cssSelector,
+        modifyDownloadUrl: condition.modifyDownloadUrl,
+    }
+}
+
+function isConditionForDashboardItem(
+    condition: SelectorCondition | ConditionalDownloadInstructions,
+    dashboardItem: DashboardItem
+): boolean {
+    const itemValue = getNestedPropertyValue(
+        dashboardItem,
+        condition.dashboardItemProperty
+    )
+    return condition.value.includes(',') && typeof itemValue === 'string'
+        ? condition.value.includes(itemValue)
+        : condition.value === itemValue
+}
+
+function getNestedPropertyValue(obj: object, propertyPath: string) {
+    const nestedValue = propertyPath
+        .split('.')
+        .reduce((val: object | string | number | boolean, key: string) => {
+            /* Below is a small TypeScript hoop we had to jump through:
+             * There is absolutely no way to guarrantee that (nested)
+             * properties like 'visualization.type' actually exist on the
+             * provided object. And since these are ultimately coming from
+             * the JSON config files, which are meant to be generic, there is
+             * no point creating types for this. So we have to explcitely
+             * tell TS the provided string represents a valid object path
+             * to avoid a compilation error. */
+            try {
+                val = val[key as keyof typeof val]
+            } catch {
+                throw new Error(
+                    `Found invalid dashboard item property "${propertyPath}"`
+                )
+            }
+
+            return val
+        }, obj)
+
+    if (typeof nestedValue === 'object') {
+        throw new Error('Value found on property path was not a primitive')
+    }
+
+    return nestedValue as string | boolean | number
 }

@@ -13,13 +13,15 @@ export type StepKind =
 
 export type HtmlOutput = 'image' | 'table'
 
-export type ConditionalSelector = Array<{
+export type SelectorCondition = {
     dashboardItemProperty: string
     value: string
     selector: string
-}>
+}
+export type SelectorConditions = Array<SelectorCondition>
 
-export type Steps = Record<StepKind, string | ConditionalSelector>[]
+export type Step = Record<StepKind, string>
+export type Steps = Step[]
 
 export type DownloadInstructions = {
     strategy: Strategy
@@ -33,7 +35,7 @@ export type DownloadInstructions = {
     }
 }
 
-type ConditionalDownloadInstructions = DownloadInstructions & {
+export type ConditionalDownloadInstructions = DownloadInstructions & {
     dashboardItemProperty: string
     value: string
 }
@@ -43,7 +45,7 @@ export type ScrapeInstructions = {
     appUrl: string
     showVisualization: {
         strategy: Strategy
-        steps: Steps
+        steps: Record<StepKind, string | SelectorConditions>[]
     }
     triggerDownload: {
         strategy: Strategy
@@ -52,6 +54,19 @@ export type ScrapeInstructions = {
     obtainDownloadArtifact: DownloadInstructions
     obtainDownloadArtifactConditionally: ConditionalDownloadInstructions[]
     clearVisualization: {
+        strategy: Strategy
+        steps: Steps
+    }
+}
+
+/* Scrape instructions without any conditional configuration
+ * `obtainDownloadArtifactConditionally` is redundant
+ * `showVisualization` is overridden so it does not contain a conditional selector */
+export type ParsedScrapeInstructions = Omit<
+    ScrapeInstructions,
+    'obtainDownloadArtifactConditionally' | 'showVisualization'
+> & {
+    showVisualization: {
         strategy: Strategy
         steps: Steps
     }
