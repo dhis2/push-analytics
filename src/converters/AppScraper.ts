@@ -9,8 +9,8 @@ import {
 import { createTimer, downloadPath, logDashboardItemConversion } from '../utils'
 import { ScrapeConfigCache } from './ScrapeConfigCache'
 import {
-    ConditionalSelector,
-    ScrapeInstructions,
+    SelectorConditions,
+    ParsedScrapeInstructions,
     AnyVisualization,
     Steps,
     StepKind,
@@ -19,8 +19,6 @@ import {
     EventVisualization,
     Dhis2Map,
     Visualization,
-    DashboardItem,
-    DownloadInstructions,
 } from '../types'
 import { insertIntoDiv, insertIntoImage, parseTemplate } from '../templates'
 
@@ -93,22 +91,7 @@ export class AppScraper implements Converter<ConverterResultObject> {
         })
     }
 
-    async #setDownloadPathToItemId(id: string) {
-        if (!this.#cdpSession) {
-            throw new Error('CDP Session has not been initialized')
-        }
-
-        const itemDownloadPath = path.join(downloadPath, id)
-
-        await this.#cdpSession.send('Browser.setDownloadBehavior', {
-            behavior: 'allow',
-            downloadPath: itemDownloadPath,
-        })
-
-        return itemDownloadPath
-    }
-
-    async convert(queueItem: QueueItem): Promise<ConverterResultObject> {
+    public async convert(queueItem: QueueItem): Promise<ConverterResultObject> {
         const visualization =
             this.#getVisualizationForDashboardItemType(queueItem)
 
@@ -129,15 +112,10 @@ export class AppScraper implements Converter<ConverterResultObject> {
         )
 
         await this.#modifyDownloadUrl(config)
-        await this.#showVisualization(
-            config,
-            visualization,
-            queueItem.dashboardItem
-        )
+        await this.#showVisualization(config, visualization)
         await this.#triggerDownload(config)
         const { html, css } = await this.#obtainDownloadArtifact(
             config,
-            queueItem.dashboardItem,
             visualization.name
         )
         await this.#clearVisualization(config)
@@ -173,7 +151,7 @@ export class AppScraper implements Converter<ConverterResultObject> {
         }
     }
 
-    async #modifyDownloadUrl(config: ScrapeInstructions) {
+    async #modifyDownloadUrl(config: ParsedScrapeInstructions) {
         const shouldModify =
             config.obtainDownloadArtifact.strategy === 'scrapeDownloadPage' &&
             config.obtainDownloadArtifact.modifyDownloadUrl
@@ -221,23 +199,17 @@ export class AppScraper implements Converter<ConverterResultObject> {
     }
 
     async #showVisualization(
-        config: ScrapeInstructions,
-        visualization: AnyVisualization,
-        dashboardItem: DashboardItem
+        config: ParsedScrapeInstructions,
+        visualization: AnyVisualization
     ) {
         if (config.showVisualization.strategy === 'navigateToUrl') {
-            await this.#navigateToVisualization(
-                config,
-                visualization,
-                dashboardItem
-            )
+            await this.#navigateToVisualization(config, visualization)
         }
     }
 
     async #navigateToVisualization(
-        config: ScrapeInstructions,
-        visualization: AnyVisualization,
-        dashboardItem: DashboardItem
+        config: ParsedScrapeInstructions,
+        visualization: AnyVisualization
     ) {
         const urlTemplate = ensureIsString(
             findStepValueByKind(config.showVisualization.steps, 'goto')
@@ -248,39 +220,14 @@ export class AppScraper implements Converter<ConverterResultObject> {
         })
         await this.page.goto(url, { waitUntil: 'networkidle2' })
 
-        const selector = ensureIsString(
-            findStepValueByKind(
-                config.showVisualization.steps,
-                'waitForSelector'
-            )
+        const selector = findStepValueByKind(
+            config.showVisualization.steps,
+            'waitForSelector'
         )
-
-        if (selector) {
-            await this.page.waitForSelector(selector, { visible: true })
-        } else {
-            const conditionalSelector = findStepValueByKind(
-                config.showVisualization.steps,
-                'waitForSelectorConditionally'
-            ) as ConditionalSelector
-            const currentSelector = conditionalSelector.find(
-                ({ dashboardItemProperty, value }) =>
-                    getNestedPropertyValue(
-                        dashboardItem,
-                        dashboardItemProperty
-                    ) === value
-            )?.selector
-
-            if (!currentSelector) {
-                throw new Error(
-                    'Could not determine which selector to wait for'
-                )
-            }
-
-            await this.page.waitForSelector(currentSelector, { visible: true })
-        }
+        await this.page.waitForSelector(selector, { visible: true })
     }
 
-    async #triggerDownload(config: ScrapeInstructions) {
+    async #triggerDownload(config: ParsedScrapeInstructions) {
         if (config.triggerDownload.strategy === 'useUiElements') {
             /* For now we simply assume all UI element interactions
              * are clicks. If use cases present themselves where this
@@ -297,50 +244,38 @@ export class AppScraper implements Converter<ConverterResultObject> {
     }
 
     async #obtainDownloadArtifact(
-        config: ScrapeInstructions,
-        dashboardItem: DashboardItem,
+        config: ParsedScrapeInstructions,
         name: string
     ): Promise<ConverterResultObject> {
+        const { strategy, htmlSelector, cssSelector } =
+            config.obtainDownloadArtifact
         const result: ConverterResultObject = {
             html: '',
             css: '',
         }
-        const currentConfig =
-            config.obtainDownloadArtifact ||
-            (config.obtainDownloadArtifactConditionally &&
-                config.obtainDownloadArtifactConditionally.find(
-                    ({ dashboardItemProperty, value }) =>
-                        getNestedPropertyValue(
-                            dashboardItem,
-                            dashboardItemProperty
-                        ) === value
-                ))
-        const usesDownloadPage = this.#usesDownloadPage(currentConfig)
+        const usesDownloadPage =
+            strategy === 'scrapeDownloadPage' ||
+            strategy === 'screenShotImgOnDownloadPage'
         const downloadPage = usesDownloadPage
             ? await this.#getDownloadPage()
             : null
 
-        if (downloadPage && currentConfig.strategy === 'scrapeDownloadPage') {
+        if (downloadPage && strategy === 'scrapeDownloadPage') {
             const rawHtml =
                 (await downloadPage.evaluate(
                     (selector) =>
                         document.querySelector(selector ?? '')?.innerHTML,
-                    currentConfig.htmlSelector
+                    htmlSelector
                 )) ?? ''
             result.html = insertIntoDiv(rawHtml, name)
             result.css =
                 (await downloadPage.evaluate(
                     (selector) =>
                         document.querySelector(selector ?? '')?.innerHTML,
-                    currentConfig.htmlSelector
+                    cssSelector
                 )) ?? ''
-        } else if (
-            downloadPage &&
-            currentConfig.strategy === 'screenShotImgOnDownloadPage'
-        ) {
-            const img = await downloadPage.waitForSelector(
-                currentConfig.htmlSelector ?? ''
-            )
+        } else if (downloadPage && strategy === 'screenShotImgOnDownloadPage') {
+            const img = await downloadPage.waitForSelector(htmlSelector ?? '')
             const base64 = await img?.screenshot({ encoding: 'base64' })
             const base64Str = Buffer.isBuffer(base64)
                 ? base64.toString()
@@ -354,14 +289,6 @@ export class AppScraper implements Converter<ConverterResultObject> {
         }
 
         return result
-    }
-
-    #usesDownloadPage(downloadInstructions: DownloadInstructions) {
-        const downloadStrategy = downloadInstructions.strategy
-        return (
-            downloadStrategy === 'scrapeDownloadPage' ||
-            downloadStrategy === 'screenShotImgOnDownloadPage'
-        )
     }
 
     /* When a file opens in another tab (i.e. the app calls `window.open()`)
@@ -380,33 +307,46 @@ export class AppScraper implements Converter<ConverterResultObject> {
         return downloadPage
     }
 
-    async #clearVisualization(config: ScrapeInstructions) {
+    async #clearVisualization(config: ParsedScrapeInstructions) {
         if (config.clearVisualization.strategy === 'navigateToUrl') {
             const urlTemplate = ensureIsString(
-                findStepValueByKind(config.showVisualization.steps, 'goto')
+                findStepValueByKind(config.clearVisualization.steps, 'goto')
             )
             const url = parseTemplate(urlTemplate, { appUrl: config.appUrl })
             this.page.goto(url)
         }
     }
+
+    async #setDownloadPathToItemId(id: string) {
+        if (!this.#cdpSession) {
+            throw new Error('CDP Session has not been initialized')
+        }
+
+        const itemDownloadPath = path.join(downloadPath, id)
+
+        await this.#cdpSession.send('Browser.setDownloadBehavior', {
+            behavior: 'allow',
+            downloadPath: itemDownloadPath,
+        })
+
+        return itemDownloadPath
+    }
 }
 
-function findStepValueByKind(
-    steps: Steps,
-    kind: StepKind
-): string | ConditionalSelector {
+function findStepValueByKind(steps: Steps, kind: StepKind): string {
     const step = steps.find((step) => !!step[kind])
 
-    if (!step || !step[kind]) {
-        throw new Error(`Could not find step of kind "${kind}"`)
+    if (typeof step?.[kind] !== 'string') {
+        throw new Error(`Could not find step of kind "${kind}`)
     }
+
     return step[kind]
 }
 
 function filterStepValuesByKind(
     steps: Steps,
     kind: StepKind
-): Array<string | ConditionalSelector> {
+): Array<string | SelectorConditions> {
     const payloads = steps
         .filter((step) => !!step[kind])
         .map((step) => step[kind])
@@ -422,29 +362,4 @@ function ensureIsString(value: unknown): string {
         throw new Error('Could not read goto url from config')
     }
     return value
-}
-
-function getNestedPropertyValue(obj: object, str: string) {
-    const nestedValue = str
-        .split('.')
-        .reduce((val: object | string | number | boolean, key: string) => {
-            /* Below is a small TypeScript hoop we had to jump through:
-             * There is absolutely no way to guarrantee that (nested)
-             * properties like 'visualization.type' actually exist on the
-             * provided object. And since these are ultimately coming from
-             * the JSON config files, which are meant to be generic, there is
-             * no point creating types for this. So we have to explcitely
-             * tell TS the provided string represents a valid object path
-             * to avoid a compilation error. I suppose the comiler has a point:
-             * this is quite fragile, the try/catch will help. */
-            try {
-                val = val[key as keyof typeof val]
-            } catch {
-                // Just keep val
-            }
-
-            return val
-        }, obj)
-
-    return nestedValue as string | boolean | number
 }

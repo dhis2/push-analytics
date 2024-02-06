@@ -13,7 +13,7 @@
                     },
                     {
                         "dashboardItemProperty": "visualization.type",
-                        "value": "CHART",
+                        "value": "COLUMN,STACKED_COLUMN,BAR,STACKED_BAR,LINE,AREA,PIE,RADAR,GAUGE,YEAR_OVER_YEAR_LINE,YEAR_OVER_YEAR_COLUMN,SINGLE_VALUE",
                         "selector": ".highcharts-container"
                     }
                 ]
@@ -38,10 +38,10 @@
         },
         {
             "dashboardItemProperty": "visualization.type",
-            "value": "CHART",
+            "value": "COLUMN,STACKED_COLUMN,BAR,STACKED_BAR,LINE,AREA,PIE,RADAR,GAUGE,YEAR_OVER_YEAR_LINE,YEAR_OVER_YEAR_COLUMN,SINGLE_VALUE",
             "strategy": "screenShotImgOnDownloadPage",
             "openerUrl": "{{appUrl}}/#/{{id}}",
-            "selector": "img"
+            "htmlSelector": "img"
         }
     ],
     "clearVisualization": {
