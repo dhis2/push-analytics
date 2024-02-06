@@ -8,7 +8,6 @@ import {
     ResourcesParser,
     TextParser,
     UnsupportedTypeConverter,
-    VisualizationScraper,
 } from '../converters'
 import {
     ConversionRequestMessage,
@@ -48,7 +47,6 @@ export class DashboardItemConversionWorker {
     #resourcesParser: ResourcesParser
     #textParser: TextParser
     #unsupportedTypeConverter: UnsupportedTypeConverter
-    #visualizationScraper: VisualizationScraper
 
     constructor({
         baseUrl,
@@ -78,11 +76,6 @@ export class DashboardItemConversionWorker {
         this.#resourcesParser = new ResourcesParser(baseUrl)
         this.#textParser = new TextParser()
         this.#unsupportedTypeConverter = new UnsupportedTypeConverter()
-        this.#visualizationScraper = new VisualizationScraper(
-            baseUrl,
-            'dhis-web-data-visualizer',
-            false
-        )
         this.#addConversionRequestListener()
     }
 
@@ -140,9 +133,7 @@ export class DashboardItemConversionWorker {
 
         /* Scrapers need to be initialised with the browser instance
          * but Parsers are ready to convert after initialisation */
-        await this.#eventReportScraper.init(this.#browser)
         await this.#mapScraper.init(this.#browser)
-        await this.#visualizationScraper.init(this.#browser)
         this.#notifyMainProcess({
             type: 'WORKER_INITIALIZED',
         } as WorkerInitializedMessage)
