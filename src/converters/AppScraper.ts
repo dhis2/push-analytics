@@ -8,18 +8,13 @@ import {
 } from '../types/ConverterCluster'
 import { createTimer, downloadPath, logDashboardItemConversion } from '../utils'
 import { ScrapeConfigCache } from './ScrapeConfigCache'
-import {
-    ParsedScrapeInstructions,
-    AnyVisualization,
-    Steps,
-    EventChart,
-    EventReport,
-    EventVisualization,
-    Dhis2Map,
-    Visualization,
-} from '../types'
+import { ParsedScrapeInstructions, Steps } from '../types'
 import { insertIntoDiv, insertIntoImage } from '../templates'
-import { filterStepValuesByKind, findStepValueByKind } from './configUtils'
+import {
+    filterStepValuesByKind,
+    findStepValueByKind,
+    getDashboardItemVisualization,
+} from './configUtils'
 
 const DONWLOAD_PAGE_URL_PATTERN =
     /api\/analytics\/enrollments|events\/query\/[a-zA-Z0-9]{11}\.html\+css/
@@ -91,8 +86,9 @@ export class AppScraper implements Converter<ConverterResultObject> {
     }
 
     public async convert(queueItem: QueueItem): Promise<ConverterResultObject> {
-        const visualization =
-            this.#getVisualizationForDashboardItemType(queueItem)
+        const visualization = getDashboardItemVisualization(
+            queueItem.dashboardItem
+        )
 
         if (
             queueItem.dashboardItem.type === 'EVENT_VISUALIZATION' &&
@@ -110,6 +106,8 @@ export class AppScraper implements Converter<ConverterResultObject> {
             queueItem.dashboardItem
         )
 
+        // console.log('CONFIG', JSON.stringify(config, null, 4))
+
         await this.#modifyDownloadUrl(config)
         await this.#showVisualization(config)
         await this.#triggerDownload(config)
@@ -126,28 +124,6 @@ export class AppScraper implements Converter<ConverterResultObject> {
         )
 
         return { html, css }
-    }
-
-    #getVisualizationForDashboardItemType(
-        queueItem: QueueItem
-    ): AnyVisualization {
-        switch (queueItem.dashboardItem.type) {
-            case 'EVENT_CHART':
-                return queueItem.dashboardItem.eventChart as EventChart
-            case 'EVENT_REPORT':
-                return queueItem.dashboardItem.eventReport as EventReport
-            case 'EVENT_VISUALIZATION':
-                return queueItem.dashboardItem
-                    .eventVisualization as EventVisualization
-            case 'MAP':
-                return queueItem.dashboardItem.map as Dhis2Map
-            case 'VISUALIZATION':
-                return queueItem.dashboardItem.visualization as Visualization
-            default:
-                throw new Error(
-                    `Received unsupported type ${queueItem.dashboardItem.type}`
-                )
-        }
     }
 
     async #modifyDownloadUrl(config: ParsedScrapeInstructions) {
