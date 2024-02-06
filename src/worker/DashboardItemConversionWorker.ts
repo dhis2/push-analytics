@@ -3,7 +3,6 @@ import puppeteer, { Browser, PuppeteerLaunchOptions } from 'puppeteer'
 import {
     AppScraper,
     EventReportScraper,
-    LineListScraper,
     MapScraper,
     ReportsParser,
     ResourcesParser,
@@ -44,7 +43,6 @@ export class DashboardItemConversionWorker {
     #authenticator: Authenticator | null
     #appScraper: AppScraper
     #eventReportScraper: EventReportScraper
-    #lineListScraper: LineListScraper
     #mapScraper: MapScraper
     #reportsParser: ReportsParser
     #resourcesParser: ResourcesParser
@@ -74,11 +72,6 @@ export class DashboardItemConversionWorker {
             baseUrl,
             'dhis-web-event-reports',
             true
-        )
-        this.#lineListScraper = new LineListScraper(
-            baseUrl,
-            'api/apps/line-listing',
-            false
         )
         this.#mapScraper = new MapScraper(baseUrl, 'dhis-web-maps', true)
         this.#reportsParser = new ReportsParser(baseUrl)
@@ -148,7 +141,6 @@ export class DashboardItemConversionWorker {
         /* Scrapers need to be initialised with the browser instance
          * but Parsers are ready to convert after initialisation */
         await this.#eventReportScraper.init(this.#browser)
-        await this.#lineListScraper.init(this.#browser)
         await this.#mapScraper.init(this.#browser)
         await this.#visualizationScraper.init(this.#browser)
         this.#notifyMainProcess({
