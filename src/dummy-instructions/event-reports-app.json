@@ -16,7 +16,6 @@
     },
     "obtainDownloadArtifact": {
         "strategy": "scrapeDownloadPage",
-        "openerUrl": "{{appUrl}}?id={{id}}",
         "htmlSelector": "body",
         "cssSelector": "style"
     },
