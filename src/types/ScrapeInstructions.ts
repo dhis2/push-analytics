@@ -15,7 +15,7 @@ export type HtmlOutput = 'image' | 'table'
 
 export type SelectorCondition = {
     dashboardItemProperty: string
-    value: string
+    value: string | string[]
     selector: string
 }
 export type SelectorConditions = Array<SelectorCondition>
@@ -37,7 +37,7 @@ export type DownloadInstructions = {
 
 export type ConditionalDownloadInstructions = DownloadInstructions & {
     dashboardItemProperty: string
-    value: string
+    value: string | string[]
 }
 
 export type ScrapeInstructions = {

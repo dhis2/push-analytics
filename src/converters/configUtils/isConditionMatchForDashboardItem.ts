@@ -13,7 +13,7 @@ export function isConditionMatchForDashboardItem(
         dashboardItem,
         condition.dashboardItemProperty
     )
-    return condition.value.includes(',') && typeof itemValue === 'string'
-        ? condition.value.includes(itemValue)
+    return Array.isArray(condition.value)
+        ? condition.value.some((currValue) => currValue === itemValue)
         : condition.value === itemValue
 }
