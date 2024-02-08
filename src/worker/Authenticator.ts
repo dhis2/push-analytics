@@ -67,7 +67,9 @@ export class Authenticator {
                     'POST'
                 )
             if (exitImpersonateStatusCode !== 200) {
-                throw new Error('Could not exit impersonation mode')
+                throw new Error(
+                    `Could not exit impersonation mode. Received response status code ${exitImpersonateStatusCode}`
+                )
             }
         }
         const impersonateStatusCode =
@@ -76,7 +78,9 @@ export class Authenticator {
                 'POST'
             )
         if (impersonateStatusCode !== 200) {
-            throw new Error('Could not impersonate user')
+            throw new Error(
+                `Could not impersonate user. Received response status code ${impersonateStatusCode}`
+            )
         } else {
             this.#isImpersonatingUser = true
             await this.#setSessionCookie()
