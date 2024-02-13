@@ -246,12 +246,25 @@ export class AppScraper implements Converter<ConverterResultObject> {
         } else if (strategy === 'interceptFileDownload') {
             const downloadDir = this.#getItemDownloadPath(visualization.id)
             // Wait until the file has downloaded and get the full path
-            const fullFilePath = await waitForFileToDownload(downloadDir)
-            // Convert to base64 encoded string
-            const base64Str = base64EncodeFile(fullFilePath)
-            // Clear dir for next time
-            await fsPromises.rm(downloadDir, { recursive: true, force: true })
-            result.html = insertIntoImage(base64Str, visualization.name)
+            try {
+                const fullFilePath = await waitForFileToDownload(downloadDir)
+                // Convert to base64 encoded string
+                const base64Str = base64EncodeFile(fullFilePath)
+                // Clear dir for next time
+                await fsPromises.rm(downloadDir, {
+                    recursive: true,
+                    force: true,
+                })
+                result.html = insertIntoImage(base64Str, visualization.name)
+            } catch (error) {
+                /* Also clean download dir if file could not be intercepted
+                 * to avoid issues in subsequent conversions */
+                await fsPromises.rm(downloadDir, {
+                    recursive: true,
+                    force: true,
+                })
+                throw error
+            }
         }
 
         if (usesDownloadPage) {
