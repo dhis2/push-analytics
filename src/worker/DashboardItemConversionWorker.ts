@@ -1,12 +1,6 @@
 import process from 'node:process'
 import puppeteer, { Browser, PuppeteerLaunchOptions } from 'puppeteer'
-import {
-    AppScraper,
-    ReportsParser,
-    ResourcesParser,
-    TextParser,
-    UnsupportedTypeConverter,
-} from '../converters'
+import { AppScraper, ItemParser } from '../converters'
 import { insertIntoConversionErrorTemplate } from '../templates'
 import type {
     ConversionRequestMessage,
@@ -27,6 +21,25 @@ type DashboardItemConversionWorkerOptions = {
     sessionTimeout: string
 }
 
+const SCRAPABLE_DASHBOARD_ITEM_TYPES = new Set([
+    'VISUALIZATION',
+    'EVENT_VISUALIZATION',
+    'EVENT_CHART',
+    'EVENT_REPORT',
+    'MAP',
+])
+
+const PARSABLE_DASHBOARD_ITEM_TYPES = new Set([
+    'REPORTS',
+    'RESOURCES',
+    'TEXT',
+    /* TODO: add support for scraping apps once there is
+     * a generic way to link a dashboard-item to an app-URL */
+    'APP',
+    'MESSAGES',
+    'USERS',
+])
+
 export class DashboardItemConversionWorker {
     #conversionInProgress: boolean
     #debug: boolean
@@ -38,10 +51,7 @@ export class DashboardItemConversionWorker {
     #browser: Browser | null
     #authenticator: Authenticator | null
     #appScraper: AppScraper
-    #reportsParser: ReportsParser
-    #resourcesParser: ResourcesParser
-    #textParser: TextParser
-    #unsupportedTypeConverter: UnsupportedTypeConverter
+    #itemParser: ItemParser
 
     constructor({
         baseUrl,
@@ -61,10 +71,7 @@ export class DashboardItemConversionWorker {
         this.#browser = null
         this.#authenticator = null
         this.#appScraper = new AppScraper(baseUrl)
-        this.#reportsParser = new ReportsParser(baseUrl)
-        this.#resourcesParser = new ResourcesParser(baseUrl)
-        this.#textParser = new TextParser()
-        this.#unsupportedTypeConverter = new UnsupportedTypeConverter()
+        this.#itemParser = new ItemParser(baseUrl)
         this.#addConversionRequestListener()
     }
 
@@ -105,7 +112,7 @@ export class DashboardItemConversionWorker {
         } as ConvertedItem
     }
 
-    async init() {
+    public async init() {
         this.#browser = await this.#createBrowser()
         const [firstBlankPage] = await this.#browser.pages()
         this.#authenticator = new Authenticator({
@@ -162,28 +169,14 @@ export class DashboardItemConversionWorker {
     }
 
     #getConverterForItemType(dashboardItemType: DashboardItemType) {
-        switch (dashboardItemType) {
-            // return this.#visualizationScraper
-            case 'VISUALIZATION':
-            case 'EVENT_VISUALIZATION':
-            case 'EVENT_CHART':
-            case 'EVENT_REPORT':
-            case 'MAP':
-                return this.#appScraper
-            case 'REPORTS':
-                return this.#reportsParser
-            case 'RESOURCES':
-                return this.#resourcesParser
-            case 'TEXT':
-                return this.#textParser
-            case 'APP':
-            case 'MESSAGES':
-            case 'USERS':
-                return this.#unsupportedTypeConverter
-            default:
-                throw new Error(
-                    `Encountered unknown dashboard item type ${dashboardItemType}`
-                )
+        if (SCRAPABLE_DASHBOARD_ITEM_TYPES.has(dashboardItemType)) {
+            return this.#appScraper
+        } else if (PARSABLE_DASHBOARD_ITEM_TYPES) {
+            return this.#itemParser
+        } else {
+            throw new Error(
+                `Encountered unknown dashboard item type ${dashboardItemType}`
+            )
         }
     }
 
