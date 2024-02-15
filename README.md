@@ -136,3 +136,16 @@ The below is just a small summary of how things _could theoretically_ work. Both
 1. Create a single user that has access to the dashboard and underlying apps
 2. Before starting the conversion, set the locale of that user to the target locale
 3. Pass the same credentials all the time
+
+## TODO
+
+-   [x] Ensure file downloading doesn't hang (max tries)
+-   [x] Always clear files
+-   [ ] Return error if >= 1 dashboard-items fail. Otherwise return HTML string
+-   [ ] Only allow request from localhost or from DHIS2_CORE_URL
+-   [ ] Ensure requests are queued until all workers have logged in successfully
+-   [ ] Ensure main worker does not crash but returns errors when stuff goes wrong
+-   [ ] Update docs/readme
+-   [ ] Ensure items are sorted correctly
+-   [ ] Eliminate the need for a request-queue: it should be possible to add items to the dashboard-item queue across requests
+-   [ ] Error monitoring / restarting when shuts down

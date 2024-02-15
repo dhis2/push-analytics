@@ -2,10 +2,7 @@ import {
     insertIntoDashboardHeaderTemplate,
     insertIntoEmailTemplate,
 } from '../templates'
-import {
-    ConverterResult,
-    OnConversionCompleteFn,
-} from '../types/ConverterCluster'
+import type { ConverterResult, OnConversionCompleteFn } from '../types'
 
 type Options = {
     baseUrl: string

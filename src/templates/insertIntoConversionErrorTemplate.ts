@@ -1,4 +1,4 @@
-import { QueueItem } from '../types/ConverterCluster'
+import type { QueueItem } from '../types'
 import { parseDashboardItemTemplate } from './parseTemplate'
 
 const template = `

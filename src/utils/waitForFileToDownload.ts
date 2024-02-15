@@ -1,7 +1,12 @@
 import fs from 'fs'
 import path from 'path'
 
-const checkFile = (dir: string) => {
+/* Note that 20 * 500 = 10000 ms so we wait max 10 sec
+ * for a file download to complete */
+const INTERVAL = 20
+const MAX_TRIES = 500
+
+function checkFile(dir: string) {
     try {
         const fileNames = fs.readdirSync(dir)
         const fileName =
@@ -17,19 +22,25 @@ const checkFile = (dir: string) => {
     }
 }
 
-export const waitForFileToDownload = async (dir: string): Promise<string> => {
-    return new Promise((resolve) => {
+export async function waitForFileToDownload(dir: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        let tries = 0
         let fileName = checkFile(dir)
         if (fileName) {
             resolve(fileName)
         } else {
             const interval = setInterval(() => {
+                tries++
                 fileName = checkFile(dir)
                 if (fileName) {
                     clearInterval(interval)
                     resolve(fileName)
                 }
-            }, 20)
+                if (tries === MAX_TRIES) {
+                    clearInterval(interval)
+                    reject('Could not find file')
+                }
+            }, INTERVAL)
         }
     })
 }

@@ -3,6 +3,7 @@ import http from 'node:http'
 import process from 'node:process'
 import { HttpResponseStatusError, createDashboardGetter } from './httpGetClient'
 import { DashboardsConverter } from './main'
+import { RequestQueue } from './main/RequestQueue'
 import {
     createTimer,
     parseQueryString,
@@ -10,7 +11,6 @@ import {
     validateRequest,
 } from './utils'
 import { DashboardItemConversionWorker } from './worker'
-import { RequestQueue } from './RequestQueue'
 
 const initializeCluster = async () => {
     const {
@@ -49,7 +49,7 @@ const initializeCluster = async () => {
                     res.end('')
                     return
                 }
-                console.log('Conversion process started')
+                console.log('Conversion request received')
                 const requestHandler = async () => {
                     const timer = createTimer()
                     validateRequest(req)

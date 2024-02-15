@@ -18,7 +18,7 @@ const isAllowedHeaderFieldType = (
     )
 }
 
-export const validateRequest = (req: http.IncomingMessage) => {
+export function validateRequest(req: http.IncomingMessage) {
     const methodType = req.method?.toUpperCase() ?? ''
 
     if (!isAllowedHeaderFieldType(req, 'content-type')) {
