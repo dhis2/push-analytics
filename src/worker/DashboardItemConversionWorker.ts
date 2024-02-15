@@ -1,6 +1,5 @@
 import process from 'node:process'
 import puppeteer, { Browser, PuppeteerLaunchOptions } from 'puppeteer'
-import { AppScraper, ItemParser } from '../converters'
 import { insertIntoConversionErrorTemplate } from '../templates'
 import type {
     ConversionRequestMessage,
@@ -11,6 +10,8 @@ import type {
     WorkerInitializedMessage,
 } from '../types'
 import { Authenticator } from './Authenticator'
+import { AppScraper } from './AppScraper'
+import { ItemParser } from './ItemParser'
 
 type DashboardItemConversionWorkerOptions = {
     debug: boolean
