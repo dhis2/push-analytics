@@ -24,18 +24,6 @@ import { getDashboardItemVisualization } from '../utils'
 const DONWLOAD_PAGE_URL_PATTERN =
     /api\/analytics\/enrollments|events\/query\/[a-zA-Z0-9]{11}\.html\+css/
 
-/**
- * This class does not extend the DashbooardItemSraper because it is meant to replace it
- * entirely. The plan is as follows:
- * 1. [DONE] Create JSON instruction files for each app
- * 2. [DONE - apart from maps-app] Install versions of the apps into the local instance which have the right class-names, etc
- * 3. [DONE] Implement config cache
- * 4. Implement type conversion based on config files and migrate from app-specific converter to this one one by one
- * 5. Remove app-specific converters and the underlying base DashboardItemScraper
- * 6. Cleanup
- */
-
-// TODO: Converter interface should simply always return an object with html and css properties
 export class AppScraper implements Converter {
     baseUrl: string
     #browser: Browser | null
