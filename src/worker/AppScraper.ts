@@ -15,11 +15,11 @@ import {
     clearDir,
     createTimer,
     downloadPath,
+    getDashboardItemVisualization,
     logDashboardItemConversion,
     waitForFileToDownload,
 } from '../utils'
 import { ScrapeConfigCache } from './ScrapeConfigCache'
-import { getDashboardItemVisualization } from '../utils'
 
 const DONWLOAD_PAGE_URL_PATTERN =
     /api\/analytics\/enrollments|events\/query\/[a-zA-Z0-9]{11}\.html\+css/

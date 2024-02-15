@@ -9,8 +9,8 @@ import type {
     QueueItem,
     WorkerInitializedMessage,
 } from '../types'
-import { Authenticator } from './Authenticator'
 import { AppScraper } from './AppScraper'
+import { Authenticator } from './Authenticator'
 import { ItemParser } from './ItemParser'
 
 type DashboardItemConversionWorkerOptions = {

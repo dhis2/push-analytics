@@ -1,9 +1,9 @@
 import cluster from 'node:cluster'
 import http from 'node:http'
 import process from 'node:process'
-import { RequestQueue } from './main/RequestQueue'
 import { HttpResponseStatusError, createDashboardGetter } from './httpGetClient'
 import { DashboardsConverter } from './main'
+import { RequestQueue } from './main/RequestQueue'
 import {
     createTimer,
     parseQueryString,
