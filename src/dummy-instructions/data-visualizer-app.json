@@ -19,7 +19,6 @@
                             "BAR",
                             "STACKED_BAR",
                             "LINE",
-                            "LINE_LIST",
                             "AREA",
                             "STACKED_AREA",
                             "PIE",
@@ -27,10 +26,11 @@
                             "GAUGE",
                             "YEAR_OVER_YEAR_LINE",
                             "YEAR_OVER_YEAR_COLUMN",
+                            "SCATTER",
+                            "BUBBLE",
                             "SINGLE_VALUE",
                             "PIVOT_TABLE",
-                            "SCATTER",
-                            "BUBBLE"
+                            "OUTLIER_TABLE"
                         ],
                         "selector": ".highcharts-container"
                     }
@@ -61,7 +61,6 @@
                 "BAR",
                 "STACKED_BAR",
                 "LINE",
-                "LINE_LIST",
                 "AREA",
                 "STACKED_AREA",
                 "PIE",
@@ -69,10 +68,11 @@
                 "GAUGE",
                 "YEAR_OVER_YEAR_LINE",
                 "YEAR_OVER_YEAR_COLUMN",
+                "SCATTER",
+                "BUBBLE",
                 "SINGLE_VALUE",
                 "PIVOT_TABLE",
-                "SCATTER",
-                "BUBBLE"
+                "OUTLIER_TABLE"
             ],
             "strategy": "screenShotImgOnDownloadPage",
             "htmlSelector": "img"

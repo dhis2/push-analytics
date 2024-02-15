@@ -11,13 +11,12 @@ export type DashboardItemType =
     | 'MESSAGES'
     | 'APP'
 
-export type EventVisualizationType =
+type BaseVisualizationType =
     | 'COLUMN'
     | 'STACKED_COLUMN'
     | 'BAR'
     | 'STACKED_BAR'
     | 'LINE'
-    | 'LINE_LIST'
     | 'AREA'
     | 'STACKED_AREA'
     | 'PIE'
@@ -25,10 +24,13 @@ export type EventVisualizationType =
     | 'GAUGE'
     | 'YEAR_OVER_YEAR_LINE'
     | 'YEAR_OVER_YEAR_COLUMN'
-    | 'SINGLE_VALUE'
-    | 'PIVOT_TABLE'
     | 'SCATTER'
     | 'BUBBLE'
+    | 'SINGLE_VALUE'
+    | 'PIVOT_TABLE'
+
+export type VisualizationType = BaseVisualizationType | 'OUTLIER_TABLE'
+export type EventVisualizationType = BaseVisualizationType | 'LINE_LIST'
 
 export type ReportType = 'HTML' | 'JASPER_REPORT_TABLE' | 'JASPER_JDBC'
 
@@ -41,11 +43,7 @@ export type Dhis2Map = {
 export type Visualization = {
     id: string
     name: string
-    /* The docs mention a subset of these types but we have encountered visualizations
-     * with other types too, so we use the `EventVisualizationType` type which includes
-     * things like `SCATTER` and `BUBBLE`.
-     * https://docs.dhis2.org/en/develop/using-the-api/dhis-core-version-master/visualizations.html?h=visualization+master+develop#webapi_visualization */
-    type: EventVisualizationType
+    type: VisualizationType
 }
 
 export type EventVisualization = {
