@@ -10,12 +10,7 @@ function checkFile(dir: string) {
     try {
         const fileNames = fs.readdirSync(dir)
         const fileName =
-            // TODO: consider removing
-            /* Note about `>=` in the condition below:
-             * in theory there should be 1 single file. But in reality
-             * I have encountered a situation (with the maps-app) where
-             * there ended up being one*/
-            Array.isArray(fileNames) && fileNames.length >= 1
+            Array.isArray(fileNames) && fileNames.length === 1
                 ? fileNames[0]
                 : ''
 

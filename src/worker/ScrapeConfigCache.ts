@@ -56,6 +56,9 @@ export class ScrapeConfigCache {
         }
 
         // TODO: switch to this method once JSON files have been migrated
+        // const scrapeConfig =
+        //     this.#cachedConfigs.get(appPath) ??
+        //     (await this.#fetchJsonInstructions(appPath: string))
         const scrapeConfig =
             this.#cachedConfigs.get(appPath) ??
             (await this.#addLocalInstructions(appPath))
