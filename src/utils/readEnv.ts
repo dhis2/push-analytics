@@ -19,7 +19,7 @@ const envVariableDefaults: Record<EnvVariableName, string> = {
     SESSION_TIMEOUT: '3600',
 }
 
-const readEnvVariable = (name: EnvVariableName): string => {
+function readEnvVariable(name: EnvVariableName): string {
     if (process.env[name]) {
         return process.env[name] ?? ''
     } else {
@@ -30,13 +30,15 @@ const readEnvVariable = (name: EnvVariableName): string => {
     }
 }
 
-export const readEnv = () => ({
-    host: readEnvVariable('HOST'),
-    port: readEnvVariable('PORT'),
-    baseUrl: readEnvVariable('DHIS2_CORE_URL'),
-    apiVersion: readEnvVariable('DHIS2_CORE_MAJOR_VERSION'),
-    adminUsername: readEnvVariable('DHIS2_CORE_ADMIN_USERNAME'),
-    adminPassword: readEnvVariable('DHIS2_CORE_ADMIN_PASSWORD'),
-    maxThreads: readEnvVariable('MAX_THREADS'),
-    sessionTimeout: readEnvVariable('SESSION_TIMEOUT'),
-})
+export function readEnv() {
+    return {
+        host: readEnvVariable('HOST'),
+        port: readEnvVariable('PORT'),
+        baseUrl: readEnvVariable('DHIS2_CORE_URL'),
+        apiVersion: readEnvVariable('DHIS2_CORE_MAJOR_VERSION'),
+        adminUsername: readEnvVariable('DHIS2_CORE_ADMIN_USERNAME'),
+        adminPassword: readEnvVariable('DHIS2_CORE_ADMIN_PASSWORD'),
+        maxThreads: readEnvVariable('MAX_THREADS'),
+        sessionTimeout: readEnvVariable('SESSION_TIMEOUT'),
+    }
+}

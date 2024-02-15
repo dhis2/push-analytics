@@ -1,6 +1,6 @@
 import { availableParallelism } from 'node:os'
 
-export const getThreadLength = (maxThreads: string = '') => {
+export function getThreadLength(maxThreads: string = ''): number {
     const availableThreads = availableParallelism()
 
     if (maxThreads) {

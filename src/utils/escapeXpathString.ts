@@ -1,4 +1,4 @@
-export const escapeXpathString = (str: string) => {
+export function escapeXpathString(str: string): string {
     const splitedQuotes = str.replace(/'/g, `', "'", '`)
     return `concat('${splitedQuotes}', '')`
 }

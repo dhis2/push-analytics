@@ -6,7 +6,7 @@ const isValidUid = (id: string) => UID_REGEX.test(id)
 const isNonEmptyString = (str: string) =>
     typeof str === 'string' && str.length > 0
 
-export const parseQueryString = (url = '', baseUrl: string) => {
+export function parseQueryString(url = '', baseUrl: string) {
     const { searchParams } = new URL(url, baseUrl)
     const { dashboardId, username } = Object.fromEntries(searchParams)
 
