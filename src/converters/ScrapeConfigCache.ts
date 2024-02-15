@@ -10,6 +10,7 @@ import dataVisualizerInstructions from '../dummy-instructions/data-visualizer-ap
 import eventChartsInstructions from '../dummy-instructions/event-charts-app.json'
 import eventReportsInstructions from '../dummy-instructions/event-reports-app.json'
 import lineListingInstructions from '../dummy-instructions/line-listing-app.json'
+import mapsInstructions from '../dummy-instructions/maps-app.json'
 import { parseTemplate } from '../templates'
 import { pickConditionalDownloadInstructionsForDashboardItem } from './configUtils/pickConditionalDownloadInstructionsForDashboardItem'
 import { pickConditionalSelectorForDashboardItem } from './configUtils/pickConditionalSelectorForDashboardItem'
@@ -23,9 +24,7 @@ const APP_PATH_LOOKUP: Record<DashboardItemType, string | undefined> = {
     EVENT_CHART: 'dhis-web-event-visualizer',
     EVENT_REPORT: 'dhis-web-event-reports',
     EVENT_VISUALIZATION: 'api/apps/line-listing',
-    // TODO: convert maps app for scraping
-    // MAP: 'dhis-web-maps',
-    MAP: undefined,
+    MAP: 'dhis-web-maps',
     MESSAGES: undefined,
     REPORTS: undefined,
     RESOURCES: undefined,
@@ -81,6 +80,8 @@ export class ScrapeConfigCache {
             Object.assign(instructions, lineListingInstructions)
         } else if (appPath === 'dhis-web-data-visualizer') {
             Object.assign(instructions, dataVisualizerInstructions)
+        } else if (appPath === 'dhis-web-maps') {
+            Object.assign(instructions, mapsInstructions)
         }
         this.#cachedConfigs.set(appPath, instructions)
 

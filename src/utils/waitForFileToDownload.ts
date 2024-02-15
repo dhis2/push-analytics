@@ -6,10 +6,11 @@ import path from 'path'
 const INTERVAL = 20
 const MAX_TRIES = 500
 
-const checkFile = (dir: string) => {
+function checkFile(dir: string) {
     try {
         const fileNames = fs.readdirSync(dir)
         const fileName =
+            // TODO: consider removing
             /* Note about `>=` in the condition below:
              * in theory there should be 1 single file. But in reality
              * I have encountered a situation (with the maps-app) where
@@ -26,7 +27,7 @@ const checkFile = (dir: string) => {
     }
 }
 
-export const waitForFileToDownload = async (dir: string): Promise<string> => {
+export async function waitForFileToDownload(dir: string): Promise<string> {
     return new Promise((resolve, reject) => {
         let tries = 0
         let fileName = checkFile(dir)

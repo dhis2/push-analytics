@@ -1,5 +1,4 @@
 import fs from 'fs'
-import fsPromises from 'node:fs/promises'
 import path from 'path'
 import { Browser, CDPSession, Page } from 'puppeteer'
 import {
@@ -9,6 +8,7 @@ import {
 } from '../types/ConverterCluster'
 import {
     base64EncodeFile,
+    clearDir,
     createTimer,
     downloadPath,
     logDashboardItemConversion,
@@ -18,7 +18,6 @@ import { ScrapeConfigCache } from './ScrapeConfigCache'
 import { AnyVisualization, ParsedScrapeInstructions, Steps } from '../types'
 import { insertIntoDiv, insertIntoImage } from '../templates'
 import {
-    filterStepValuesByKind,
     findStepValueByKind,
     getDashboardItemVisualization,
 } from './configUtils'
@@ -201,7 +200,7 @@ export class AppScraper implements Converter<ConverterResultObject> {
             /* For now we simply assume all UI element interactions
              * are clicks. If use cases present themselves where this
              * is not the case we will need to add complexity here */
-            await this.#executeUiElementClickSteps(config.triggerDownload.steps)
+            await this.#executeUiElementSteps(config.triggerDownload.steps)
         }
     }
 
@@ -249,20 +248,14 @@ export class AppScraper implements Converter<ConverterResultObject> {
             try {
                 const fullFilePath = await waitForFileToDownload(downloadDir)
                 // Convert to base64 encoded string
-                const base64Str = base64EncodeFile(fullFilePath)
+                const base64Str = await base64EncodeFile(fullFilePath)
                 // Clear dir for next time
-                await fsPromises.rm(downloadDir, {
-                    recursive: true,
-                    force: true,
-                })
+                await clearDir(downloadDir)
                 result.html = insertIntoImage(base64Str, visualization.name)
             } catch (error) {
                 /* Also clean download dir if file could not be intercepted
                  * to avoid issues in subsequent conversions */
-                await fsPromises.rm(downloadDir, {
-                    recursive: true,
-                    force: true,
-                })
+                await clearDir(downloadDir)
                 throw error
             }
         }
@@ -297,11 +290,9 @@ export class AppScraper implements Converter<ConverterResultObject> {
                 config.clearVisualization.steps,
                 'goto'
             )
-            await this.page.goto(url)
+            await this.page.goto(url, { waitUntil: 'networkidle2' })
         } else if (config.clearVisualization.strategy === 'useUiElements') {
-            await this.#executeUiElementClickSteps(
-                config.clearVisualization.steps
-            )
+            await this.#executeUiElementSteps(config.clearVisualization.steps)
         }
     }
 
@@ -317,14 +308,25 @@ export class AppScraper implements Converter<ConverterResultObject> {
     }
 
     #getItemDownloadPath(id: string) {
-        return path.join(downloadPath, id)
+        return path.join(downloadPath, `${id}_${process.pid}`)
     }
 
-    async #executeUiElementClickSteps(steps: Steps) {
-        const selectors = filterStepValuesByKind(steps, 'click')
-
-        for (const selector of selectors) {
-            await this.page.click(selector)
+    async #executeUiElementSteps(steps: Steps) {
+        for (const step of steps) {
+            if (step.click && typeof step.click === 'string') {
+                await this.page.click(step.click)
+            } else if (
+                step.waitForSelector &&
+                typeof step.waitForSelector === 'string'
+            ) {
+                await this.page.waitForSelector(step.waitForSelector)
+            } else if (step.goto && typeof step.goto === 'string') {
+                await this.page.goto(step.goto, { waitUntil: 'networkidle2' })
+            } else {
+                throw new Error(
+                    `Failed to intepret step "${JSON.stringify(step)}"`
+                )
+            }
         }
     }
 }

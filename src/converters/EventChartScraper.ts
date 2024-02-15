@@ -48,7 +48,7 @@ export class EventChartScraper extends DashboardItemScraper<string> {
         // Wait until the file has downloaded and get the full path
         const fullFilePath = await waitForFileToDownload(downloadDir)
         // Convert to base64 encoded string
-        const base64Str = base64EncodeFile(fullFilePath)
+        const base64Str = await base64EncodeFile(fullFilePath)
         await this.#clearPage()
         await fs.rm(downloadDir, { recursive: true, force: true })
         // Show some progress so it's clear the process is not hanging

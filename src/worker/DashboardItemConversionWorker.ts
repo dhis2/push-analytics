@@ -2,7 +2,6 @@ import process from 'node:process'
 import puppeteer, { Browser, PuppeteerLaunchOptions } from 'puppeteer'
 import {
     AppScraper,
-    MapScraper,
     ReportsParser,
     ResourcesParser,
     TextParser,
@@ -18,7 +17,6 @@ import {
 import { Authenticator } from './Authenticator'
 import { DashboardItemType } from '../types'
 import { insertIntoConversionErrorTemplate } from '../templates'
-import { DashboardItemScraper } from '../converters/base/DashboardItemScraper'
 
 type DashboardItemConversionWorkerOptions = {
     debug: boolean
@@ -40,7 +38,6 @@ export class DashboardItemConversionWorker {
     #browser: Browser | null
     #authenticator: Authenticator | null
     #appScraper: AppScraper
-    #mapScraper: MapScraper
     #reportsParser: ReportsParser
     #resourcesParser: ResourcesParser
     #textParser: TextParser
@@ -64,7 +61,6 @@ export class DashboardItemConversionWorker {
         this.#browser = null
         this.#authenticator = null
         this.#appScraper = new AppScraper(baseUrl)
-        this.#mapScraper = new MapScraper(baseUrl, 'dhis-web-maps', true)
         this.#reportsParser = new ReportsParser(baseUrl)
         this.#resourcesParser = new ResourcesParser(baseUrl)
         this.#textParser = new TextParser()
@@ -122,11 +118,9 @@ export class DashboardItemConversionWorker {
             isConverting: this.isConverting,
         })
         await this.#authenticator.establishNonExpiringAdminSession()
+        // Init appScraper once the browser instance is available
         await this.#appScraper.init(this.#browser)
 
-        /* Scrapers need to be initialised with the browser instance
-         * but Parsers are ready to convert after initialisation */
-        await this.#mapScraper.init(this.#browser)
         this.#notifyMainProcess({
             type: 'WORKER_INITIALIZED',
         } as WorkerInitializedMessage)
@@ -145,7 +139,7 @@ export class DashboardItemConversionWorker {
             const result = await itemTypeConverter.convert(queueItem)
             return result
         } catch (error) {
-            if (itemTypeConverter instanceof DashboardItemScraper) {
+            if (itemTypeConverter instanceof AppScraper) {
                 try {
                     await itemTypeConverter.takeErrorScreenShot(queueItem)
                 } catch (error) {
@@ -156,9 +150,8 @@ export class DashboardItemConversionWorker {
             }
 
             console.log(
-                `Conversion failed for dashboard-id ${queueItem.dashboardId} item-id "${queueItem.dashboardItem.id}" using converter "${itemTypeConverter.constructor.name}" with PID "${process.pid}"`
+                `Conversion failed for dashboard-id ${queueItem.dashboardId} item-id "${queueItem.dashboardItem.id}" of type "${queueItem.dashboardItem.type}" on worker with PID "${process.pid}"`
             )
-            console.log(error)
 
             return Promise.resolve(
                 insertIntoConversionErrorTemplate(queueItem, error)
@@ -175,9 +168,8 @@ export class DashboardItemConversionWorker {
             case 'EVENT_VISUALIZATION':
             case 'EVENT_CHART':
             case 'EVENT_REPORT':
-                return this.#appScraper
             case 'MAP':
-                return this.#mapScraper
+                return this.#appScraper
             case 'REPORTS':
                 return this.#reportsParser
             case 'RESOURCES':
@@ -215,28 +207,21 @@ export class DashboardItemConversionWorker {
 
     #addConversionRequestListener() {
         process.on('message', async (message: ConversionRequestMessage) => {
-            try {
-                if (
-                    message?.type !== 'ITEM_CONVERSION_REQUEST' ||
-                    !message.payload
-                ) {
-                    throw new Error(
-                        `Received unexpected message with type "${message?.type}"`
-                    )
-                }
-                const queueItem: QueueItem = message.payload
-                const convertedItem: ConvertedItem = await this.convert(
-                    queueItem
+            if (
+                message?.type !== 'ITEM_CONVERSION_REQUEST' ||
+                !message.payload
+            ) {
+                throw new Error(
+                    `Received unexpected message with type "${message?.type}"`
                 )
-
-                this.#notifyMainProcess({
-                    type: 'ITEM_CONVERSION_RESULT',
-                    payload: convertedItem,
-                } as ConversionResultMessage)
-            } catch (error) {
-                console.log(error)
-                throw error
             }
+            const queueItem: QueueItem = message.payload
+            const convertedItem: ConvertedItem = await this.convert(queueItem)
+
+            this.#notifyMainProcess({
+                type: 'ITEM_CONVERSION_RESULT',
+                payload: convertedItem,
+            } as ConversionResultMessage)
         })
     }
 

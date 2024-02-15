@@ -49,7 +49,7 @@ const initializeCluster = async () => {
                     res.end('')
                     return
                 }
-                console.log('Conversion process started')
+                console.log('Conversion request received')
                 const requestHandler = async () => {
                     const timer = createTimer()
                     validateRequest(req)
