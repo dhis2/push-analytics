@@ -1,5 +1,5 @@
 import { insertIntoResourcesTemplate } from '../templates'
-import type { QueueItem } from '../types/ConverterCluster'
+import type { QueueItem } from '../types'
 import { createTimer } from '../utils'
 import { AnchorParser } from './base/AnchorParser'
 

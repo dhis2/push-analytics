@@ -1,4 +1,10 @@
-import {
+import dataVisualizerInstructions from '../dummy-instructions/data-visualizer-app.json'
+import eventChartsInstructions from '../dummy-instructions/event-charts-app.json'
+import eventReportsInstructions from '../dummy-instructions/event-reports-app.json'
+import lineListingInstructions from '../dummy-instructions/line-listing-app.json'
+import mapsInstructions from '../dummy-instructions/maps-app.json'
+import { parseTemplate } from '../templates'
+import type {
     DashboardItem,
     DashboardItemType,
     ParsedScrapeInstructions,
@@ -6,15 +12,9 @@ import {
     SelectorConditions,
     Steps,
 } from '../types'
-import dataVisualizerInstructions from '../dummy-instructions/data-visualizer-app.json'
-import eventChartsInstructions from '../dummy-instructions/event-charts-app.json'
-import eventReportsInstructions from '../dummy-instructions/event-reports-app.json'
-import lineListingInstructions from '../dummy-instructions/line-listing-app.json'
-import mapsInstructions from '../dummy-instructions/maps-app.json'
-import { parseTemplate } from '../templates'
+import { getDashboardItemVisualization } from './configUtils'
 import { pickConditionalDownloadInstructionsForDashboardItem } from './configUtils/pickConditionalDownloadInstructionsForDashboardItem'
 import { pickConditionalSelectorForDashboardItem } from './configUtils/pickConditionalSelectorForDashboardItem'
-import { getDashboardItemVisualization } from './configUtils'
 
 /* TODO: in the future type 'APP' should also be supported
  * But before we can do this we need a way to identify the correct URL

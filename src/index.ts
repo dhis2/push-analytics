@@ -1,6 +1,7 @@
 import cluster from 'node:cluster'
 import http from 'node:http'
 import process from 'node:process'
+import { RequestQueue } from './RequestQueue'
 import { HttpResponseStatusError, createDashboardGetter } from './httpGetClient'
 import { DashboardsConverter } from './main'
 import {
@@ -10,7 +11,6 @@ import {
     validateRequest,
 } from './utils'
 import { DashboardItemConversionWorker } from './worker'
-import { RequestQueue } from './RequestQueue'
 
 const initializeCluster = async () => {
     const {

@@ -1,6 +1,5 @@
 import { insertIntoReportsTemplate } from '../templates'
-import { ReportType } from '../types'
-import type { QueueItem } from '../types/ConverterCluster'
+import type { QueueItem, ReportType } from '../types'
 import { createTimer } from '../utils'
 import { AnchorParser } from './base/AnchorParser'
 

@@ -6,7 +6,7 @@ import type {
     ConvertedItem,
     QueueItem,
     WorkerInitializedMessage,
-} from '../types/ConverterCluster'
+} from '../types'
 import { getThreadLength } from '../utils'
 import { DashboardsHtmlStore } from './DashboardsHtmlStore'
 

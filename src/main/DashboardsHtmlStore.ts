@@ -1,4 +1,4 @@
-import { OnConversionCompleteFn } from '../types/ConverterCluster'
+import type { OnConversionCompleteFn } from '../types'
 import { DashboardHtmlBuilder } from './DashboardHtmlBuilder'
 
 type CreateDashboardHtmlCollectionOptions = {

@@ -1,11 +1,15 @@
 import fs from 'fs'
 import path from 'path'
 import { Browser, CDPSession, Page } from 'puppeteer'
-import {
+import { insertIntoDiv, insertIntoImage } from '../templates'
+import type {
+    AnyVisualization,
     Converter,
-    ConverterResultObject,
+    ConverterResult,
+    ParsedScrapeInstructions,
     QueueItem,
-} from '../types/ConverterCluster'
+    Steps,
+} from '../types'
 import {
     base64EncodeFile,
     clearDir,
@@ -15,8 +19,6 @@ import {
     waitForFileToDownload,
 } from '../utils'
 import { ScrapeConfigCache } from './ScrapeConfigCache'
-import { AnyVisualization, ParsedScrapeInstructions, Steps } from '../types'
-import { insertIntoDiv, insertIntoImage } from '../templates'
 import {
     findStepValueByKind,
     getDashboardItemVisualization,
@@ -37,7 +39,7 @@ const DONWLOAD_PAGE_URL_PATTERN =
  */
 
 // TODO: Converter interface should simply always return an object with html and css properties
-export class AppScraper implements Converter<ConverterResultObject> {
+export class AppScraper implements Converter {
     baseUrl: string
     #browser: Browser | null
     #page: Page | null
@@ -91,7 +93,7 @@ export class AppScraper implements Converter<ConverterResultObject> {
         })
     }
 
-    public async convert(queueItem: QueueItem): Promise<ConverterResultObject> {
+    public async convert(queueItem: QueueItem): Promise<ConverterResult> {
         const visualization = getDashboardItemVisualization(
             queueItem.dashboardItem
         )
@@ -207,10 +209,10 @@ export class AppScraper implements Converter<ConverterResultObject> {
     async #obtainDownloadArtifact(
         config: ParsedScrapeInstructions,
         visualization: AnyVisualization
-    ): Promise<ConverterResultObject> {
+    ): Promise<ConverterResult> {
         const { strategy, htmlSelector, cssSelector } =
             config.obtainDownloadArtifact
-        const result: ConverterResultObject = {
+        const result: ConverterResult = {
             html: '',
             css: '',
         }

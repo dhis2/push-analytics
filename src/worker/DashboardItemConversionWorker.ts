@@ -7,16 +7,16 @@ import {
     TextParser,
     UnsupportedTypeConverter,
 } from '../converters'
-import {
+import { insertIntoConversionErrorTemplate } from '../templates'
+import type {
     ConversionRequestMessage,
     ConversionResultMessage,
     ConvertedItem,
+    DashboardItemType,
     QueueItem,
     WorkerInitializedMessage,
-} from '../types/ConverterCluster'
+} from '../types'
 import { Authenticator } from './Authenticator'
-import { DashboardItemType } from '../types'
-import { insertIntoConversionErrorTemplate } from '../templates'
 
 type DashboardItemConversionWorkerOptions = {
     debug: boolean

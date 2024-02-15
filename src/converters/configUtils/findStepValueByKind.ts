@@ -1,4 +1,4 @@
-import { Steps, StepKind } from '../../types'
+import { StepKind, Steps } from '../../types'
 
 export function findStepValueByKind(steps: Steps, kind: StepKind): string {
     const step = steps.find((step) => !!step[kind])

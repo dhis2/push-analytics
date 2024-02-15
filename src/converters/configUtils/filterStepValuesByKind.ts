@@ -1,4 +1,4 @@
-import { Steps, StepKind } from '../../types'
+import type { StepKind, Steps } from '../../types'
 
 export function filterStepValuesByKind(
     steps: Steps,

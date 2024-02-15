@@ -1,5 +1,5 @@
-import { DashboardItem, SelectorConditions, Step } from '../../types'
 import { isConditionMatchForDashboardItem } from '.'
+import type { DashboardItem, SelectorConditions, Step } from '../../types'
 
 export function pickConditionalSelectorForDashboardItem(
     conditions: SelectorConditions,

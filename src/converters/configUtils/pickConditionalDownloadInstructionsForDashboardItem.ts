@@ -1,9 +1,9 @@
-import {
+import type {
     ConditionalDownloadInstructions,
     DashboardItem,
     DownloadInstructions,
 } from '../../types'
-import { isConditionMatchForDashboardItem } from '.'
+import { isConditionMatchForDashboardItem } from './isConditionMatchForDashboardItem'
 
 export function pickConditionalDownloadInstructionsForDashboardItem(
     conditions: ConditionalDownloadInstructions[],

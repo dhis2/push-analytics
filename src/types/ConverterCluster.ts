@@ -47,14 +47,13 @@ export type ConversionResultMessage = Message<
 
 export type WorkerInitializedMessage = Message<'WORKER_INITIALIZED', undefined>
 
-export type ConverterResultObject = {
+export type ConverterResult = {
     html: string
     css: string
 }
-export type ConverterResult = string | ConverterResultObject
 
-export interface Converter<T extends ConverterResult> {
-    convert: (queueItem: QueueItem) => Promise<T>
+export interface Converter {
+    convert: (queueItem: QueueItem) => Promise<ConverterResult>
     init?: (browser: Browser) => Promise<void>
     takeErrorScreenShot?: (queueItem: QueueItem) => Promise<void>
 }
