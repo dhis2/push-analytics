@@ -5,16 +5,18 @@ import lineListingInstructions from '../dummy-instructions/line-listing-app.json
 import mapsInstructions from '../dummy-instructions/maps-app.json'
 import { parseTemplate } from '../templates'
 import type {
+    ConditionalDownloadInstructions,
     DashboardItem,
     DashboardItemType,
+    DownloadInstructions,
     ParsedScrapeInstructions,
     ScrapeInstructions,
+    SelectorCondition,
     SelectorConditions,
+    Step,
     Steps,
 } from '../types'
-import { getDashboardItemVisualization } from './configUtils'
-import { pickConditionalDownloadInstructionsForDashboardItem } from './configUtils/pickConditionalDownloadInstructionsForDashboardItem'
-import { pickConditionalSelectorForDashboardItem } from './configUtils/pickConditionalSelectorForDashboardItem'
+import { getDashboardItemVisualization, getNestedPropertyValue } from '../utils'
 
 /* TODO: in the future type 'APP' should also be supported
  * But before we can do this we need a way to identify the correct URL
@@ -120,7 +122,7 @@ export class ScrapeConfigCache {
                 steps: scrapeConfig.showVisualization.steps.map((step) => {
                     // Transform conditional step into unconditional
                     if (step.waitForSelectorConditionally) {
-                        return pickConditionalSelectorForDashboardItem(
+                        return this.#parseConditionalSelectorStep(
                             step.waitForSelectorConditionally as SelectorConditions,
                             dashboardItem
                         )
@@ -143,7 +145,7 @@ export class ScrapeConfigCache {
             obtainDownloadArtifact:
                 // Transform conditional download instructions into unconditional
                 scrapeConfig.obtainDownloadArtifact ??
-                pickConditionalDownloadInstructionsForDashboardItem(
+                this.#parseConditionalDownloadInstructions(
                     scrapeConfig.obtainDownloadArtifactConditionally,
                     dashboardItem
                 ),
@@ -161,5 +163,59 @@ export class ScrapeConfigCache {
                 ) as Steps,
             },
         }
+    }
+
+    #parseConditionalSelectorStep(
+        conditions: SelectorConditions,
+        dashboardItem: DashboardItem
+    ): Pick<Step, 'waitForSelector'> {
+        const condition = conditions.find((condition) =>
+            this.#isConditionMatch(condition, dashboardItem)
+        )
+
+        if (!condition?.selector) {
+            throw new Error(
+                `Could identify conditional for selector dashboard item of type ${dashboardItem.type}`
+            )
+        }
+
+        return { waitForSelector: condition?.selector }
+    }
+
+    #parseConditionalDownloadInstructions(
+        conditions: ConditionalDownloadInstructions[],
+        dashboardItem: DashboardItem
+    ): DownloadInstructions {
+        const condition = conditions.find((condition) =>
+            this.#isConditionMatch(condition, dashboardItem)
+        )
+
+        if (!condition?.strategy) {
+            throw new Error(
+                `Could identify conditional download instructions for dashboard item of type ${dashboardItem.type}`
+            )
+        }
+
+        return {
+            strategy: condition.strategy,
+            HtmlOutput: condition.HtmlOutput,
+            openerUrl: condition.openerUrl,
+            htmlSelector: condition.htmlSelector,
+            cssSelector: condition.cssSelector,
+            modifyDownloadUrl: condition.modifyDownloadUrl,
+        }
+    }
+
+    #isConditionMatch(
+        condition: SelectorCondition | ConditionalDownloadInstructions,
+        dashboardItem: DashboardItem
+    ): boolean {
+        const itemValue = getNestedPropertyValue(
+            dashboardItem,
+            condition.dashboardItemProperty
+        )
+        return Array.isArray(condition.value)
+            ? condition.value.some((currValue) => currValue === itemValue)
+            : condition.value === itemValue
     }
 }

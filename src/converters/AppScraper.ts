@@ -19,10 +19,7 @@ import {
     waitForFileToDownload,
 } from '../utils'
 import { ScrapeConfigCache } from './ScrapeConfigCache'
-import {
-    findStepValueByKind,
-    getDashboardItemVisualization,
-} from './configUtils'
+import { getDashboardItemVisualization } from '../utils'
 
 const DONWLOAD_PAGE_URL_PATTERN =
     /api\/analytics\/enrollments|events\/query\/[a-zA-Z0-9]{11}\.html\+css/
@@ -183,27 +180,11 @@ export class AppScraper implements Converter {
     }
 
     async #showVisualization(config: ParsedScrapeInstructions) {
-        if (config.showVisualization.strategy === 'navigateToUrl') {
-            const url = findStepValueByKind(
-                config.showVisualization.steps,
-                'goto'
-            )
-            const selector = findStepValueByKind(
-                config.showVisualization.steps,
-                'waitForSelector'
-            )
-            await this.page.goto(url, { waitUntil: 'networkidle2' })
-            await this.page.waitForSelector(selector, { visible: true })
-        }
+        await this.#executeSteps(config.showVisualization.steps)
     }
 
     async #triggerDownload(config: ParsedScrapeInstructions) {
-        if (config.triggerDownload.strategy === 'useUiElements') {
-            /* For now we simply assume all UI element interactions
-             * are clicks. If use cases present themselves where this
-             * is not the case we will need to add complexity here */
-            await this.#executeUiElementSteps(config.triggerDownload.steps)
-        }
+        await this.#executeSteps(config.triggerDownload.steps)
     }
 
     async #obtainDownloadArtifact(
@@ -287,15 +268,7 @@ export class AppScraper implements Converter {
     }
 
     async #clearVisualization(config: ParsedScrapeInstructions) {
-        if (config.clearVisualization.strategy === 'navigateToUrl') {
-            const url = findStepValueByKind(
-                config.clearVisualization.steps,
-                'goto'
-            )
-            await this.page.goto(url, { waitUntil: 'networkidle2' })
-        } else if (config.clearVisualization.strategy === 'useUiElements') {
-            await this.#executeUiElementSteps(config.clearVisualization.steps)
-        }
+        await this.#executeSteps(config.clearVisualization.steps)
     }
 
     async #setDownloadPathToItemId(id: string) {
@@ -313,7 +286,7 @@ export class AppScraper implements Converter {
         return path.join(downloadPath, `${id}_${process.pid}`)
     }
 
-    async #executeUiElementSteps(steps: Steps) {
+    async #executeSteps(steps: Steps) {
         for (const step of steps) {
             if (step.click && typeof step.click === 'string') {
                 await this.page.click(step.click)

@@ -6,7 +6,7 @@ import {
     EventReport,
     EventVisualization,
     Visualization,
-} from '../../types'
+} from '../types'
 
 export function getDashboardItemVisualization(
     dashboardItem: DashboardItem
