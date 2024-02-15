@@ -1,7 +1,6 @@
 import MdParser from '@dhis2/d2-ui-rich-text/parser/MdParser'
 import {
-    insertIntoReportsTemplate,
-    insertIntoResourcesTemplate,
+    insertIntoAnchorListTemplate,
     insertIntoTextTemplate,
 } from '../templates'
 import type {
@@ -72,7 +71,9 @@ export class ItemParser implements Converter {
 
         const timer = createTimer()
 
-        const html = insertIntoResourcesTemplate(
+        const html = insertIntoAnchorListTemplate(
+            // TODO: this is static non-localized text ¯\_(ツ)_/¯
+            'Resources',
             resources.map(({ name, id }) => ({
                 name,
                 url: `${this.#baseUrl}/api/documents/${id}/data`,
@@ -95,7 +96,9 @@ export class ItemParser implements Converter {
 
         const timer = createTimer()
 
-        const html = insertIntoReportsTemplate(
+        const html = insertIntoAnchorListTemplate(
+            // TODO: this is static non-localized text ¯\_(ツ)_/¯
+            'Reports',
             reports.map(({ name, type, id }) => ({
                 name,
                 url: `${this.#baseUrl}/${this.#getReportPath(id, type)}`,

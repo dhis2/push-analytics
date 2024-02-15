@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import { Browser, CDPSession, Page } from 'puppeteer'
-import { insertIntoDiv, insertIntoImage } from '../templates'
+import { insertIntoDivTemplate, insertIntoImageTemplate } from '../templates'
 import type {
     AnyVisualization,
     Converter,
@@ -199,7 +199,7 @@ export class AppScraper implements Converter {
                         document.querySelector(selector ?? '')?.innerHTML,
                     htmlSelector
                 )) ?? ''
-            result.html = insertIntoDiv(rawHtml, visualization.name)
+            result.html = insertIntoDivTemplate(rawHtml, visualization.name)
             result.css =
                 (await downloadPage.evaluate(
                     (selector) =>
@@ -212,7 +212,7 @@ export class AppScraper implements Converter {
             const base64Str = Buffer.isBuffer(base64)
                 ? base64.toString()
                 : base64 ?? ''
-            result.html = insertIntoImage(base64Str, visualization.name)
+            result.html = insertIntoImageTemplate(base64Str, visualization.name)
         } else if (strategy === 'interceptFileDownload') {
             const downloadDir = this.#getItemDownloadPath(visualization.id)
             // Wait until the file has downloaded and get the full path
@@ -222,7 +222,10 @@ export class AppScraper implements Converter {
                 const base64Str = await base64EncodeFile(fullFilePath)
                 // Clear dir for next time
                 await clearDir(downloadDir)
-                result.html = insertIntoImage(base64Str, visualization.name)
+                result.html = insertIntoImageTemplate(
+                    base64Str,
+                    visualization.name
+                )
             } catch (error) {
                 /* Also clean download dir if file could not be intercepted
                  * to avoid issues in subsequent conversions */
