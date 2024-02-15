@@ -6,6 +6,7 @@ import type {
     AnyVisualization,
     Converter,
     ConverterResult,
+    DownloadInstructions,
     ParsedScrapeInstructions,
     QueueItem,
     Steps,
@@ -65,19 +66,6 @@ export class AppScraper implements Converter {
         }
     }
 
-    public async takeErrorScreenShot(queueItem: QueueItem) {
-        const dir = './error-screenshots'
-        const id = queueItem.dashboardItem.id
-
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir)
-        }
-
-        await this.page.screenshot({
-            path: path.resolve(dir, `${id}.png`),
-        })
-    }
-
     public async convert(queueItem: QueueItem): Promise<ConverterResult> {
         const visualization = getDashboardItemVisualization(
             queueItem.dashboardItem
@@ -99,8 +87,8 @@ export class AppScraper implements Converter {
             queueItem.dashboardItem
         )
 
-        // Make sure we download the exported file to `./images/${dashboardItemId}`,
-        // which allows us to track the download process in a relatively sane way
+        /* Make sure we download the exported file to `./images/${PID}_${dashboardItemId}`,
+         * which allows us to track the download process in a relatively sane way */
         await this.#setDownloadPathToItemId(visualization.id)
         await this.#modifyDownloadUrl(config)
         await this.#showVisualization(config)
@@ -118,6 +106,19 @@ export class AppScraper implements Converter {
         )
 
         return { html, css }
+    }
+
+    public async takeErrorScreenShot(queueItem: QueueItem) {
+        const dir = './error-screenshots'
+        const id = queueItem.dashboardItem.id
+
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir)
+        }
+
+        await this.page.screenshot({
+            path: path.resolve(dir, `${id}.png`),
+        })
     }
 
     async #modifyDownloadUrl(config: ParsedScrapeInstructions) {
@@ -179,60 +180,18 @@ export class AppScraper implements Converter {
         config: ParsedScrapeInstructions,
         visualization: AnyVisualization
     ): Promise<ConverterResult> {
-        const { strategy, htmlSelector, cssSelector } =
-            config.obtainDownloadArtifact
-        const result: ConverterResult = {
-            html: '',
-            css: '',
-        }
+        const downloadInstructions = config.obtainDownloadArtifact
         const usesDownloadPage =
-            strategy === 'scrapeDownloadPage' ||
-            strategy === 'screenShotImgOnDownloadPage'
+            downloadInstructions.strategy === 'scrapeDownloadPage' ||
+            downloadInstructions.strategy === 'screenShotImgOnDownloadPage'
         const downloadPage = usesDownloadPage
             ? await this.#getDownloadPage()
             : null
-
-        if (downloadPage && strategy === 'scrapeDownloadPage') {
-            const rawHtml =
-                (await downloadPage.evaluate(
-                    (selector) =>
-                        document.querySelector(selector ?? '')?.innerHTML,
-                    htmlSelector
-                )) ?? ''
-            result.html = insertIntoDivTemplate(rawHtml, visualization.name)
-            result.css =
-                (await downloadPage.evaluate(
-                    (selector) =>
-                        document.querySelector(selector ?? '')?.innerHTML,
-                    cssSelector
-                )) ?? ''
-        } else if (downloadPage && strategy === 'screenShotImgOnDownloadPage') {
-            const img = await downloadPage.waitForSelector(htmlSelector ?? '')
-            const base64 = await img?.screenshot({ encoding: 'base64' })
-            const base64Str = Buffer.isBuffer(base64)
-                ? base64.toString()
-                : base64 ?? ''
-            result.html = insertIntoImageTemplate(base64Str, visualization.name)
-        } else if (strategy === 'interceptFileDownload') {
-            const downloadDir = this.#getItemDownloadPath(visualization.id)
-            // Wait until the file has downloaded and get the full path
-            try {
-                const fullFilePath = await waitForFileToDownload(downloadDir)
-                // Convert to base64 encoded string
-                const base64Str = await base64EncodeFile(fullFilePath)
-                // Clear dir for next time
-                await clearDir(downloadDir)
-                result.html = insertIntoImageTemplate(
-                    base64Str,
-                    visualization.name
-                )
-            } catch (error) {
-                /* Also clean download dir if file could not be intercepted
-                 * to avoid issues in subsequent conversions */
-                await clearDir(downloadDir)
-                throw error
-            }
-        }
+        const result = await this.#obtainDownloadArtifactForStrategy(
+            downloadInstructions,
+            visualization,
+            downloadPage
+        )
 
         if (usesDownloadPage) {
             await this.page.bringToFront()
@@ -240,6 +199,90 @@ export class AppScraper implements Converter {
         }
 
         return result
+    }
+
+    async #obtainDownloadArtifactForStrategy(
+        downloadInstructions: DownloadInstructions,
+        visualization: AnyVisualization,
+        downloadPage: Page | null
+    ) {
+        const { strategy, htmlSelector, cssSelector } = downloadInstructions
+        if (downloadPage && strategy === 'scrapeDownloadPage') {
+            return await this.#scrapeDownloadPage(
+                downloadPage,
+                visualization.name,
+                htmlSelector,
+                cssSelector
+            )
+        } else if (downloadPage && strategy === 'screenShotImgOnDownloadPage') {
+            return await this.#screenShotImgOnDownloadPage(
+                downloadPage,
+                visualization.name,
+                htmlSelector
+            )
+        } else if (strategy === 'interceptFileDownload') {
+            return await this.#interceptFileDownload(visualization)
+        } else {
+            throw new Error(
+                'Invalid instructions received for obtaining the download artifact'
+            )
+        }
+    }
+
+    async #scrapeDownloadPage(
+        downloadPage: Page,
+        name: string,
+        htmlSelector: string = '',
+        cssSelector: string = ''
+    ): Promise<ConverterResult> {
+        const rawHtml = await downloadPage.evaluate(
+            (selector) => document.querySelector(selector)?.innerHTML,
+            htmlSelector
+        )
+        const css = await downloadPage.evaluate(
+            (selector) => document.querySelector(selector)?.innerHTML,
+            cssSelector
+        )
+
+        return {
+            html: insertIntoDivTemplate(rawHtml ?? '', name),
+            css: css ?? '',
+        }
+    }
+    async #screenShotImgOnDownloadPage(
+        downloadPage: Page,
+        name: string,
+        htmlSelector: string = ''
+    ): Promise<ConverterResult> {
+        const img = await downloadPage.waitForSelector(htmlSelector ?? '')
+        const base64 = await img?.screenshot({ encoding: 'base64' })
+        const base64Str = Buffer.isBuffer(base64)
+            ? base64.toString()
+            : base64 ?? ''
+
+        return { html: insertIntoImageTemplate(base64Str, name), css: '' }
+    }
+    async #interceptFileDownload(
+        visualization: AnyVisualization
+    ): Promise<ConverterResult> {
+        // Wait until the file has downloaded and get the full path
+        const downloadDir = this.#getItemDownloadPath(visualization.id)
+        try {
+            const fullFilePath = await waitForFileToDownload(downloadDir)
+            // Convert to base64 encoded string
+            const base64Str = await base64EncodeFile(fullFilePath)
+            // Clear dir for next time
+            await clearDir(downloadDir)
+            return {
+                html: insertIntoImageTemplate(base64Str, visualization.name),
+                css: '',
+            }
+        } catch (error) {
+            /* Also clean download dir if file could not be intercepted
+             * to avoid issues in subsequent conversions */
+            await clearDir(downloadDir)
+            throw error
+        }
     }
 
     /* When a file opens in another tab (i.e. the app calls `window.open()`)
@@ -273,10 +316,6 @@ export class AppScraper implements Converter {
         })
     }
 
-    #getItemDownloadPath(id: string) {
-        return path.join(downloadPath, `${id}_${process.pid}`)
-    }
-
     async #executeSteps(steps: Steps) {
         for (const step of steps) {
             if (step.click && typeof step.click === 'string') {
@@ -294,5 +333,9 @@ export class AppScraper implements Converter {
                 )
             }
         }
+    }
+
+    #getItemDownloadPath(id: string) {
+        return path.join(downloadPath, `${id}_${process.pid}`)
     }
 }
