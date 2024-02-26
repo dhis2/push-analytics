@@ -5,8 +5,8 @@ type EnvVariableName =
     | 'DHIS2_CORE_MAJOR_VERSION'
     | 'DHIS2_CORE_ADMIN_USERNAME'
     | 'DHIS2_CORE_ADMIN_PASSWORD'
+    | 'DHIS2_CORE_SESSION_TIMEOUT'
     | 'MAX_THREADS'
-    | 'SESSION_TIMEOUT'
 
 const envVariableDefaults: Record<EnvVariableName, string> = {
     HOST: 'localhost',
@@ -15,8 +15,8 @@ const envVariableDefaults: Record<EnvVariableName, string> = {
     DHIS2_CORE_MAJOR_VERSION: '40',
     DHIS2_CORE_ADMIN_USERNAME: 'admin',
     DHIS2_CORE_ADMIN_PASSWORD: 'district',
-    MAX_THREADS: 'max',
-    SESSION_TIMEOUT: '3600',
+    MAX_THREADS: '4',
+    DHIS2_CORE_SESSION_TIMEOUT: '3600',
 }
 
 function readEnvVariable(name: EnvVariableName): string {
@@ -39,6 +39,6 @@ export function readEnv() {
         adminUsername: readEnvVariable('DHIS2_CORE_ADMIN_USERNAME'),
         adminPassword: readEnvVariable('DHIS2_CORE_ADMIN_PASSWORD'),
         maxThreads: readEnvVariable('MAX_THREADS'),
-        sessionTimeout: readEnvVariable('SESSION_TIMEOUT'),
+        sessionTimeout: readEnvVariable('DHIS2_CORE_SESSION_TIMEOUT'),
     }
 }

@@ -7,14 +7,8 @@ export function getThreadLength(maxThreads: string = ''): number {
         if (maxThreads.toLowerCase() === 'max') {
             return availableThreads
         }
-        return parseInt(maxThreads)
+        return Math.min(parseInt(maxThreads), availableThreads)
     }
 
-    if (availableThreads < 4) {
-        return availableThreads
-    } else if (availableThreads < 8) {
-        return 4
-    } else {
-        return Math.ceil(availableThreads / 2)
-    }
+    return Math.ceil(availableThreads / 2)
 }
