@@ -2,6 +2,10 @@
 
 ## Setup instructions
 
+### Prerequisites for the Push Analytics Service
+
+NodeJS with a min version `20.11.0` (LTS at the time of writing). Lower version may also suffice, as far as I am aware, the most modern API feature used by the push-analytics-service is [os.availableParallelism()](https://nodejs.org/api/os.html#osavailableparallelism).
+
 ### Prerequisites for the DHIS2 Core Instance
 
 -   DHIS2 Core needs to be version 41 or above to have the push-analytics job-type available in the job-scheduler. Some analytics-apps also need to be installed and have to be above a certain version, but all apps bundled have with 2.41 will have meet this requirement:
