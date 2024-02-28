@@ -3,3 +3,4 @@ build
 .env
 images
 error-screenshots
+docker/db-dump
