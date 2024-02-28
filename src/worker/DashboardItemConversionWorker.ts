@@ -194,6 +194,7 @@ export class DashboardItemConversionWorker {
             : {
                   headless: 'new',
                   defaultViewport,
+                  args: ['--no-sandbox'],
               }
         const browser = await puppeteer.launch(browserOptions)
         return browser
