@@ -11,11 +11,14 @@ export function parseQueryString(url = '', baseUrl: string) {
     const { dashboardId, username } = Object.fromEntries(searchParams)
 
     if (!isValidUid(dashboardId)) {
-        throw new HttpResponseStatusError('Invalid dashhboard UID', 400)
+        throw new HttpResponseStatusError(
+            `Invalid dashhboard UID ${dashboardId}`,
+            400
+        )
     }
 
     if (!isNonEmptyString(username)) {
-        throw new HttpResponseStatusError('Invalid username', 400)
+        throw new HttpResponseStatusError(`Invalid username ${username}`, 400)
     }
 
     return { dashboardId, username }
