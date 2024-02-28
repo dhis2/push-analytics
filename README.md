@@ -18,6 +18,7 @@ NodeJS with a min version `20.11.0` (LTS at the time of writing). Lower version 
 -   The instance needs to be configured to allow [user-impersonation](https://docs.dhis2.org/en/manage/performing-system-administration/dhis-core-version-master/debugging-as-another-user.html?h=user+impersonation+master#user_impersonation), which requires some changes to the `dhis.conf` file:
     -   `switch_user_feature.enabled = true`
     -   `switch_user_allow_listed_ips = <PUSH_ANALYTICS_SERVICE_IP>`
+-   The URL/IP of the push analytics service needs to be added to the CORS whitelist of the DHIS2 Core Instance
 -   A "User impersonator" role needs to be added which gets granted the `IMPERSONATE_USER` authority
 -   A user account needs to be created which gets assigned to this role. The username and password for this user then need to be provided as the `DHIS2_CORE_USERNAME` and `DHIS2_CORE_PASSWORD` environment variables for the push analytics service.
 
