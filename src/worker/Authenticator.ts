@@ -62,7 +62,7 @@ export class Authenticator {
     async impersonateUser(username: string) {
         if (this.#isImpersonatingUser) {
             const exitImpersonateStatusCode =
-                await this.#doAuthenticatedGetRequestFromPage(
+                await this.doAuthenticatedRequestFromPage(
                     '/impersonateExit',
                     'POST'
                 )
@@ -72,11 +72,10 @@ export class Authenticator {
                 )
             }
         }
-        const impersonateStatusCode =
-            await this.#doAuthenticatedGetRequestFromPage(
-                `/impersonate?username=${username}`,
-                'POST'
-            )
+        const impersonateStatusCode = await this.doAuthenticatedRequestFromPage(
+            `/impersonate?username=${username}`,
+            'POST'
+        )
         if (impersonateStatusCode !== 200) {
             throw new Error(
                 `Could not impersonate user. Received response status code ${impersonateStatusCode}`
@@ -87,44 +86,11 @@ export class Authenticator {
         }
     }
 
-    async #preventSessionExpiry() {
-        // Do a ping request 30 seconds before the session is due to expire
-        const intervalInMs = (parseInt(this.#sessionTimeout) - 30) * 1000
-        const intervalId = setInterval(async () => {
-            /* Bringing the login page to the front could break the
-             * dashboard item conversion process. And and the naturally
-             * occuring network traffic in a conversion also makes it
-             * redundant to fire another request from here. */
-            if (this.#isConverting()) {
-                return
-            }
-
-            await this.#page.bringToFront()
-
-            const url = `/api/${this.#apiVersion}/system/ping`
-            const httpStatusCode =
-                await this.#doAuthenticatedGetRequestFromPage(url)
-
-            if (httpStatusCode !== 200) {
-                clearInterval(intervalId)
-                this.establishNonExpiringAdminSession()
-            }
-        }, intervalInMs)
-    }
-
-    async #setSessionCookie() {
-        const cookies = await this.#page.cookies()
-        const sessionCookie = cookies.find(
-            (cookie: Protocol.Network.Cookie) => cookie.name === 'JSESSIONID'
-        )
-        if (!sessionCookie) {
-            throw new Error('Could not find session cookie')
-        }
-
-        this.#sessionCookie = sessionCookie
-    }
-
-    async #doAuthenticatedGetRequestFromPage(url: string, method = 'GET') {
+    async doAuthenticatedRequestFromPage(
+        url: string,
+        method = 'GET',
+        returnValueType: 'responseStatus' | 'responseBody' = 'responseStatus'
+    ) {
         if (!this.#sessionCookie) {
             throw new Error(
                 'Cookie not found, cannot issue an authenticated request'
@@ -139,6 +105,7 @@ export class Authenticator {
                 value: this.#sessionCookie.value,
             },
             method,
+            returnValueType,
         }
 
         return await this.#page.evaluate((options) => {
@@ -157,8 +124,54 @@ export class Authenticator {
                     'x-requested-with': 'XMLHttpRequest',
                 },
             })
-                .then((response) => response.status)
-                .catch(() => 500)
+                .then((response) =>
+                    options.returnValueType === 'responseStatus'
+                        ? response.status
+                        : response.json()
+                )
+                .catch(() =>
+                    options.returnValueType === 'responseStatus'
+                        ? 500
+                        : { Error: true }
+                )
         }, options)
+    }
+
+    async #preventSessionExpiry() {
+        // Do a ping request 30 seconds before the session is due to expire
+        const intervalInMs = (parseInt(this.#sessionTimeout) - 30) * 1000
+        const intervalId = setInterval(async () => {
+            /* Bringing the login page to the front could break the
+             * dashboard item conversion process. And and the naturally
+             * occuring network traffic in a conversion also makes it
+             * redundant to fire another request from here. */
+            if (this.#isConverting()) {
+                return
+            }
+
+            await this.#page.bringToFront()
+
+            const url = `/api/${this.#apiVersion}/system/ping`
+            const httpStatusCode = await this.doAuthenticatedRequestFromPage(
+                url
+            )
+
+            if (httpStatusCode !== 200) {
+                clearInterval(intervalId)
+                this.establishNonExpiringAdminSession()
+            }
+        }, intervalInMs)
+    }
+
+    async #setSessionCookie() {
+        const cookies = await this.#page.cookies()
+        const sessionCookie = cookies.find(
+            (cookie: Protocol.Network.Cookie) => cookie.name === 'JSESSIONID'
+        )
+        if (!sessionCookie) {
+            throw new Error('Could not find session cookie')
+        }
+
+        this.#sessionCookie = sessionCookie
     }
 }

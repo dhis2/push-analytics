@@ -1,5 +1,6 @@
 import { Browser } from 'puppeteer'
 import type { DashboardItem } from '.'
+import { Authenticator } from '../worker/Authenticator'
 
 export type OnConversionCompleteFn = (html: string) => void
 
@@ -54,6 +55,6 @@ export type ConverterResult = {
 
 export interface Converter {
     convert: (queueItem: QueueItem) => Promise<ConverterResult>
-    init?: (browser: Browser) => Promise<void>
+    init?: (browser: Browser, authenticator: Authenticator) => Promise<void>
     takeErrorScreenShot?: (queueItem: QueueItem) => Promise<void>
 }

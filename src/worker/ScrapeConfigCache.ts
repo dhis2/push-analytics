@@ -1,8 +1,3 @@
-import dataVisualizerInstructions from '../dummy-instructions/data-visualizer-app.json'
-import eventChartsInstructions from '../dummy-instructions/event-charts-app.json'
-import eventReportsInstructions from '../dummy-instructions/event-reports-app.json'
-import lineListingInstructions from '../dummy-instructions/line-listing-app.json'
-import mapsInstructions from '../dummy-instructions/maps-app.json'
 import { parseTemplate } from '../templates'
 import type {
     ConditionalDownloadInstructions,
@@ -17,6 +12,7 @@ import type {
     Steps,
 } from '../types'
 import { getDashboardItemVisualization, getNestedPropertyValue } from '../utils'
+import { Authenticator } from './Authenticator'
 
 /* TODO: in the future type 'APP' should also be supported
  * But before we can do this we need a way to identify the correct URL
@@ -38,10 +34,12 @@ const APP_PATH_LOOKUP: Record<DashboardItemType, string | undefined> = {
 export class ScrapeConfigCache {
     #baseUrl: string
     #cachedConfigs: Map<string, ScrapeInstructions>
+    #authenticator
 
-    constructor(baseUrl: string) {
+    constructor(baseUrl: string, authenticator: Authenticator) {
         this.#baseUrl = baseUrl
         this.#cachedConfigs = new Map()
+        this.#authenticator = authenticator
     }
 
     async getScrapeConfig(
@@ -55,13 +53,9 @@ export class ScrapeConfigCache {
             )
         }
 
-        // TODO: switch to this method once JSON files have been migrated
-        // const scrapeConfig =
-        //     this.#cachedConfigs.get(appPath) ??
-        //     (await this.#fetchJsonInstructions(appPath: string))
         const scrapeConfig =
             this.#cachedConfigs.get(appPath) ??
-            (await this.#addLocalInstructions(appPath))
+            (await this.#fetchJsonInstructions(appPath))
 
         if (!scrapeConfig) {
             throw new Error(
@@ -72,44 +66,26 @@ export class ScrapeConfigCache {
         return this.#parse(scrapeConfig, dashboardItem)
     }
 
-    async #addLocalInstructions(appPath: string) {
-        const instructions = {
-            appUrl: `${this.#baseUrl}/${appPath}`,
-        } as ScrapeInstructions
+    async #fetchJsonInstructions(appPath: string) {
+        const appUrl = `${this.#baseUrl}/${appPath}`
+        const jsonFileUrl = `${appUrl}/push-analytics.json`
 
-        if (appPath === 'dhis-web-event-visualizer') {
-            Object.assign(instructions, eventChartsInstructions)
-        } else if (appPath === 'dhis-web-event-reports') {
-            Object.assign(instructions, eventReportsInstructions)
-        } else if (appPath === 'api/apps/line-listing') {
-            Object.assign(instructions, lineListingInstructions)
-        } else if (appPath === 'dhis-web-data-visualizer') {
-            Object.assign(instructions, dataVisualizerInstructions)
-        } else if (appPath === 'dhis-web-maps') {
-            Object.assign(instructions, mapsInstructions)
+        try {
+            const instructions: ScrapeInstructions = await this.#authenticator
+                .doAuthenticatedRequestFromPage(
+                    jsonFileUrl,
+                    'GET',
+                    'responseBody'
+                )
+                .then((response) => ({ ...response, appUrl }))
+            this.#cachedConfigs.set(appPath, instructions)
+            return instructions
+        } catch (error) {
+            throw new Error(
+                `Could not fetch JSON scrape instructions from ${jsonFileUrl}`
+            )
         }
-        this.#cachedConfigs.set(appPath, instructions)
-
-        return Promise.resolve(instructions)
     }
-
-    // async #fetchJsonInstructions(appPath: string) {
-    //     const appUrl = `${this.#baseUrl}/${appPath}`
-    //     const jsonFileUrl = `${appUrl}/push-analytics.json`
-
-    //     try {
-    //         const instructions: ScrapeInstructions = await fetch(jsonFileUrl)
-    //             .then((response) => response.json())
-    //             .then((instructions) => ({ ...instructions, appUrl }))
-
-    //         this.#cachedConfigs.set(appPath, instructions)
-    //         return instructions
-    //     } catch (error) {
-    //         throw new Error(
-    //             `Could not fetch JSON scrape instructions from ${jsonFileUrl}`
-    //         )
-    //     }
-    // }
 
     // Resolve conditional parts of the config file for the current dashboardItem
     #parse(
