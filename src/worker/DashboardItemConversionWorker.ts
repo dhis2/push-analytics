@@ -127,7 +127,7 @@ export class DashboardItemConversionWorker {
         })
         await this.#authenticator.establishNonExpiringAdminSession()
         // Init appScraper once the browser instance is available
-        await this.#appScraper.init(this.#browser)
+        await this.#appScraper.init(this.#browser, this.#authenticator)
 
         this.#notifyMainProcess({
             type: 'WORKER_INITIALIZED',

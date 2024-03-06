@@ -21,6 +21,7 @@ import {
     waitForFileToDownload,
 } from '../utils'
 import { ScrapeConfigCache } from './ScrapeConfigCache'
+import { Authenticator } from './Authenticator'
 
 const DONWLOAD_PAGE_URL_PATTERN =
     /api\/analytics\/enrollments|events\/query\/[a-zA-Z0-9]{11}\.html\+css/
@@ -30,20 +31,25 @@ export class AppScraper implements Converter {
     #browser: Browser | null
     #page: Page | null
     #cdpSession: CDPSession | null
-    #configCache: ScrapeConfigCache
+    #configCache: ScrapeConfigCache | null
+    #authenticator: Authenticator | null
 
     constructor(baseUrl: string) {
         this.baseUrl = baseUrl
         this.#page = null
         this.#browser = null
         this.#cdpSession = null
-        this.#configCache = new ScrapeConfigCache(baseUrl)
+        this.#authenticator = null
+        this.#configCache = null
     }
 
-    async init(browser: Browser) {
+    async init(browser: Browser, authenticator: Authenticator) {
         this.#browser = browser
         this.#page = await browser.newPage()
         this.#cdpSession = await this.#page.target().createCDPSession()
+        this.#authenticator = authenticator
+        this.#configCache = new ScrapeConfigCache(this.baseUrl, authenticator)
+
         await this.#cdpSession.send('Browser.setDownloadBehavior', {
             behavior: 'allow',
             downloadPath,
@@ -66,6 +72,14 @@ export class AppScraper implements Converter {
         }
     }
 
+    get configCache() {
+        if (!this.#configCache) {
+            throw new Error('Config Cache has not been initialized')
+        } else {
+            return this.#configCache
+        }
+    }
+
     public async convert(queueItem: QueueItem): Promise<ConverterResult> {
         const visualization = getDashboardItemVisualization(
             queueItem.dashboardItem
@@ -83,7 +97,7 @@ export class AppScraper implements Converter {
 
         const timer = createTimer()
         await this.page.bringToFront()
-        const config = await this.#configCache.getScrapeConfig(
+        const config = await this.configCache.getScrapeConfig(
             queueItem.dashboardItem
         )
 
