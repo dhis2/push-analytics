@@ -58,7 +58,7 @@ export class DashboardItemConversionWorker {
         this.#authenticator = null
         this.#appScraper = new AppScraper(env.baseUrl)
         this.#itemParser = new ItemParser(env.baseUrl)
-        process.on('message', this.#handlePrimaryProcessMessage)
+        process.on('message', this.#handlePrimaryProcessMessage.bind(this))
     }
 
     get browser() {

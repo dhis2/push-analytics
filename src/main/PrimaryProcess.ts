@@ -9,8 +9,12 @@ import { AddDashboardOptions, ConvertedItem, ConverterResult } from '../types'
 export class PrimaryProcess {
     #clusterManager: ClusterManager
     #dashboardItemsQueue: DashboardItemsQueue
-    #requestHandler: RequestHandler
+    requestHandler: RequestHandler
     #responseManager: ResponseManager
+    requestListener: (
+        request: IncomingMessage,
+        response: ServerResponse
+    ) => Promise<void>
 
     constructor(env: PushAnalyticsEnvVariables) {
         this.#clusterManager = new ClusterManager({
@@ -23,28 +27,24 @@ export class PrimaryProcess {
                 this.#handleWorkerConversionFailure.bind(this),
         })
         this.#dashboardItemsQueue = new DashboardItemsQueue()
-        this.#requestHandler = new RequestHandler({
+        this.requestHandler = new RequestHandler({
             env,
             onDashboardDetailsReceived:
                 this.#onDashboardDetailsReceived.bind(this),
             onRequestHandlerError: this.#handleRequestHandlerError.bind(this),
         })
         this.#responseManager = new ResponseManager(env)
+        this.requestListener = this.requestHandler.handleRequest.bind(
+            this.requestHandler
+        )
     }
 
-    public async requestListener(
-        request: IncomingMessage,
-        response: ServerResponse
-    ) {
-        return await this.#requestHandler.handleRequest(request, response)
-    }
-
-    public spawnWorkers() {
+    spawnWorkers() {
         this.#clusterManager.spawnWorkers()
     }
 
     #handleWorkerReady(workerId: number) {
-        console.log('handleWorkerReady', this)
+        console.log('handleWorkerReady')
         this.#handleWorkerRelease(workerId)
     }
 
@@ -88,9 +88,9 @@ export class PrimaryProcess {
     }
 
     #onDashboardDetailsReceived(payload: AddDashboardOptions) {
-        console.log('onDashboardDetailsReceived')
         this.#responseManager.addDashboard(payload)
         this.#dashboardItemsQueue.addItemsToQueue(payload)
+
         if (this.#clusterManager.hasIdleWorkers()) {
             for (const { id } of this.#clusterManager.getIdleWorkers()) {
                 if (this.#dashboardItemsQueue.hasQueuedItems()) {
