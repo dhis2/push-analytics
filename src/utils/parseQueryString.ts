@@ -1,5 +1,5 @@
 // import { parse } from 'node:querystring'
-import { HttpResponseStatusError } from '../httpGetClient'
+import { HttpResponseStatusError } from '../types'
 
 const UID_REGEX = /^[a-zA-Z][a-zA-Z0-9]{10}$/
 const isValidUid = (id: string) => UID_REGEX.test(id)

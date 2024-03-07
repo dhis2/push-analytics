@@ -8,6 +8,17 @@ type EnvVariableName =
     | 'DHIS2_CORE_SESSION_TIMEOUT'
     | 'MAX_THREADS'
 
+export type PushAnalyticsEnvVariables = {
+    host: string
+    port: string
+    baseUrl: string
+    apiVersion: string
+    adminUsername: string
+    adminPassword: string
+    maxThreads: string
+    sessionTimeout: string
+}
+
 const envVariableDefaults: Record<EnvVariableName, string> = {
     HOST: 'localhost',
     PORT: '1337',
@@ -30,7 +41,7 @@ function readEnvVariable(name: EnvVariableName): string {
     }
 }
 
-export function readEnv() {
+export function readEnv(): PushAnalyticsEnvVariables {
     return {
         host: readEnvVariable('HOST'),
         port: readEnvVariable('PORT'),

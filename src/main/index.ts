@@ -1,1 +1,1 @@
-export { DashboardsConverter } from './DashboardsConverter'
+export { PrimaryProcess } from './PrimaryProcess'

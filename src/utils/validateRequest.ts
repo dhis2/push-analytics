@@ -1,14 +1,14 @@
-import http from 'http'
-import { HttpResponseStatusError } from '../httpGetClient'
+import { IncomingMessage } from 'http'
+import { HttpResponseStatusError } from '../types'
 
 const TYPE_JSON = 'application/json'
 const TYPE_ANY = '*/*'
 
 const isAllowedHeaderFieldType = (
-    req: http.IncomingMessage,
+    request: IncomingMessage,
     headerField: string
 ) => {
-    const headerValue = req.headers[headerField] ?? ''
+    const headerValue = request.headers[headerField] ?? ''
 
     return (
         headerValue.includes(TYPE_JSON) ||
@@ -18,17 +18,24 @@ const isAllowedHeaderFieldType = (
     )
 }
 
-export function validateRequest(req: http.IncomingMessage) {
-    const methodType = req.method?.toUpperCase() ?? ''
+export function validateRequest(request: IncomingMessage) {
+    const methodType = request.method?.toUpperCase() ?? ''
 
-    if (!isAllowedHeaderFieldType(req, 'content-type')) {
+    if (request.url === '/favicon.ico') {
+        throw new HttpResponseStatusError(
+            `Invalid request URL "${request.url}"`,
+            400
+        )
+    }
+
+    if (!isAllowedHeaderFieldType(request, 'content-type')) {
         throw new HttpResponseStatusError(
             `"content-type" request header must be ${TYPE_JSON}"`,
             400
         )
     }
 
-    if (!isAllowedHeaderFieldType(req, 'accept')) {
+    if (!isAllowedHeaderFieldType(request, 'accept')) {
         throw new HttpResponseStatusError(
             `"accept" request header must be ${TYPE_JSON} or ${TYPE_ANY}`,
             400

@@ -12,15 +12,7 @@ import type {
 import { AppScraper } from './AppScraper'
 import { Authenticator } from './Authenticator'
 import { ItemParser } from './ItemParser'
-
-type DashboardItemConversionWorkerOptions = {
-    debug: boolean
-    baseUrl: string
-    apiVersion: string
-    adminUsername: string
-    adminPassword: string
-    sessionTimeout: string
-}
+import { PushAnalyticsEnvVariables } from '../utils'
 
 const SCRAPABLE_DASHBOARD_ITEM_TYPES = new Set([
     'VISUALIZATION',
@@ -54,26 +46,19 @@ export class DashboardItemConversionWorker {
     #appScraper: AppScraper
     #itemParser: ItemParser
 
-    constructor({
-        baseUrl,
-        apiVersion,
-        debug,
-        adminUsername,
-        adminPassword,
-        sessionTimeout,
-    }: DashboardItemConversionWorkerOptions) {
+    constructor(env: PushAnalyticsEnvVariables, debug: boolean) {
         this.#conversionInProgress = false
-        this.#baseUrl = baseUrl
-        this.#apiVersion = apiVersion
-        this.#adminUsername = adminUsername
-        this.#adminPassword = adminPassword
-        this.#sessionTimeout = sessionTimeout
+        this.#baseUrl = env.baseUrl
+        this.#apiVersion = env.apiVersion
+        this.#adminUsername = env.adminUsername
+        this.#adminPassword = env.adminPassword
+        this.#sessionTimeout = env.sessionTimeout
         this.#debug = debug
         this.#browser = null
         this.#authenticator = null
-        this.#appScraper = new AppScraper(baseUrl)
-        this.#itemParser = new ItemParser(baseUrl)
-        this.#addConversionRequestListener()
+        this.#appScraper = new AppScraper(env.baseUrl)
+        this.#itemParser = new ItemParser(env.baseUrl)
+        process.on('message', this.#handlePrimaryProcessMessage)
     }
 
     get browser() {
@@ -129,7 +114,7 @@ export class DashboardItemConversionWorker {
         // Init appScraper once the browser instance is available
         await this.#appScraper.init(this.#browser, this.#authenticator)
 
-        this.#notifyMainProcess({
+        this.#notifyPrimaryProcess({
             type: 'WORKER_INITIALIZED',
         } as WorkerInitializedMessage)
     }
@@ -147,6 +132,7 @@ export class DashboardItemConversionWorker {
             const result = await itemTypeConverter.convert(queueItem)
             return result
         } catch (error) {
+            // TODO: skip in production too
             if (itemTypeConverter instanceof AppScraper) {
                 try {
                     await itemTypeConverter.takeErrorScreenShot(queueItem)
@@ -181,6 +167,7 @@ export class DashboardItemConversionWorker {
         }
     }
 
+    // TODO: should probably do this in the AppScraper
     async #createBrowser() {
         const defaultViewport = { width: 1280, height: 1000 }
         const browserOptions: PuppeteerLaunchOptions = this.#debug
@@ -200,27 +187,26 @@ export class DashboardItemConversionWorker {
         return browser
     }
 
-    #addConversionRequestListener() {
-        process.on('message', async (message: ConversionRequestMessage) => {
-            if (
-                message?.type !== 'ITEM_CONVERSION_REQUEST' ||
-                !message.payload
-            ) {
-                throw new Error(
-                    `Received unexpected message with type "${message?.type}"`
-                )
-            }
-            const queueItem: QueueItem = message.payload
-            const convertedItem: ConvertedItem = await this.convert(queueItem)
-
-            this.#notifyMainProcess({
-                type: 'ITEM_CONVERSION_RESULT',
-                payload: convertedItem,
-            } as ConversionResultMessage)
-        })
+    async #handlePrimaryProcessMessage(message: ConversionRequestMessage) {
+        if (message?.type === 'ITEM_CONVERSION_REQUEST' && message.payload) {
+            this.#handleConversionRequest(message.payload as QueueItem)
+        } else {
+            throw new Error(
+                `Received unexpected message with type "${message?.type}"`
+            )
+        }
     }
 
-    #notifyMainProcess(
+    async #handleConversionRequest(queueItem: QueueItem) {
+        const convertedItem: ConvertedItem = await this.convert(queueItem)
+
+        this.#notifyPrimaryProcess({
+            type: 'ITEM_CONVERSION_RESULT',
+            payload: convertedItem,
+        } as ConversionResultMessage)
+    }
+
+    #notifyPrimaryProcess(
         message: ConversionResultMessage | WorkerInitializedMessage
     ) {
         if (!process?.send) {

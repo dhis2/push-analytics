@@ -1,18 +1,19 @@
 import { Browser } from 'puppeteer'
 import type { DashboardItem } from '.'
 import { Authenticator } from '../worker/Authenticator'
-
-export type OnConversionCompleteFn = (html: string) => void
+import { ServerResponse } from 'node:http'
 
 export type AddDashboardOptions = {
-    dashboardId: string
+    requestId: number
+    response: ServerResponse
     username: string
+    dashboardId: string
     displayName: string
     dashboardItems: DashboardItem[]
-    onComplete: OnConversionCompleteFn
 }
 
 export type ConvertedItem = {
+    requestId: number
     dashboardId: string
     username: string
     dashboardItemId: string
@@ -21,6 +22,7 @@ export type ConvertedItem = {
 }
 
 export type QueueItem = {
+    requestId: number
     dashboardId: string
     dashboardItem: DashboardItem
     username: string
