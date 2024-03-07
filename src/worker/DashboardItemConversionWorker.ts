@@ -82,7 +82,7 @@ export class DashboardItemConversionWorker {
         return () => this.#conversionInProgress
     }
 
-    public async convert(queueItem: QueueItem) {
+    public async convert(queueItem: QueueItem): Promise<ConvertedItem> {
         if (!process?.send) {
             throw new Error('Cannont send message from worker to main thread')
         }
@@ -90,12 +90,13 @@ export class DashboardItemConversionWorker {
         const result = await this.#convertItemType(queueItem)
 
         return {
+            requestId: queueItem.requestId,
             dashboardId: queueItem.dashboardId,
             username: queueItem.username,
             dashboardItemId: queueItem.dashboardItem.id,
             html: typeof result === 'string' ? result : result.html,
             css: typeof result === 'string' ? '' : result.css,
-        } as ConvertedItem
+        }
     }
 
     public async init() {
@@ -132,7 +133,7 @@ export class DashboardItemConversionWorker {
             const result = await itemTypeConverter.convert(queueItem)
             return result
         } catch (error) {
-            // TODO: skip in production too
+            // TODO: skip in production too?
             if (itemTypeConverter instanceof AppScraper) {
                 try {
                     await itemTypeConverter.takeErrorScreenShot(queueItem)

@@ -16,6 +16,12 @@ export class HtmlCollector {
         dashboardItemId: string,
         converterResult: ConverterResult
     ) {
+        if (!this.#itemsHtml.has(dashboardItemId)) {
+            throw new Error(
+                `Provided dashboard item ID "${dashboardItemId}" not found in HTML collection`
+            )
+        }
+
         ++this.#convertedItemsCount
         this.#itemsHtml.set(dashboardItemId, converterResult)
     }

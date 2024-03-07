@@ -3,7 +3,7 @@ import { PushAnalyticsEnvVariables } from '../utils'
 import { ClusterManager } from './ClusterManager'
 import { DashboardItemsQueue } from './DashboardItemQueue'
 import { RequestHandler } from './RequestHandler'
-import { ResponseManager } from './ResponseBuilder'
+import { ResponseManager } from './ResponseManager'
 import { AddDashboardOptions, ConvertedItem, ConverterResult } from '../types'
 
 export class PrimaryProcess {
@@ -64,11 +64,11 @@ export class PrimaryProcess {
     ) {
         console.log('handleWorkerConversionSuccess')
         // Add html to response collector
-        const { requestId, dashboardId, html, css } = convertedItem
+        const { requestId, dashboardItemId, html, css } = convertedItem
         const converterResult: ConverterResult = { html, css }
         this.#responseManager.addDashboardItemHtml(
             requestId,
-            dashboardId,
+            dashboardItemId,
             converterResult
         )
         this.#handleWorkerRelease(workerId)
