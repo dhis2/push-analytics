@@ -2,11 +2,13 @@ import { AddDashboardOptions, QueueItem } from '../types'
 
 export class DashboardItemsQueue {
     #dashboardItemsQueue: QueueItem[]
+
     constructor() {
         this.#dashboardItemsQueue = []
     }
 
     takeItemFromQueue() {
+        // Take from the start
         const queueItem = this.#dashboardItemsQueue.shift()
 
         if (!queueItem) {
@@ -36,11 +38,7 @@ export class DashboardItemsQueue {
         }
     }
 
-    isEmpty() {
-        return this.#dashboardItemsQueue.length === 0
-    }
-
     hasQueuedItems() {
-        return !this.isEmpty()
+        return this.#dashboardItemsQueue.length > 0
     }
 }

@@ -1,54 +1,14 @@
 import { ServerResponse } from 'http'
-import { AddDashboardOptions, ConverterResult, DashboardItem } from '../types'
+import { AddDashboardOptions, ConverterResult } from '../types'
 import { PushAnalyticsEnvVariables } from '../utils'
 import {
     insertIntoDashboardHeaderTemplate,
     insertIntoEmailTemplate,
 } from '../templates'
-
-class HtmlCollector {
-    #itemsHtml: Map<string, ConverterResult>
-    #convertedItemsCount: number
-
-    constructor(dashboardItems: DashboardItem[]) {
-        this.#convertedItemsCount = 0
-        this.#itemsHtml = dashboardItems.reduce((itemsHtml, dashboardItem) => {
-            itemsHtml.set(dashboardItem.id, { html: '', css: '' })
-            return itemsHtml
-        }, new Map())
-    }
-
-    addDashboardItemHtml(
-        dashboardItemId: string,
-        converterResult: ConverterResult
-    ) {
-        ++this.#convertedItemsCount
-        this.#itemsHtml.set(dashboardItemId, converterResult)
-    }
-
-    isComplete() {
-        return this.#convertedItemsCount === this.#itemsHtml.size
-    }
-
-    combineItemsHtml(): ConverterResult {
-        return Array.from(this.#itemsHtml.values()).reduce(
-            (acc, result: ConverterResult) => {
-                acc.html += result.html
-                if (result.css && !acc.css.includes(result.css)) {
-                    acc.css += result.css
-                }
-                return acc
-            },
-            {
-                html: '',
-                css: '',
-            }
-        )
-    }
-}
+import { HtmlCollector } from './HtmlCollector'
 
 export class ResponseManager {
-    env: PushAnalyticsEnvVariables
+    #env: PushAnalyticsEnvVariables
     #responseQueue: Map<
         number,
         {
@@ -60,7 +20,7 @@ export class ResponseManager {
     >
 
     constructor(env: PushAnalyticsEnvVariables) {
-        this.env = env
+        this.#env = env
         this.#responseQueue = new Map()
     }
 
@@ -75,7 +35,7 @@ export class ResponseManager {
             requestId,
             response,
             headerHtml: insertIntoDashboardHeaderTemplate(
-                this.env.baseUrl,
+                this.#env.baseUrl,
                 dashboardId,
                 displayName
             ),
@@ -94,14 +54,14 @@ export class ResponseManager {
          * dashboard could already be in-progress when the failure occurs. And when
          * these conversions finish they end up here, where they should simply be
          * ignored. So the conditional chaining below is justified. */
-        this.#getItemsHtmlCollection(requestId)?.addDashboardItemHtml(
+        this.getItemsHtmlCollection(requestId)?.addDashboardItemHtml(
             dashboardId,
             converterResult
         )
     }
 
     isConversionComplete(requestId: number) {
-        return this.#getItemsHtmlCollection(requestId)?.isComplete() ?? false
+        return this.getItemsHtmlCollection(requestId)?.isComplete() ?? false
     }
 
     sendResponse(requestId: number) {
@@ -123,7 +83,7 @@ export class ResponseManager {
         response.end(fullHtml)
     }
 
-    #getItemsHtmlCollection(requestId: number) {
+    getItemsHtmlCollection(requestId: number) {
         return this.#responseQueue.get(requestId)?.itemsHtmlCollection
     }
 }

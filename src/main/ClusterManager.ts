@@ -61,15 +61,6 @@ export class ClusterManager {
         }
     }
 
-    #spawnWorker() {
-        const worker = cluster.fork()
-        this.#conversionWorkers.set(worker.id, {
-            id: worker.id,
-            idle: false,
-            worker,
-        })
-    }
-
     hasIdleWorkers() {
         for (const [, { idle }] of this.#conversionWorkers) {
             if (idle) {
@@ -100,6 +91,15 @@ export class ClusterManager {
             type: 'ITEM_CONVERSION_REQUEST',
             payload: queueItem,
         } as ConversionRequestMessage)
+    }
+
+    #spawnWorker() {
+        const worker = cluster.fork()
+        this.#conversionWorkers.set(worker.id, {
+            id: worker.id,
+            idle: false,
+            worker,
+        })
     }
 
     #getConversionWorkerById(id: number): ConversionWorker {

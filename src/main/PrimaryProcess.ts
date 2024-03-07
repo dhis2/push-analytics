@@ -7,40 +7,44 @@ import { ResponseManager } from './ResponseBuilder'
 import { AddDashboardOptions, ConvertedItem, ConverterResult } from '../types'
 
 export class PrimaryProcess {
-    env: PushAnalyticsEnvVariables
     #clusterManager: ClusterManager
     #dashboardItemsQueue: DashboardItemsQueue
     #requestHandler: RequestHandler
     #responseManager: ResponseManager
 
     constructor(env: PushAnalyticsEnvVariables) {
-        this.env = env
         this.#clusterManager = new ClusterManager({
-            env: this.env,
-            onWorkerInitialized: this.#handleWorkerReady,
-            onWorkerExit: this.#handleWorkerExit,
-            onWorkerConversionSuccess: this.#handleWorkerConversionSuccess,
-            onWorkerConversionFailure: this.#handleWorkerConversionFailure,
+            env,
+            onWorkerInitialized: this.#handleWorkerReady.bind(this),
+            onWorkerExit: this.#handleWorkerExit.bind(this),
+            onWorkerConversionSuccess:
+                this.#handleWorkerConversionSuccess.bind(this),
+            onWorkerConversionFailure:
+                this.#handleWorkerConversionFailure.bind(this),
         })
         this.#dashboardItemsQueue = new DashboardItemsQueue()
         this.#requestHandler = new RequestHandler({
-            env: this.env,
-            onDashboardDetailsReceived: this.#onDashboardDetailsReceived,
-            onRequestHandlerError: this.#handleRequestHandlerError,
+            env,
+            onDashboardDetailsReceived:
+                this.#onDashboardDetailsReceived.bind(this),
+            onRequestHandlerError: this.#handleRequestHandlerError.bind(this),
         })
-        this.#responseManager = new ResponseManager(this.env)
+        this.#responseManager = new ResponseManager(env)
     }
 
-    async requestListener(request: IncomingMessage, response: ServerResponse) {
+    public async requestListener(
+        request: IncomingMessage,
+        response: ServerResponse
+    ) {
         return await this.#requestHandler.handleRequest(request, response)
     }
 
-    spawnWorkers() {
+    public spawnWorkers() {
         this.#clusterManager.spawnWorkers()
     }
 
     #handleWorkerReady(workerId: number) {
-        console.log('handleWorkerReady')
+        console.log('handleWorkerReady', this)
         this.#handleWorkerRelease(workerId)
     }
 
