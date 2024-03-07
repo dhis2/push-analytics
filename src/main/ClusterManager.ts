@@ -1,5 +1,4 @@
 import cluster, { Worker } from 'node:cluster'
-import { PushAnalyticsEnvVariables, getThreadLength } from '../utils'
 import {
     ConversionRequestMessage,
     ConversionResultMessage,
@@ -7,6 +6,7 @@ import {
     QueueItem,
     WorkerInitializedMessage,
 } from '../types'
+import { PushAnalyticsEnvVariables, getThreadLength } from '../utils'
 
 type ConversionWorker = {
     id: number

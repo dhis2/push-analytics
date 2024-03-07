@@ -9,10 +9,10 @@ import type {
     QueueItem,
     WorkerInitializedMessage,
 } from '../types'
+import { PushAnalyticsEnvVariables } from '../utils'
 import { AppScraper } from './AppScraper'
 import { Authenticator } from './Authenticator'
 import { ItemParser } from './ItemParser'
-import { PushAnalyticsEnvVariables } from '../utils'
 
 const SCRAPABLE_DASHBOARD_ITEM_TYPES = new Set([
     'VISUALIZATION',

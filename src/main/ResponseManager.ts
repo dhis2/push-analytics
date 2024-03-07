@@ -1,10 +1,10 @@
 import { ServerResponse } from 'http'
-import { AddDashboardOptions, ConverterResult } from '../types'
-import { PushAnalyticsEnvVariables } from '../utils'
 import {
     insertIntoDashboardHeaderTemplate,
     insertIntoEmailTemplate,
 } from '../templates'
+import { AddDashboardOptions, ConverterResult } from '../types'
+import { PushAnalyticsEnvVariables } from '../utils'
 import { HtmlCollector } from './HtmlCollector'
 
 export class ResponseManager {

@@ -1,10 +1,9 @@
 import cluster from 'node:cluster'
 import http from 'node:http'
 import process from 'node:process'
-
-import { DashboardItemConversionWorker } from './worker'
 import { PrimaryProcess } from './main'
 import { readEnv } from './utils'
+import { DashboardItemConversionWorker } from './worker'
 
 const initializeCluster = async () => {
     const env = readEnv()
