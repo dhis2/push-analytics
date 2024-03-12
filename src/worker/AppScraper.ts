@@ -100,7 +100,7 @@ export class AppScraper implements Converter {
         const config = await this.configCache.getScrapeConfig(
             queueItem.dashboardItem
         )
-
+        await this.#clearVisualization(config)
         /* Make sure we download the exported file to `./images/${PID}_${dashboardItemId}`,
          * which allows us to track the download process in a relatively sane way */
         await this.#setDownloadPathToItemId(visualization.id)
@@ -111,7 +111,6 @@ export class AppScraper implements Converter {
             config,
             visualization
         )
-        await this.#clearVisualization(config)
 
         logDashboardItemConversion(
             queueItem.dashboardItem.type,
