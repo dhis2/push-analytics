@@ -19,7 +19,7 @@ export class Authenticator {
     #sessionTimeout: string
     #isConverting: () => boolean
     #sessionCookie: Protocol.Network.Cookie | null
-    #isImpersonatingUser: boolean
+    #impersonatedUser: string | null
 
     constructor({
         page,
@@ -38,7 +38,7 @@ export class Authenticator {
         this.#sessionTimeout = sessionTimeout
         this.#isConverting = isConverting
         this.#sessionCookie = null
-        this.#isImpersonatingUser = false
+        this.#impersonatedUser = null
     }
 
     async establishNonExpiringAdminSession(): Promise<void> {
@@ -60,7 +60,13 @@ export class Authenticator {
     }
 
     async impersonateUser(username: string) {
-        if (this.#isImpersonatingUser) {
+        // No need to take action if it is the same user as before
+        if (this.#impersonatedUser === username) {
+            return
+        }
+
+        // Only exit impersonation mode if already in it
+        if (this.#impersonatedUser) {
             const exitImpersonateStatusCode =
                 await this.doAuthenticatedRequestFromPage(
                     '/impersonateExit',
@@ -72,17 +78,21 @@ export class Authenticator {
                 )
             }
         }
-        const impersonateStatusCode = await this.doAuthenticatedRequestFromPage(
-            `/impersonate?username=${username}`,
-            'POST'
-        )
-        if (impersonateStatusCode !== 200) {
-            throw new Error(
-                `Could not impersonate user. Received response status code ${impersonateStatusCode}`
-            )
-        } else {
-            this.#isImpersonatingUser = true
-            await this.#setSessionCookie()
+
+        // Skip impersonation for admin user only
+        if (username !== this.#adminUsername) {
+            const impersonateStatusCode =
+                await this.doAuthenticatedRequestFromPage(
+                    `/impersonate?username=${username}`,
+                    'POST'
+                )
+            if (impersonateStatusCode !== 200) {
+                throw new Error(
+                    `Could not impersonate user. Received response status code ${impersonateStatusCode}`
+                )
+            }
+
+            this.#impersonatedUser = username
         }
     }
 
@@ -143,7 +153,7 @@ export class Authenticator {
         const intervalId = setInterval(async () => {
             /* Bringing the login page to the front could break the
              * dashboard item conversion process. And and the naturally
-             * occuring network traffic in a conversion also makes it
+             * occuring network traffic during a conversion also makes it
              * redundant to fire another request from here. */
             if (this.#isConverting()) {
                 return
