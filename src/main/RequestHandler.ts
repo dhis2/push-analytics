@@ -39,7 +39,14 @@ export class RequestHandler {
         const requestId = ++this.#requestId
 
         try {
+            // TODO: remove this part, this is sth that happens when testing in the browser
+            if (request.url === '/favicon.ico') {
+                response.writeHead(404)
+                response.end()
+                return
+            }
             validateRequest(request)
+
             const { dashboardId, username } = parseQueryString(
                 request.url,
                 this.#env.baseUrl
@@ -57,6 +64,7 @@ export class RequestHandler {
             })
         } catch (error) {
             this.#onRequestHandlerError(requestId, error)
+            console.log(error)
             // console.log(error)
             // if (error instanceof HttpResponseStatusError) {
             //     response.writeHead(error.status)
