@@ -177,12 +177,15 @@ export class DashboardItemConversionWorker {
                   devtools: true,
                   defaultViewport,
                   args: ['--window-size=2560,2160', '--window-position=4000,0'],
-                  slowMo: 100,
+                  /* Uncomment to add a delay between puppeteer steps
+                   * making it easier to visually debug problems */
+                  //   slowMo: 100,
               }
             : {
                   headless: 'new',
                   defaultViewport,
-                  args: ['--no-sandbox'],
+                  //   Required argument for dockerized puppeteer
+                  //   args: ['--no-sandbox'],
               }
         const browser = await puppeteer.launch(browserOptions)
         return browser
@@ -199,7 +202,16 @@ export class DashboardItemConversionWorker {
     }
 
     async #handleConversionRequest(queueItem: QueueItem) {
+        console.log(
+            'received conversion request - is converting',
+            this.#conversionInProgress
+        )
+        if (this.#conversionInProgress) {
+            console.log('not ready!!!!')
+            return
+        }
         const convertedItem: ConvertedItem = await this.convert(queueItem)
+        // console.log('Sending conversion response', process.pid)
 
         this.#notifyPrimaryProcess({
             type: 'ITEM_CONVERSION_RESULT',
