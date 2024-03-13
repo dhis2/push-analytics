@@ -1,14 +1,7 @@
 import process from 'node:process'
 import puppeteer, { Browser, PuppeteerLaunchOptions } from 'puppeteer'
 import { insertIntoConversionErrorTemplate } from '../templates'
-import type {
-    ConversionRequestMessage,
-    ConversionResultMessage,
-    ConvertedItem,
-    DashboardItemType,
-    QueueItem,
-    WorkerInitializedMessage,
-} from '../types'
+import type { ConvertedItem, DashboardItemType, QueueItem } from '../types'
 import { PushAnalyticsEnvVariables } from '../utils'
 import { AppScraper } from './AppScraper'
 import { Authenticator } from './Authenticator'
@@ -33,7 +26,7 @@ const PARSABLE_DASHBOARD_ITEM_TYPES = new Set([
     'USERS',
 ])
 
-export class DashboardItemConversionWorker {
+export class DashboardItemConverter {
     #conversionInProgress: boolean
     #debug: boolean
     #baseUrl: string
@@ -58,7 +51,6 @@ export class DashboardItemConversionWorker {
         this.#authenticator = null
         this.#appScraper = new AppScraper(env.baseUrl)
         this.#itemParser = new ItemParser(env.baseUrl)
-        process.on('message', this.#handlePrimaryProcessMessage.bind(this))
     }
 
     get browser() {
@@ -114,10 +106,6 @@ export class DashboardItemConversionWorker {
         await this.#authenticator.establishNonExpiringAdminSession()
         // Init appScraper once the browser instance is available
         await this.#appScraper.init(this.#browser, this.#authenticator)
-
-        this.#notifyPrimaryProcess({
-            type: 'WORKER_INITIALIZED',
-        } as WorkerInitializedMessage)
     }
 
     async #convertItemType(queueItem: QueueItem) {
@@ -189,42 +177,5 @@ export class DashboardItemConversionWorker {
               }
         const browser = await puppeteer.launch(browserOptions)
         return browser
-    }
-
-    async #handlePrimaryProcessMessage(message: ConversionRequestMessage) {
-        if (message?.type === 'ITEM_CONVERSION_REQUEST' && message.payload) {
-            this.#handleConversionRequest(message.payload as QueueItem)
-        } else {
-            throw new Error(
-                `Received unexpected message with type "${message?.type}"`
-            )
-        }
-    }
-
-    async #handleConversionRequest(queueItem: QueueItem) {
-        console.log(
-            'received conversion request - is converting',
-            this.#conversionInProgress
-        )
-        if (this.#conversionInProgress) {
-            console.log('not ready!!!!')
-            return
-        }
-        const convertedItem: ConvertedItem = await this.convert(queueItem)
-        // console.log('Sending conversion response', process.pid)
-
-        this.#notifyPrimaryProcess({
-            type: 'ITEM_CONVERSION_RESULT',
-            payload: convertedItem,
-        } as ConversionResultMessage)
-    }
-
-    #notifyPrimaryProcess(
-        message: ConversionResultMessage | WorkerInitializedMessage
-    ) {
-        if (!process?.send) {
-            throw new Error('Cannont send message from worker to main thread')
-        }
-        process.send(message)
     }
 }

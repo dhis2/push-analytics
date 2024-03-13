@@ -21,6 +21,10 @@ export type ConvertedItem = {
     css: string
 }
 
+export type ConversionError = Omit<ConvertedItem, 'html' | 'css'> & {
+    errorMessage: string
+}
+
 export type QueueItem = {
     requestId: number
     dashboardId: string
@@ -29,26 +33,38 @@ export type QueueItem = {
 }
 
 export type MessageType =
-    | 'WORKER_INITIALIZED'
-    | 'ITEM_CONVERSION_REQUEST'
-    | 'ITEM_CONVERSION_RESULT'
+    | 'ITEMS_ADDED_TO_QUEUE'
+    | 'ITEM_REQUESTED_FROM_QUEUE'
+    | 'ITEM_TAKEN_FROM_QUEUE'
+    | 'ITEM_CONVERTED'
+    | 'ITEM_CONVERSION_ERROR'
 
 export type Message<T extends MessageType, P> = {
     type: T
     payload?: P
 }
 
-export type ConversionRequestMessage = Message<
-    'ITEM_CONVERSION_REQUEST',
+export type ItemsAddedToQueueMessage = Message<
+    'ITEMS_ADDED_TO_QUEUE',
+    undefined
+>
+
+export type ItemRequestedFromQueueMessage = Message<
+    'ITEM_REQUESTED_FROM_QUEUE',
+    undefined
+>
+
+export type ItemTakenFromQueueMessage = Message<
+    'ITEM_TAKEN_FROM_QUEUE',
     QueueItem
 >
 
-export type ConversionResultMessage = Message<
-    'ITEM_CONVERSION_RESULT',
-    ConvertedItem
->
+export type ItemConvertedMessage = Message<'ITEM_CONVERTED', ConvertedItem>
 
-export type WorkerInitializedMessage = Message<'WORKER_INITIALIZED', undefined>
+export type ItemConversionErrorMessage = Message<
+    'ITEM_CONVERSION_ERROR',
+    ConversionError
+>
 
 export type ConverterResult = {
     html: string

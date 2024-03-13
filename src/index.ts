@@ -3,14 +3,13 @@ import http from 'node:http'
 import process from 'node:process'
 import { PrimaryProcess } from './main'
 import { readEnv } from './utils'
-import { DashboardItemConversionWorker } from './worker'
+import { WorkerProcess } from './worker'
 
 const initializeCluster = async () => {
     const env = readEnv()
 
     if (cluster.isPrimary) {
         const primaryProcess = new PrimaryProcess(env)
-        primaryProcess.spawnWorkers()
 
         http.createServer(primaryProcess.requestListener).listen(
             env.port,
@@ -25,8 +24,7 @@ const initializeCluster = async () => {
         console.log(
             `Starting dashboard-item conversion worker on PID ${process.pid}`
         )
-        const conversionWorker = new DashboardItemConversionWorker(env, false)
-        await conversionWorker.init()
+        await WorkerProcess.create(env, false)
     }
 }
 

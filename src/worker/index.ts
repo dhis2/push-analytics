@@ -1,1 +1,1 @@
-export { DashboardItemConversionWorker } from './DashboardItemConversionWorker'
+export { WorkerProcess } from './WorkerProcess'

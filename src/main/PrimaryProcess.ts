@@ -1,13 +1,20 @@
 import { IncomingMessage, ServerResponse } from 'http'
-import { AddDashboardOptions, ConvertedItem, ConverterResult } from '../types'
-import { PushAnalyticsEnvVariables } from '../utils'
-import { ClusterManager } from './ClusterManager'
+import cluster, { Worker } from 'node:cluster'
+import {
+    AddDashboardOptions,
+    ConvertedItem,
+    ConverterResult,
+    QueueItem,
+} from '../types'
+import { PushAnalyticsEnvVariables, getThreadLength } from '../utils'
+import { PrimaryProcessMessageHandler } from './PrimaryProcessMessageHandler'
 import { DashboardItemsQueue } from './DashboardItemQueue'
 import { RequestHandler } from './RequestHandler'
 import { ResponseManager } from './ResponseManager'
 
 export class PrimaryProcess {
-    #clusterManager: ClusterManager
+    #env: PushAnalyticsEnvVariables
+    #messageHandler: PrimaryProcessMessageHandler
     #dashboardItemsQueue: DashboardItemsQueue
     requestHandler: RequestHandler
     #responseManager: ResponseManager
@@ -17,14 +24,14 @@ export class PrimaryProcess {
     ) => Promise<void>
 
     constructor(env: PushAnalyticsEnvVariables) {
-        this.#clusterManager = new ClusterManager({
-            env,
-            onWorkerInitialized: this.#handleWorkerReady.bind(this),
-            onWorkerExit: this.#handleWorkerExit.bind(this),
+        this.#env = env
+        this.#messageHandler = new PrimaryProcessMessageHandler({
+            onWorkerItemRequest: this.#handleWorkerItemRequest.bind(this),
             onWorkerConversionSuccess:
                 this.#handleWorkerConversionSuccess.bind(this),
             onWorkerConversionFailure:
                 this.#handleWorkerConversionFailure.bind(this),
+            onWorkerExit: this.#handleWorkerExit.bind(this),
         })
         this.#dashboardItemsQueue = new DashboardItemsQueue()
         this.requestHandler = new RequestHandler({
@@ -37,19 +44,18 @@ export class PrimaryProcess {
         this.requestListener = this.requestHandler.handleRequest.bind(
             this.requestHandler
         )
+        this.#spawnWorkers()
     }
 
-    spawnWorkers() {
-        this.#clusterManager.spawnWorkers()
+    #spawnWorkers() {
+        const threadLength = getThreadLength(this.#env.maxThreads)
+        for (let i = 0; i < threadLength; i++) {
+            cluster.fork()
+        }
     }
 
-    #handleWorkerReady(workerId: number) {
-        console.log('handleWorkerReady')
-        this.#handleWorkerRelease(workerId)
-    }
-
-    #handleWorkerExit() {
-        console.log('handleWorkerExit')
+    #handleWorkerExit(worker: Worker) {
+        console.log('handleWorkerExit', worker.id)
         // Remove worker from pool
         // Identify request the crashed worker was busy with
         // Remove all queued dashboard items belonging to that request
@@ -58,10 +64,16 @@ export class PrimaryProcess {
         // Fork a new worker and add the new one to the worker pool
     }
 
-    #handleWorkerConversionSuccess(
-        workerId: number,
-        convertedItem: ConvertedItem
-    ) {
+    #handleWorkerItemRequest(workerId: number) {
+        // Ignore the request if queue is empty
+        if (this.#dashboardItemsQueue.hasQueuedItems()) {
+            const queueItem: QueueItem =
+                this.#dashboardItemsQueue.takeItemFromQueue()
+            this.#messageHandler.sendQueueItemToWorker(workerId, queueItem)
+        }
+    }
+
+    #handleWorkerConversionSuccess(convertedItem: ConvertedItem) {
         console.log('handleWorkerConversionSuccess')
         // Add html to response collector
         const { requestId, dashboardItemId, html, css } = convertedItem
@@ -71,7 +83,6 @@ export class PrimaryProcess {
             dashboardItemId,
             converterResult
         )
-        this.#handleWorkerRelease(workerId)
         // Check if the received response completes the dashboard-items in the request
         if (this.#responseManager.isConversionComplete(requestId)) {
             // If it does, then combine HTML and send 200 response
@@ -90,17 +101,7 @@ export class PrimaryProcess {
     #onDashboardDetailsReceived(payload: AddDashboardOptions) {
         this.#responseManager.addDashboard(payload)
         this.#dashboardItemsQueue.addItemsToQueue(payload)
-
-        if (this.#clusterManager.hasIdleWorkers()) {
-            for (const { id } of this.#clusterManager.getIdleWorkers()) {
-                if (this.#dashboardItemsQueue.hasQueuedItems()) {
-                    this.#clusterManager.sendQueueItemToWorker(
-                        id,
-                        this.#dashboardItemsQueue.takeItemFromQueue()
-                    )
-                }
-            }
-        }
+        this.#messageHandler.notifyWorkersAboutAddedDashboardItems()
     }
 
     #handleRequestHandlerError() {
@@ -108,18 +109,5 @@ export class PrimaryProcess {
         // send error response
         // remove from response builder
         // remove from item queue
-    }
-
-    #handleWorkerRelease(workerId: number) {
-        if (this.#dashboardItemsQueue.hasQueuedItems()) {
-            // If there items to convert do it
-            this.#clusterManager.sendQueueItemToWorker(
-                workerId,
-                this.#dashboardItemsQueue.takeItemFromQueue()
-            )
-        } else {
-            // Otherwise set status to idle
-            this.#clusterManager.setWorkerToIdle(workerId)
-        }
     }
 }

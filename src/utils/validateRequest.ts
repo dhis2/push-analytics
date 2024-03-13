@@ -21,13 +21,6 @@ const isAllowedHeaderFieldType = (
 export function validateRequest(request: IncomingMessage) {
     const methodType = request.method?.toUpperCase() ?? ''
 
-    if (request.url === '/favicon.ico') {
-        throw new HttpResponseStatusError(
-            `Invalid request URL "${request.url}"`,
-            400
-        )
-    }
-
     if (!isAllowedHeaderFieldType(request, 'content-type')) {
         throw new HttpResponseStatusError(
             `"content-type" request header must be ${TYPE_JSON}"`,
