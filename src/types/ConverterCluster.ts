@@ -1,7 +1,7 @@
 import type { ServerResponse } from 'node:http'
 import type { Browser } from 'puppeteer'
 import type { DashboardItem, ParsedScrapeInstructions } from '.'
-import type { Authenticator } from '../worker/Authenticator'
+import type { Authenticator } from '../WorkerProcess/Authenticator'
 
 export type AddDashboardOptions = {
     requestId: number

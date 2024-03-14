@@ -1,9 +1,9 @@
 import cluster from 'node:cluster'
 import http from 'node:http'
 import process from 'node:process'
-import { PrimaryProcess } from './main'
+import { PrimaryProcess } from './MainProcess'
+import { WorkerProcess } from './WorkerProcess'
 import { readEnv } from './utils'
-import { WorkerProcess } from './worker'
 
 const initializeCluster = async () => {
     const env = readEnv()

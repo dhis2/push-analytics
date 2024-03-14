@@ -2,13 +2,13 @@
 export { base64EncodeFile } from './base64EncodeFile'
 export { clearDir } from './clearDir'
 export { createPuppeteerBrowser } from './createPuppeteerBrowser'
+export { createTimer } from './createTimer'
 export { downloadPath } from './downloadPath'
 export { getDashboardItemVisualization } from './getDashboardItemVisualization'
 export { getNestedPropertyValue } from './getNestedPropertyValue'
 export { logDashboardItemConversion } from './logDashboardItemConversion'
 export { validateRequest } from './validateRequest'
 export { waitForFileToDownload } from './waitForFileToDownload'
-export { createTimer } from './createTimer'
 
 // Only in 3 files, consider colocation
 export { getThreadLength } from './getThreadLength' // PrimaryProcess
