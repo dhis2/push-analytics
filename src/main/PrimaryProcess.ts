@@ -1,14 +1,16 @@
-import { IncomingMessage, ServerResponse } from 'http'
-import cluster, { Worker } from 'node:cluster'
-import {
+import type { IncomingMessage, ServerResponse } from 'http'
+import type { Worker } from 'node:cluster'
+import cluster from 'node:cluster'
+import type {
     AddDashboardOptions,
     ConvertedItem,
     ConverterResult,
+    PushAnalyticsEnvVariables,
     QueueItem,
 } from '../types'
-import { PushAnalyticsEnvVariables, getThreadLength } from '../utils'
-import { PrimaryProcessMessageHandler } from './PrimaryProcessMessageHandler'
+import { getThreadLength } from '../utils'
 import { DashboardItemsQueue } from './DashboardItemQueue'
+import { PrimaryProcessMessageHandler } from './PrimaryProcessMessageHandler'
 import { RequestHandler } from './RequestHandler'
 import { ResponseManager } from './ResponseManager'
 

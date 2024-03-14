@@ -1,4 +1,4 @@
-import { IncomingMessage } from 'http'
+import type { IncomingMessage } from 'http'
 import { HttpResponseStatusError } from '../types'
 
 const TYPE_JSON = 'application/json'

@@ -1,4 +1,4 @@
-import { ConverterResult, DashboardItem } from '../types'
+import type { ConverterResult, DashboardItem } from '../types'
 
 export class HtmlCollector {
     #itemsHtml: Map<string, ConverterResult>

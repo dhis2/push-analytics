@@ -1,13 +1,14 @@
-import cluster, { Worker } from 'node:cluster'
-import {
-    ItemsAddedToQueueMessage,
+import type { Worker } from 'node:cluster'
+import cluster from 'node:cluster'
+import type {
+    ConversionError,
+    ConvertedItem,
+    ItemConversionErrorMessage,
+    ItemConvertedMessage,
     ItemRequestedFromQueueMessage,
     ItemTakenFromQueueMessage,
-    ItemConvertedMessage,
-    ItemConversionErrorMessage,
-    ConvertedItem,
+    ItemsAddedToQueueMessage,
     QueueItem,
-    ConversionError,
 } from '../types'
 
 type OnWorkerItemRequestFn = (workerId: number) => void

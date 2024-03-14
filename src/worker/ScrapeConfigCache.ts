@@ -12,7 +12,7 @@ import type {
     Steps,
 } from '../types'
 import { getDashboardItemVisualization, getNestedPropertyValue } from '../utils'
-import { Authenticator } from './Authenticator'
+import type { Authenticator } from './Authenticator'
 
 /* TODO: in the future type 'APP' should also be supported
  * But before we can do this we need a way to identify the correct URL

@@ -1,7 +1,7 @@
-import { ServerResponse } from 'node:http'
-import { Browser } from 'puppeteer'
-import type { DashboardItem } from '.'
-import { Authenticator } from '../worker/Authenticator'
+import type { ServerResponse } from 'node:http'
+import type { Browser } from 'puppeteer'
+import type { DashboardItem, ParsedScrapeInstructions } from '.'
+import type { Authenticator } from '../worker/Authenticator'
 
 export type AddDashboardOptions = {
     requestId: number
@@ -72,7 +72,10 @@ export type ConverterResult = {
 }
 
 export interface Converter {
-    convert: (queueItem: QueueItem) => Promise<ConverterResult>
+    convert: (
+        queueItem: QueueItem,
+        config: ParsedScrapeInstructions
+    ) => Promise<ConverterResult>
     init?: (browser: Browser, authenticator: Authenticator) => Promise<void>
     takeErrorScreenShot?: (queueItem: QueueItem) => Promise<void>
 }

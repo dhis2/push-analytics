@@ -1,5 +1,6 @@
 export * from './ConverterCluster'
 export * from './Dashboard'
+export * from './Env'
 export * from './Errors'
 export * from './HttpGet'
 export * from './ScrapeInstructions'

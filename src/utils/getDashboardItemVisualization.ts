@@ -1,4 +1,4 @@
-import {
+import type {
     AnyVisualization,
     DashboardItem,
     Dhis2Map,

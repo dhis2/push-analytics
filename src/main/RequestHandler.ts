@@ -1,12 +1,12 @@
 import axios from 'axios'
-import { IncomingMessage, ServerResponse } from 'node:http'
-import {
+import type { IncomingMessage, ServerResponse } from 'node:http'
+import type {
+    AddDashboardOptions,
+    Dashboard,
+    Field,
     PushAnalyticsEnvVariables,
-    parseQueryString,
-    validateRequest,
-} from '../utils'
-// import { HttpResponseStatusError } from '../httpGetClient'
-import { AddDashboardOptions, Dashboard, Field } from '../types'
+} from '../types'
+import { parseQueryString, validateRequest } from '../utils'
 
 type RequestHandlerOptions = {
     env: PushAnalyticsEnvVariables

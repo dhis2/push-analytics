@@ -1,4 +1,4 @@
-import { AddDashboardOptions, QueueItem } from '../types'
+import type { AddDashboardOptions, QueueItem } from '../types'
 
 export class DashboardItemsQueue {
     #dashboardItemsQueue: QueueItem[]
