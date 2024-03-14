@@ -1,14 +1,29 @@
-import { ConversionError, ConvertedItem, QueueItem } from '../types'
-import { PushAnalyticsEnvVariables } from '../utils'
+import type {
+    ConversionError,
+    ConvertedItem,
+    PushAnalyticsEnvVariables,
+    QueueItem,
+} from '../types'
+import { createPuppeteerBrowser } from '../utils'
+import { Authenticator } from './Authenticator'
 import { DashboardItemConverter } from './DashboardItemConverter'
+import { ScrapeConfigCache } from './ScrapeConfigCache'
 import { WorkerProcessMessageHandler } from './WorkerProcessMessageHandler'
 
 export class WorkerProcess {
     #messageHandler: WorkerProcessMessageHandler
     #converter: DashboardItemConverter
+    #authenticator: Authenticator
+    #configCache: ScrapeConfigCache
 
-    private constructor(converter: DashboardItemConverter) {
+    private constructor(
+        converter: DashboardItemConverter,
+        authenticator: Authenticator,
+        configCache: ScrapeConfigCache
+    ) {
         this.#converter = converter
+        this.#authenticator = authenticator
+        this.#configCache = configCache
         this.#messageHandler = new WorkerProcessMessageHandler({
             onItemsAddedToQueue: this.#handleItemsAddedToQueue.bind(this),
             onItemTakenFromQueue: this.#handleItemTakenFromQueue.bind(this),
@@ -18,9 +33,16 @@ export class WorkerProcess {
     }
 
     static async create(env: PushAnalyticsEnvVariables, debug: boolean) {
-        const converter = new DashboardItemConverter(env, debug)
-        await converter.init()
-        return new WorkerProcess(converter)
+        const browser = await createPuppeteerBrowser(debug)
+        const converter = await DashboardItemConverter.create(env, browser)
+        const authenticator = await Authenticator.create(
+            env,
+            browser,
+            converter
+        )
+        const configCache = new ScrapeConfigCache(env.baseUrl, authenticator)
+        await authenticator.establishNonExpiringAdminSession()
+        return new WorkerProcess(converter, authenticator, configCache)
     }
 
     #handleItemsAddedToQueue() {
@@ -38,8 +60,16 @@ export class WorkerProcess {
         }
 
         try {
+            let config = undefined
+            if (this.#converter.isAppScraperConversion(queueItem)) {
+                config = await this.#configCache.getScrapeConfig(
+                    queueItem.dashboardItem
+                )
+                await this.#authenticator.impersonateUser(queueItem.username)
+            }
             const convertedItem: ConvertedItem = await this.#converter.convert(
-                queueItem
+                queueItem,
+                config
             )
             this.#messageHandler.sendConvertedItemToPrimaryProcess(
                 convertedItem

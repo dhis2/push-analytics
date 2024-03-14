@@ -1,55 +1,38 @@
-import { Page, Protocol } from 'puppeteer'
-
-type AuthenticatorOptions = {
-    page: Page
-    baseUrl: string
-    apiVersion: string
-    adminUsername: string
-    adminPassword: string
-    sessionTimeout: string
-    isConverting: () => boolean
-}
+import type { Browser, Page, Protocol } from 'puppeteer'
+import type { PushAnalyticsEnvVariables } from '../types'
+import type { DashboardItemConverter } from './DashboardItemConverter'
 
 export class Authenticator {
+    #env: PushAnalyticsEnvVariables
     #page: Page
-    #baseUrl: string
-    #apiVersion: string
-    #adminUsername: string
-    #adminPassword: string
-    #sessionTimeout: string
-    #isConverting: () => boolean
+    #converter: DashboardItemConverter
     #sessionCookie: Protocol.Network.Cookie | null
     #impersonatedUser: string | null
 
-    constructor({
-        page,
-        baseUrl,
-        apiVersion,
-        adminUsername,
-        adminPassword,
-        sessionTimeout,
-        isConverting,
-    }: AuthenticatorOptions) {
+    private constructor(
+        env: PushAnalyticsEnvVariables,
+        page: Page,
+        converter: DashboardItemConverter
+    ) {
+        this.#env = env
         this.#page = page
-        this.#baseUrl = baseUrl
-        this.#apiVersion = apiVersion
-        this.#adminUsername = adminUsername
-        this.#adminPassword = adminPassword
-        this.#sessionTimeout = sessionTimeout
-        this.#isConverting = isConverting
+        this.#converter = converter
         this.#sessionCookie = null
         this.#impersonatedUser = null
     }
 
+    static async create(
+        env: PushAnalyticsEnvVariables,
+        browser: Browser,
+        converter: DashboardItemConverter
+    ) {
+        const [firstBlankPage] = await browser.pages()
+        return new Authenticator(env, firstBlankPage, converter)
+    }
+
     async establishNonExpiringAdminSession(): Promise<void> {
         try {
-            await this.#page.bringToFront()
-            await this.#page.goto(
-                `${this.#baseUrl}/dhis-web-commons/security/login.action`
-            )
-            await this.#page.type('#j_username', this.#adminUsername)
-            await this.#page.type('#j_password', this.#adminPassword)
-            await this.#page.click('#submit')
+            await this.#loginViaForm()
             await this.#setSessionCookie()
             this.#preventSessionExpiry()
         } catch (error) {
@@ -57,6 +40,16 @@ export class Authenticator {
                 'Admin user could not login to the DHIS2 Core instance'
             )
         }
+    }
+
+    async #loginViaForm() {
+        await this.#page.bringToFront()
+        await this.#page.goto(
+            `${this.#env.baseUrl}/dhis-web-commons/security/login.action`
+        )
+        await this.#page.type('#j_username', this.#env.adminUsername)
+        await this.#page.type('#j_password', this.#env.adminPassword)
+        await this.#page.click('#submit')
     }
 
     async impersonateUser(username: string) {
@@ -80,7 +73,7 @@ export class Authenticator {
         }
 
         // Skip impersonation for admin user only
-        if (username !== this.#adminUsername) {
+        if (username !== this.#env.adminUsername) {
             const impersonateStatusCode =
                 await this.doAuthenticatedRequestFromPage(
                     `/impersonate?username=${username}`,
@@ -109,7 +102,7 @@ export class Authenticator {
 
         const options = {
             url,
-            host: this.#baseUrl,
+            host: this.#env.baseUrl,
             cookie: {
                 name: this.#sessionCookie.name,
                 value: this.#sessionCookie.value,
@@ -149,19 +142,19 @@ export class Authenticator {
 
     async #preventSessionExpiry() {
         // Do a ping request 30 seconds before the session is due to expire
-        const intervalInMs = (parseInt(this.#sessionTimeout) - 30) * 1000
+        const intervalInMs = (parseInt(this.#env.sessionTimeout) - 30) * 1000
         const intervalId = setInterval(async () => {
             /* Bringing the login page to the front could break the
              * dashboard item conversion process. And and the naturally
              * occuring network traffic during a conversion also makes it
              * redundant to fire another request from here. */
-            if (this.#isConverting()) {
+            if (this.#converter.isConverting()) {
                 return
             }
 
             await this.#page.bringToFront()
 
-            const url = `/api/${this.#apiVersion}/system/ping`
+            const url = `/api/${this.#env.apiVersion}/system/ping`
             const httpStatusCode = await this.doAuthenticatedRequestFromPage(
                 url
             )

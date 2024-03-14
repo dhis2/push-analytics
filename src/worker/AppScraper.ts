@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { Browser, CDPSession, Page } from 'puppeteer'
+import type { Browser, CDPSession, Page } from 'puppeteer'
 import { insertIntoDivTemplate, insertIntoImageTemplate } from '../templates'
 import type {
     AnyVisualization,
@@ -20,40 +20,38 @@ import {
     logDashboardItemConversion,
     waitForFileToDownload,
 } from '../utils'
-import { Authenticator } from './Authenticator'
-import { ScrapeConfigCache } from './ScrapeConfigCache'
 
 const DONWLOAD_PAGE_URL_PATTERN =
     /api\/analytics\/enrollments|events\/query\/[a-zA-Z0-9]{11}\.html\+css/
 
 export class AppScraper implements Converter {
     baseUrl: string
-    #browser: Browser | null
-    #page: Page | null
-    #cdpSession: CDPSession | null
-    #configCache: ScrapeConfigCache | null
-    #authenticator: Authenticator | null
+    #browser: Browser
+    #page: Page
+    #cdpSession: CDPSession
 
-    constructor(baseUrl: string) {
+    private constructor(
+        baseUrl: string,
+        browser: Browser,
+        page: Page,
+        cdpSession: CDPSession
+    ) {
         this.baseUrl = baseUrl
-        this.#page = null
-        this.#browser = null
-        this.#cdpSession = null
-        this.#authenticator = null
-        this.#configCache = null
+        this.#browser = browser
+        this.#page = page
+        this.#cdpSession = cdpSession
     }
 
-    async init(browser: Browser, authenticator: Authenticator) {
-        this.#browser = browser
-        this.#page = await browser.newPage()
-        this.#cdpSession = await this.#page.target().createCDPSession()
-        this.#authenticator = authenticator
-        this.#configCache = new ScrapeConfigCache(this.baseUrl, authenticator)
+    static async create(baseUrl: string, browser: Browser) {
+        const page = await browser.newPage()
+        const cdpSession = await page.target().createCDPSession()
 
-        await this.#cdpSession.send('Browser.setDownloadBehavior', {
+        await cdpSession.send('Browser.setDownloadBehavior', {
             behavior: 'allow',
             downloadPath,
         })
+
+        return new AppScraper(baseUrl, browser, page, cdpSession)
     }
 
     get browser() {
@@ -72,15 +70,10 @@ export class AppScraper implements Converter {
         }
     }
 
-    get configCache() {
-        if (!this.#configCache) {
-            throw new Error('Config Cache has not been initialized')
-        } else {
-            return this.#configCache
-        }
-    }
-
-    public async convert(queueItem: QueueItem): Promise<ConverterResult> {
+    public async convert(
+        queueItem: QueueItem,
+        config: ParsedScrapeInstructions
+    ): Promise<ConverterResult> {
         const visualization = getDashboardItemVisualization(
             queueItem.dashboardItem
         )
@@ -97,9 +90,6 @@ export class AppScraper implements Converter {
 
         const timer = createTimer()
         await this.page.bringToFront()
-        const config = await this.configCache.getScrapeConfig(
-            queueItem.dashboardItem
-        )
         await this.#clearVisualization(config)
         /* Make sure we download the exported file to `./images/${PID}_${dashboardItemId}`,
          * which allows us to track the download process in a relatively sane way */
