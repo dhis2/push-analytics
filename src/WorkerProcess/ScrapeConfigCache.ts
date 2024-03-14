@@ -1,4 +1,4 @@
-import { parseTemplate } from '../templates'
+import { parseTemplate } from './htmlTemplates'
 import type {
     ConditionalDownloadInstructions,
     DashboardItem,
@@ -11,7 +11,10 @@ import type {
     Step,
     Steps,
 } from '../types'
-import { getDashboardItemVisualization, getNestedPropertyValue } from '../utils'
+import {
+    getDashboardItemVisualization,
+    getNestedPropertyValue,
+} from './scrapeUtils'
 import type { Authenticator } from './Authenticator'
 
 /* TODO: in the future type 'APP' should also be supported

@@ -1,5 +1,4 @@
 export { insertIntoAnchorListTemplate } from './insertIntoAnchorListTemplate'
-export { insertIntoConversionErrorTemplate } from './insertIntoConversionErrorTemplate'
 export { insertIntoDashboardHeaderTemplate } from './insertIntoDashboardHeaderTemplate'
 export { insertIntoDivTemplate } from './insertIntoDivTemplate'
 export { insertIntoEmailTemplate } from './insertIntoEmailTemplate'

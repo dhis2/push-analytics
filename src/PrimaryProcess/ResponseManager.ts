@@ -2,7 +2,7 @@ import type { ServerResponse } from 'http'
 import {
     insertIntoDashboardHeaderTemplate,
     insertIntoEmailTemplate,
-} from '../templates'
+} from '../WorkerProcess/htmlTemplates'
 import type {
     AddDashboardOptions,
     ConverterResult,

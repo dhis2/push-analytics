@@ -3,10 +3,13 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import type {
     AddDashboardOptions,
     Dashboard,
-    Field,
     PushAnalyticsEnvVariables,
 } from '../types'
-import { parseQueryString, validateRequest } from '../utils'
+import {
+    parseQueryString,
+    validateRequest,
+    getDashboardFieldsParam,
+} from './RequestHandlerUtils'
 
 type RequestHandlerOptions = {
     env: PushAnalyticsEnvVariables
@@ -84,47 +87,11 @@ export class RequestHandler {
         const url = `${baseUrl}/api/${apiVersion}/dashboards/${dashboardId}`
         const options = {
             params: {
-                fields: getDashboardFieldsParamValue(),
+                fields: getDashboardFieldsParam(),
             },
             auth: { username: adminUsername, password: adminPassword },
         }
         const result = await axios.get<Dashboard>(url, options)
         return result.data
-    }
-}
-
-function getDashboardFieldsParamValue() {
-    return [
-        'displayName',
-        'itemCount',
-        {
-            name: 'dashboardItems',
-            fields: [
-                'id',
-                'type',
-                'text',
-                'x',
-                'y',
-                { name: 'eventChart', fields: ['id', 'name', 'type'] },
-                { name: 'eventReport', fields: ['id', 'name', 'type'] },
-                { name: 'eventVisualization', fields: ['id', 'name', 'type'] },
-                { name: 'map', fields: ['id', 'name'] },
-                { name: 'reports', fields: ['id', 'name', 'type'] },
-                { name: 'resources', fields: ['id', 'name'] },
-                { name: 'visualization', fields: ['id', 'name', 'type'] },
-            ],
-        },
-    ]
-        .map(parseField)
-        .join()
-}
-
-function parseField(field: Field): string {
-    if (typeof field === 'string') {
-        return field
-    } else if (field.name && Array.isArray(field.fields)) {
-        return `${field.name}[${field.fields.map(parseField).join()}]`
-    } else {
-        throw new Error('Could not parse query fields')
     }
 }

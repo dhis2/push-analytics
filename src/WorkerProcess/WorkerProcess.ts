@@ -4,7 +4,7 @@ import type {
     PushAnalyticsEnvVariables,
     QueueItem,
 } from '../types'
-import { createPuppeteerBrowser } from '../utils'
+import { createPuppeteerBrowser } from './scrapeUtils'
 import { Authenticator } from './Authenticator'
 import { DashboardItemConverter } from './DashboardItemConverter'
 import { ScrapeConfigCache } from './ScrapeConfigCache'

@@ -2,14 +2,13 @@ import MdParser from '@dhis2/d2-ui-rich-text/parser/MdParser'
 import {
     insertIntoAnchorListTemplate,
     insertIntoTextTemplate,
-} from '../templates'
+} from './htmlTemplates'
 import type {
     Converter,
     ConverterResult,
     QueueItem,
     ReportType,
 } from '../types'
-import { createTimer } from '../utils'
 
 export class ItemParser implements Converter {
     #baseUrl: string
@@ -46,15 +45,12 @@ export class ItemParser implements Converter {
             )
         }
 
-        const timer = createTimer()
         const parser = new MdParser()
 
         const html =
             text === 'SPACER_ITEM_FOR_DASHBOARD_LAYOUT_CONVENIENCE'
                 ? '<hr class="spacer"/>'
                 : insertIntoTextTemplate(parser.render(text))
-
-        console.log(`Converted text item in ${timer.getElapsedTime()} sec`)
 
         return Promise.resolve({ html, css: '' })
     }
@@ -69,8 +65,6 @@ export class ItemParser implements Converter {
             )
         }
 
-        const timer = createTimer()
-
         const html = insertIntoAnchorListTemplate(
             // TODO: this is static non-localized text ¯\_(ツ)_/¯
             'Resources',
@@ -79,8 +73,6 @@ export class ItemParser implements Converter {
                 url: `${this.#baseUrl}/api/documents/${id}/data`,
             }))
         )
-
-        console.log(`Converted resources list in ${timer.getElapsedTime()} sec`)
 
         return Promise.resolve({ html, css: '' })
     }
@@ -94,8 +86,6 @@ export class ItemParser implements Converter {
             )
         }
 
-        const timer = createTimer()
-
         const html = insertIntoAnchorListTemplate(
             // TODO: this is static non-localized text ¯\_(ツ)_/¯
             'Reports',
@@ -104,8 +94,6 @@ export class ItemParser implements Converter {
                 url: `${this.#baseUrl}/${this.#getReportPath(id, type)}`,
             }))
         )
-
-        console.log(`Converted reports list in ${timer.getElapsedTime()} sec`)
 
         return Promise.resolve({ html, css: '' })
     }

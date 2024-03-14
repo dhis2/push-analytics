@@ -1,6 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'http'
 import type { Worker } from 'node:cluster'
 import cluster from 'node:cluster'
+import { availableParallelism } from 'node:os'
 import type {
     AddDashboardOptions,
     ConvertedItem,
@@ -8,14 +9,13 @@ import type {
     PushAnalyticsEnvVariables,
     QueueItem,
 } from '../types'
-import { getThreadLength } from '../utils'
 import { DashboardItemsQueue } from './DashboardItemQueue'
 import { PrimaryProcessMessageHandler } from './PrimaryProcessMessageHandler'
 import { RequestHandler } from './RequestHandler'
 import { ResponseManager } from './ResponseManager'
 
 export class PrimaryProcess {
-    #env: PushAnalyticsEnvVariables
+    #workerCount: number
     #messageHandler: PrimaryProcessMessageHandler
     #dashboardItemsQueue: DashboardItemsQueue
     requestHandler: RequestHandler
@@ -26,7 +26,7 @@ export class PrimaryProcess {
     ) => Promise<void>
 
     constructor(env: PushAnalyticsEnvVariables) {
-        this.#env = env
+        this.#workerCount = this.#computeWorkerCount(env.maxThreads)
         this.#messageHandler = new PrimaryProcessMessageHandler({
             onWorkerItemRequest: this.#handleWorkerItemRequest.bind(this),
             onWorkerConversionSuccess:
@@ -46,14 +46,7 @@ export class PrimaryProcess {
         this.requestListener = this.requestHandler.handleRequest.bind(
             this.requestHandler
         )
-        this.#spawnWorkers()
-    }
-
-    #spawnWorkers() {
-        const threadLength = getThreadLength(this.#env.maxThreads)
-        for (let i = 0; i < threadLength; i++) {
-            cluster.fork()
-        }
+        this.#initializeWorkers()
     }
 
     #handleWorkerExit(worker: Worker) {
@@ -111,5 +104,24 @@ export class PrimaryProcess {
         // send error response
         // remove from response builder
         // remove from item queue
+    }
+
+    #computeWorkerCount(maxThreads: string = ''): number {
+        const availableThreads = availableParallelism()
+
+        if (maxThreads) {
+            if (maxThreads.toLowerCase() === 'max') {
+                return availableThreads
+            }
+            return Math.min(parseInt(maxThreads), availableThreads)
+        }
+
+        return Math.ceil(availableThreads / 2)
+    }
+
+    #initializeWorkers() {
+        for (let i = 0; i < this.#workerCount; i++) {
+            cluster.fork()
+        }
     }
 }

@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import type { Browser, CDPSession, Page } from 'puppeteer'
-import { insertIntoDivTemplate, insertIntoImageTemplate } from '../templates'
+import { insertIntoDivTemplate, insertIntoImageTemplate } from './htmlTemplates'
 import type {
     AnyVisualization,
     Converter,
@@ -14,12 +14,10 @@ import type {
 import {
     base64EncodeFile,
     clearDir,
-    createTimer,
     downloadPath,
     getDashboardItemVisualization,
-    logDashboardItemConversion,
     waitForFileToDownload,
-} from '../utils'
+} from './scrapeUtils'
 
 const DONWLOAD_PAGE_URL_PATTERN =
     /api\/analytics\/enrollments|events\/query\/[a-zA-Z0-9]{11}\.html\+css/
@@ -88,7 +86,6 @@ export class AppScraper implements Converter {
             return Promise.resolve({ html: '', css: '' })
         }
 
-        const timer = createTimer()
         await this.page.bringToFront()
         await this.#clearVisualization(config)
         /* Make sure we download the exported file to `./images/${PID}_${dashboardItemId}`,
@@ -100,12 +97,6 @@ export class AppScraper implements Converter {
         const { html, css } = await this.#obtainDownloadArtifact(
             config,
             visualization
-        )
-
-        logDashboardItemConversion(
-            queueItem.dashboardItem.type,
-            visualization.name,
-            timer.getElapsedTime()
         )
 
         return { html, css }

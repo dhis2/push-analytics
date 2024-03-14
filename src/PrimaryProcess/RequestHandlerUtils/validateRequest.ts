@@ -1,5 +1,5 @@
 import type { IncomingMessage } from 'http'
-import { HttpResponseStatusError } from '../types'
+import { HttpResponseStatusError } from '../../types'
 
 const TYPE_JSON = 'application/json'
 const TYPE_ANY = '*/*'
