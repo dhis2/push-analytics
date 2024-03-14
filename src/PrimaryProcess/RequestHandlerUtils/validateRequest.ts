@@ -4,10 +4,7 @@ import { HttpResponseStatusError } from '../../types'
 const TYPE_JSON = 'application/json'
 const TYPE_ANY = '*/*'
 
-const isAllowedHeaderFieldType = (
-    request: IncomingMessage,
-    headerField: string
-) => {
+const isAllowedHeaderFieldType = (request: IncomingMessage, headerField: string) => {
     const headerValue = request.headers[headerField] ?? ''
 
     return (

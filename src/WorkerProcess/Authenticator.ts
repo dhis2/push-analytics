@@ -36,9 +36,7 @@ export class Authenticator {
             await this.#setSessionCookie()
             this.#preventSessionExpiry()
         } catch (error) {
-            throw new Error(
-                'Admin user could not login to the DHIS2 Core instance'
-            )
+            throw new Error('Admin user could not login to the DHIS2 Core instance')
         }
     }
 
@@ -60,11 +58,10 @@ export class Authenticator {
 
         // Only exit impersonation mode if already in it
         if (this.#impersonatedUser) {
-            const exitImpersonateStatusCode =
-                await this.doAuthenticatedRequestFromPage(
-                    '/impersonateExit',
-                    'POST'
-                )
+            const exitImpersonateStatusCode = await this.doAuthenticatedRequestFromPage(
+                '/impersonateExit',
+                'POST'
+            )
             if (exitImpersonateStatusCode !== 200) {
                 throw new Error(
                     `Could not exit impersonation mode. Received response status code ${exitImpersonateStatusCode}`
@@ -74,11 +71,10 @@ export class Authenticator {
 
         // Skip impersonation for admin user only
         if (username !== this.#env.adminUsername) {
-            const impersonateStatusCode =
-                await this.doAuthenticatedRequestFromPage(
-                    `/impersonate?username=${username}`,
-                    'POST'
-                )
+            const impersonateStatusCode = await this.doAuthenticatedRequestFromPage(
+                `/impersonate?username=${username}`,
+                'POST'
+            )
             if (impersonateStatusCode !== 200) {
                 throw new Error(
                     `Could not impersonate user. Received response status code ${impersonateStatusCode}`
@@ -95,9 +91,7 @@ export class Authenticator {
         returnValueType: 'responseStatus' | 'responseBody' = 'responseStatus'
     ) {
         if (!this.#sessionCookie) {
-            throw new Error(
-                'Cookie not found, cannot issue an authenticated request'
-            )
+            throw new Error('Cookie not found, cannot issue an authenticated request')
         }
 
         const options = {
@@ -133,9 +127,7 @@ export class Authenticator {
                         : response.json()
                 )
                 .catch(() =>
-                    options.returnValueType === 'responseStatus'
-                        ? 500
-                        : { Error: true }
+                    options.returnValueType === 'responseStatus' ? 500 : { Error: true }
                 )
         }, options)
     }
@@ -155,9 +147,7 @@ export class Authenticator {
             await this.#page.bringToFront()
 
             const url = `/api/${this.#env.apiVersion}/system/ping`
-            const httpStatusCode = await this.doAuthenticatedRequestFromPage(
-                url
-            )
+            const httpStatusCode = await this.doAuthenticatedRequestFromPage(url)
 
             if (httpStatusCode !== 200) {
                 clearInterval(intervalId)

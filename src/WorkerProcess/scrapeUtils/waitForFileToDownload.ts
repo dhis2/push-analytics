@@ -10,9 +10,7 @@ function checkFile(dir: string) {
     try {
         const fileNames = fs.readdirSync(dir)
         const fileName =
-            Array.isArray(fileNames) && fileNames.length === 1
-                ? fileNames[0]
-                : ''
+            Array.isArray(fileNames) && fileNames.length === 1 ? fileNames[0] : ''
 
         return fileName && !fileName.endsWith('.crdownload')
             ? path.join(dir, fileName)

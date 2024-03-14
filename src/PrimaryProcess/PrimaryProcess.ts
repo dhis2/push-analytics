@@ -20,32 +20,24 @@ export class PrimaryProcess {
     #dashboardItemsQueue: DashboardItemsQueue
     requestHandler: RequestHandler
     #responseManager: ResponseManager
-    requestListener: (
-        request: IncomingMessage,
-        response: ServerResponse
-    ) => Promise<void>
+    requestListener: (request: IncomingMessage, response: ServerResponse) => Promise<void>
 
     constructor(env: PushAnalyticsEnvVariables) {
         this.#workerCount = this.#computeWorkerCount(env.maxThreads)
         this.#messageHandler = new PrimaryProcessMessageHandler({
             onWorkerItemRequest: this.#handleWorkerItemRequest.bind(this),
-            onWorkerConversionSuccess:
-                this.#handleWorkerConversionSuccess.bind(this),
-            onWorkerConversionFailure:
-                this.#handleWorkerConversionFailure.bind(this),
+            onWorkerConversionSuccess: this.#handleWorkerConversionSuccess.bind(this),
+            onWorkerConversionFailure: this.#handleWorkerConversionFailure.bind(this),
             onWorkerExit: this.#handleWorkerExit.bind(this),
         })
         this.#dashboardItemsQueue = new DashboardItemsQueue()
         this.requestHandler = new RequestHandler({
             env,
-            onDashboardDetailsReceived:
-                this.#onDashboardDetailsReceived.bind(this),
+            onDashboardDetailsReceived: this.#onDashboardDetailsReceived.bind(this),
             onRequestHandlerError: this.#handleRequestHandlerError.bind(this),
         })
         this.#responseManager = new ResponseManager(env)
-        this.requestListener = this.requestHandler.handleRequest.bind(
-            this.requestHandler
-        )
+        this.requestListener = this.requestHandler.handleRequest.bind(this.requestHandler)
         this.#initializeWorkers()
     }
 
@@ -62,8 +54,7 @@ export class PrimaryProcess {
     #handleWorkerItemRequest(workerId: number) {
         // Ignore the request if queue is empty
         if (this.#dashboardItemsQueue.hasQueuedItems()) {
-            const queueItem: QueueItem =
-                this.#dashboardItemsQueue.takeItemFromQueue()
+            const queueItem: QueueItem = this.#dashboardItemsQueue.takeItemFromQueue()
             this.#messageHandler.sendQueueItemToWorker(workerId, queueItem)
         }
     }

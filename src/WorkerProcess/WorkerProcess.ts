@@ -35,11 +35,7 @@ export class WorkerProcess {
     static async create(env: PushAnalyticsEnvVariables, debug: boolean) {
         const browser = await createPuppeteerBrowser(debug)
         const converter = await DashboardItemConverter.create(env, browser)
-        const authenticator = await Authenticator.create(
-            env,
-            browser,
-            converter
-        )
+        const authenticator = await Authenticator.create(env, browser, converter)
         const configCache = new ScrapeConfigCache(env.baseUrl, authenticator)
         await authenticator.establishNonExpiringAdminSession()
         return new WorkerProcess(converter, authenticator, configCache)
@@ -62,18 +58,14 @@ export class WorkerProcess {
         try {
             let config = undefined
             if (this.#converter.isAppScraperConversion(queueItem)) {
-                config = await this.#configCache.getScrapeConfig(
-                    queueItem.dashboardItem
-                )
+                config = await this.#configCache.getScrapeConfig(queueItem.dashboardItem)
                 await this.#authenticator.impersonateUser(queueItem.username)
             }
             const convertedItem: ConvertedItem = await this.#converter.convert(
                 queueItem,
                 config
             )
-            this.#messageHandler.sendConvertedItemToPrimaryProcess(
-                convertedItem
-            )
+            this.#messageHandler.sendConvertedItemToPrimaryProcess(convertedItem)
         } catch (error) {
             const errorMessage =
                 error instanceof Error ? error.message : 'Conversion error'
@@ -84,9 +76,7 @@ export class WorkerProcess {
                 dashboardItemId: queueItem.dashboardItem.id,
                 errorMessage,
             }
-            this.#messageHandler.sendItemConversionErrorToPrimaryProcess(
-                conversionError
-            )
+            this.#messageHandler.sendItemConversionErrorToPrimaryProcess(conversionError)
         } finally {
             // See if there is more work to do
             this.#messageHandler.requestDashboardItemFromQueue()

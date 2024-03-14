@@ -72,9 +72,7 @@ export class AppScraper implements Converter {
         queueItem: QueueItem,
         config: ParsedScrapeInstructions
     ): Promise<ConverterResult> {
-        const visualization = getDashboardItemVisualization(
-            queueItem.dashboardItem
-        )
+        const visualization = getDashboardItemVisualization(queueItem.dashboardItem)
 
         if (
             queueItem.dashboardItem.type === 'EVENT_VISUALIZATION' &&
@@ -94,10 +92,7 @@ export class AppScraper implements Converter {
         await this.#modifyDownloadUrl(config)
         await this.#showVisualization(config)
         await this.#triggerDownload(config)
-        const { html, css } = await this.#obtainDownloadArtifact(
-            config,
-            visualization
-        )
+        const { html, css } = await this.#obtainDownloadArtifact(config, visualization)
 
         return { html, css }
     }
@@ -138,9 +133,7 @@ export class AppScraper implements Converter {
 
                     window.open = (...args) => {
                         const url =
-                            (args[0] instanceof URL
-                                ? args[0].toString()
-                                : args[0]) ?? ''
+                            (args[0] instanceof URL ? args[0].toString() : args[0]) ?? ''
 
                         if (regex.test(url)) {
                             args[0] = url.replace(
@@ -178,9 +171,7 @@ export class AppScraper implements Converter {
         const usesDownloadPage =
             downloadInstructions.strategy === 'scrapeDownloadPage' ||
             downloadInstructions.strategy === 'screenShotImgOnDownloadPage'
-        const downloadPage = usesDownloadPage
-            ? await this.#getDownloadPage()
-            : null
+        const downloadPage = usesDownloadPage ? await this.#getDownloadPage() : null
         const result = await this.#obtainDownloadArtifactForStrategy(
             downloadInstructions,
             visualization,
@@ -250,9 +241,7 @@ export class AppScraper implements Converter {
     ): Promise<ConverterResult> {
         const img = await downloadPage.waitForSelector(htmlSelector ?? '')
         const base64 = await img?.screenshot({ encoding: 'base64' })
-        const base64Str = Buffer.isBuffer(base64)
-            ? base64.toString()
-            : base64 ?? ''
+        const base64Str = Buffer.isBuffer(base64) ? base64.toString() : base64 ?? ''
 
         return { html: insertIntoImageTemplate(base64Str, name), css: '' }
     }
@@ -314,17 +303,12 @@ export class AppScraper implements Converter {
         for (const step of steps) {
             if (step.click && typeof step.click === 'string') {
                 await this.page.click(step.click)
-            } else if (
-                step.waitForSelector &&
-                typeof step.waitForSelector === 'string'
-            ) {
+            } else if (step.waitForSelector && typeof step.waitForSelector === 'string') {
                 await this.page.waitForSelector(step.waitForSelector)
             } else if (step.goto && typeof step.goto === 'string') {
                 await this.page.goto(step.goto, { waitUntil: 'networkidle2' })
             } else {
-                throw new Error(
-                    `Failed to intepret step "${JSON.stringify(step)}"`
-                )
+                throw new Error(`Failed to intepret step "${JSON.stringify(step)}"`)
             }
         }
     }

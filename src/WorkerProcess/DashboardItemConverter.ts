@@ -78,10 +78,7 @@ export class DashboardItemConverter {
         }
     }
 
-    async #convertItemType(
-        queueItem: QueueItem,
-        config?: ParsedScrapeInstructions
-    ) {
+    async #convertItemType(queueItem: QueueItem, config?: ParsedScrapeInstructions) {
         this.#conversionInProgress = true
         try {
             const result = this.isAppScraperConversion(queueItem)

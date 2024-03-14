@@ -11,10 +11,7 @@ import type {
     Step,
     Steps,
 } from '../types'
-import {
-    getDashboardItemVisualization,
-    getNestedPropertyValue,
-} from './scrapeUtils'
+import { getDashboardItemVisualization, getNestedPropertyValue } from './scrapeUtils'
 import type { Authenticator } from './Authenticator'
 
 /* TODO: in the future type 'APP' should also be supported
@@ -75,11 +72,7 @@ export class ScrapeConfigCache {
 
         try {
             const instructions: ScrapeInstructions = await this.#authenticator
-                .doAuthenticatedRequestFromPage(
-                    jsonFileUrl,
-                    'GET',
-                    'responseBody'
-                )
+                .doAuthenticatedRequestFromPage(jsonFileUrl, 'GET', 'responseBody')
                 .then((response) => ({ ...response, appUrl }))
             this.#cachedConfigs.set(appPath, instructions)
             return instructions

@@ -13,9 +13,7 @@ export function getNestedPropertyValue(obj: object, propertyPath: string) {
             try {
                 val = val[key as keyof typeof val]
             } catch {
-                throw new Error(
-                    `Found invalid dashboard item property "${propertyPath}"`
-                )
+                throw new Error(`Found invalid dashboard item property "${propertyPath}"`)
             }
 
             return val

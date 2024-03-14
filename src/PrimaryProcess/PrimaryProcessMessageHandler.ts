@@ -87,13 +87,9 @@ export class PrimaryProcessMessageHandler {
             case 'ITEM_REQUESTED_FROM_QUEUE':
                 return this.#onWorkerItemRequest(worker.id)
             case 'ITEM_CONVERTED':
-                return this.#onWorkerConversionSuccess(
-                    message.payload as ConvertedItem
-                )
+                return this.#onWorkerConversionSuccess(message.payload as ConvertedItem)
             case 'ITEM_CONVERSION_ERROR':
-                return this.#onWorkerConversionFailure(
-                    message.payload as ConversionError
-                )
+                return this.#onWorkerConversionFailure(message.payload as ConversionError)
             default:
                 throw new Error('Received unknown message from worker')
         }

@@ -1,10 +1,6 @@
 import axios from 'axios'
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import type {
-    AddDashboardOptions,
-    Dashboard,
-    PushAnalyticsEnvVariables,
-} from '../types'
+import type { AddDashboardOptions, Dashboard, PushAnalyticsEnvVariables } from '../types'
 import {
     parseQueryString,
     validateRequest,
@@ -54,9 +50,7 @@ export class RequestHandler {
                 request.url,
                 this.#env.baseUrl
             )
-            const { displayName, dashboardItems } = await this.#getDashboard(
-                dashboardId
-            )
+            const { displayName, dashboardItems } = await this.#getDashboard(dashboardId)
             this.#onDashboardDetailsReceived({
                 requestId,
                 response,

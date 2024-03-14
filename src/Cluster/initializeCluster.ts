@@ -21,9 +21,7 @@ export const initializeCluster = async () => {
             }
         )
     } else {
-        console.log(
-            `Starting dashboard-item conversion worker on PID ${process.pid}`
-        )
+        console.log(`Starting dashboard-item conversion worker on PID ${process.pid}`)
         await WorkerProcess.create(env, false)
     }
 }

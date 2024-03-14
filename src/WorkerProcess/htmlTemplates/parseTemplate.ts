@@ -13,10 +13,7 @@ const trimNewlines = (str: string) => str.replace(/\n^/, '').replace(/\n$/, '')
 
 export const inline = (str: string) => str.replace(/\s+/g, '')
 
-export const parseTemplate = (
-    template: string,
-    interpolator: Interpolator
-): string =>
+export const parseTemplate = (template: string, interpolator: Interpolator): string =>
     Object.entries(interpolator).reduce(
         (populatedTemplate, [key, value]) =>
             populatedTemplate.replaceAll(`{{${key}}}`, value),

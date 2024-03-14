@@ -44,27 +44,18 @@ export type Message<T extends MessageType, P> = {
     payload?: P
 }
 
-export type ItemsAddedToQueueMessage = Message<
-    'ITEMS_ADDED_TO_QUEUE',
-    undefined
->
+export type ItemsAddedToQueueMessage = Message<'ITEMS_ADDED_TO_QUEUE', undefined>
 
 export type ItemRequestedFromQueueMessage = Message<
     'ITEM_REQUESTED_FROM_QUEUE',
     undefined
 >
 
-export type ItemTakenFromQueueMessage = Message<
-    'ITEM_TAKEN_FROM_QUEUE',
-    QueueItem
->
+export type ItemTakenFromQueueMessage = Message<'ITEM_TAKEN_FROM_QUEUE', QueueItem>
 
 export type ItemConvertedMessage = Message<'ITEM_CONVERTED', ConvertedItem>
 
-export type ItemConversionErrorMessage = Message<
-    'ITEM_CONVERSION_ERROR',
-    ConversionError
->
+export type ItemConversionErrorMessage = Message<'ITEM_CONVERSION_ERROR', ConversionError>
 
 export type ConverterResult = {
     html: string

@@ -12,10 +12,7 @@ export class HtmlCollector {
         }, new Map())
     }
 
-    addDashboardItemHtml(
-        dashboardItemId: string,
-        converterResult: ConverterResult
-    ) {
+    addDashboardItemHtml(dashboardItemId: string, converterResult: ConverterResult) {
         if (!this.#itemsHtml.has(dashboardItemId)) {
             throw new Error(
                 `Provided dashboard item ID "${dashboardItemId}" not found in HTML collection`
