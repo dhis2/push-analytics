@@ -1,7 +1,6 @@
 import fs from 'fs'
 import path from 'path'
 import type { Browser, CDPSession, Page } from 'puppeteer'
-import { insertIntoDivTemplate, insertIntoImageTemplate } from './htmlTemplates'
 import type {
     AnyVisualization,
     Converter,
@@ -11,6 +10,7 @@ import type {
     QueueItem,
     Steps,
 } from '../types'
+import { insertIntoDivTemplate, insertIntoImageTemplate } from './htmlTemplates'
 import {
     base64EncodeFile,
     clearDir,

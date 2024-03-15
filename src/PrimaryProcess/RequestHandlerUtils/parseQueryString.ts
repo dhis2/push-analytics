@@ -1,5 +1,5 @@
-// import { parse } from 'node:querystring'
-import { HttpResponseStatusError } from '../../types'
+import { URL } from 'node:url'
+import { HttpError } from '../../types'
 
 const UID_REGEX = /^[a-zA-Z][a-zA-Z0-9]{10}$/
 const isValidUid = (id: string) => UID_REGEX.test(id)
@@ -10,11 +10,11 @@ export function parseQueryString(url = '', baseUrl: string) {
     const { dashboardId, username } = Object.fromEntries(searchParams)
 
     if (!isValidUid(dashboardId)) {
-        throw new HttpResponseStatusError(`Invalid dashhboard UID ${dashboardId}`, 400)
+        throw new HttpError(`Invalid dashhboard UID ${dashboardId}`, 400)
     }
 
     if (!isNonEmptyString(username)) {
-        throw new HttpResponseStatusError(`Invalid username ${username}`, 400)
+        throw new HttpError(`Invalid username ${username}`, 400)
     }
 
     return { dashboardId, username }

@@ -3,12 +3,12 @@ import {
     insertIntoDashboardHeaderTemplate,
     insertIntoEmailTemplate,
 } from '../WorkerProcess/htmlTemplates'
-import { HttpError } from '../types'
 import type {
     AddDashboardOptions,
     ConverterResult,
     PushAnalyticsEnvVariables,
 } from '../types'
+import { HttpError } from '../types'
 import { HtmlCollector } from './HtmlCollector'
 
 export class ResponseManager {

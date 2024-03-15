@@ -2,7 +2,6 @@ import type { IncomingMessage, ServerResponse } from 'http'
 import type { Worker } from 'node:cluster'
 import cluster from 'node:cluster'
 import { availableParallelism } from 'node:os'
-import { HttpError } from '../types'
 import type {
     AddDashboardOptions,
     ConvertedItem,
@@ -10,6 +9,7 @@ import type {
     PushAnalyticsEnvVariables,
     QueueItem,
 } from '../types'
+import { HttpError } from '../types'
 import { DashboardItemsQueue } from './DashboardItemQueue'
 import { PrimaryProcessMessageHandler } from './PrimaryProcessMessageHandler'
 import { RequestHandler } from './RequestHandler'

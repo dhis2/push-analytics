@@ -1,4 +1,3 @@
-import { parseTemplate } from './htmlTemplates'
 import type {
     ConditionalDownloadInstructions,
     DashboardItem,
@@ -11,8 +10,9 @@ import type {
     Step,
     Steps,
 } from '../types'
-import { getDashboardItemVisualization, getNestedPropertyValue } from './scrapeUtils'
 import type { Authenticator } from './Authenticator'
+import { parseTemplate } from './htmlTemplates'
+import { getDashboardItemVisualization, getNestedPropertyValue } from './scrapeUtils'
 
 /* TODO: in the future type 'APP' should also be supported
  * But before we can do this we need a way to identify the correct URL

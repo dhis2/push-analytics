@@ -2,9 +2,9 @@ import axios from 'axios'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { AddDashboardOptions, Dashboard, PushAnalyticsEnvVariables } from '../types'
 import {
+    getDashboardFieldsParam,
     parseQueryString,
     validateRequest,
-    getDashboardFieldsParam,
 } from './RequestHandlerUtils'
 
 type RequestHandlerOptions = {

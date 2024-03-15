@@ -1,6 +1,6 @@
 import MdParser from '@dhis2/d2-ui-rich-text/parser/MdParser'
-import { insertIntoAnchorListTemplate, insertIntoTextTemplate } from './htmlTemplates'
 import type { Converter, ConverterResult, QueueItem, ReportType } from '../types'
+import { insertIntoAnchorListTemplate, insertIntoTextTemplate } from './htmlTemplates'
 
 export class ItemParser implements Converter {
     #baseUrl: string
