@@ -3,6 +3,7 @@ import {
     insertIntoDashboardHeaderTemplate,
     insertIntoEmailTemplate,
 } from '../WorkerProcess/htmlTemplates'
+import { HttpError } from '../types'
 import type {
     AddDashboardOptions,
     ConverterResult,
@@ -27,13 +28,16 @@ export class ResponseManager {
         this.#responseQueue = new Map()
     }
 
-    addDashboard({
-        requestId,
-        response,
-        dashboardId,
-        displayName,
-        dashboardItems,
-    }: AddDashboardOptions) {
+    addDashboard(
+        {
+            requestId,
+            response,
+            dashboardId,
+            displayName,
+            dashboardItems,
+        }: AddDashboardOptions,
+        onConversionTimeout: () => void
+    ) {
         this.#responseQueue.set(requestId, {
             requestId,
             response,
@@ -42,7 +46,7 @@ export class ResponseManager {
                 dashboardId,
                 displayName
             ),
-            itemsHtmlCollection: new HtmlCollector(dashboardItems),
+            itemsHtmlCollection: new HtmlCollector(dashboardItems, onConversionTimeout),
         })
     }
 
@@ -67,17 +71,11 @@ export class ResponseManager {
         return this.getItemsHtmlCollection(requestId)?.isComplete() ?? false
     }
 
-    sendResponse(requestId: number) {
-        const responseQueueItem = this.#responseQueue.get(requestId)
-
-        if (!responseQueueItem) {
-            throw new Error(
-                `Cannot find response queue item for request ID "${requestId}"`
-            )
-        }
-
-        const { response, headerHtml, itemsHtmlCollection } = responseQueueItem
+    sendSuccessResponse(requestId: number) {
+        const { response, headerHtml, itemsHtmlCollection } =
+            this.#getResponseQueueItem(requestId)
         const { html, css } = itemsHtmlCollection.combineItemsHtml()
+        itemsHtmlCollection.clearConversionTimeout()
         const fullHtml = insertIntoEmailTemplate(headerHtml + html, css)
 
         this.#responseQueue.delete(requestId)
@@ -86,7 +84,34 @@ export class ResponseManager {
         response.end(fullHtml)
     }
 
+    sendErrorResponse(requestId: number, error: unknown) {
+        const { response } = this.#getResponseQueueItem(requestId)
+        const statusCode = error instanceof HttpError ? error.statusCode : 500
+        const message = error instanceof Error ? error.message : 'Internal error'
+
+        this.#responseQueue.delete(requestId)
+
+        response.writeHead(statusCode)
+        response.end(message)
+    }
+
+    getPendingRequestIds() {
+        return Array.from(this.#responseQueue.values()).map(({ requestId }) => requestId)
+    }
+
     getItemsHtmlCollection(requestId: number) {
         return this.#responseQueue.get(requestId)?.itemsHtmlCollection
+    }
+
+    #getResponseQueueItem(requestId: number) {
+        const responseQueueItem = this.#responseQueue.get(requestId)
+
+        if (!responseQueueItem) {
+            throw new Error(
+                `Cannot find response queue item for request ID "${requestId}"`
+            )
+        }
+
+        return responseQueueItem
     }
 }

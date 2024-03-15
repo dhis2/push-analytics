@@ -41,4 +41,14 @@ export class DashboardItemsQueue {
     hasQueuedItems() {
         return this.#dashboardItemsQueue.length > 0
     }
+
+    clearQueue() {
+        this.#dashboardItemsQueue = []
+    }
+
+    removeItemsByRequestId(requestId: number) {
+        this.#dashboardItemsQueue = this.#dashboardItemsQueue.filter(
+            (queueItem) => queueItem.requestId !== requestId
+        )
+    }
 }

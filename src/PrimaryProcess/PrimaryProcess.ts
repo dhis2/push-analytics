@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'http'
 import type { Worker } from 'node:cluster'
 import cluster from 'node:cluster'
 import { availableParallelism } from 'node:os'
+import { HttpError } from '../types'
 import type {
     AddDashboardOptions,
     ConvertedItem,
@@ -42,13 +43,29 @@ export class PrimaryProcess {
     }
 
     #handleWorkerExit(worker: Worker) {
-        console.log('handleWorkerExit', worker.id)
-        // Remove worker from pool
-        // Identify request the crashed worker was busy with
-        // Remove all queued dashboard items belonging to that request
-        // Ignore all future conversion results for that request
-        // Send error response for request
-        // Fork a new worker and add the new one to the worker pool
+        /* Technically it would be possible to handle this
+         * in a much more sophisticated way. We could find out if the worker
+         * was busy doing a conversion and then we could either retry that
+         * conversion, or we could send an error response to the request
+         * the dashboard item was part of. But this would involve implementing
+         * additional state by which we can map a worker.id to a
+         * request.id. I don't think it would be overly complex, but in
+         * practice we've only seen workers die when the service was idle
+         * for a long time. So we just go with this simple but quite drastic
+         * approach of sending error responses to all pending requests and
+         * and clearing the dashboard item queue. */
+        this.#dashboardItemsQueue.clearQueue()
+        for (const requestId of this.#responseManager.getPendingRequestIds()) {
+            this.#responseManager.sendErrorResponse(
+                requestId,
+                new HttpError(
+                    `Conversion worker with ID "${worker.id}" crashed, need to restart`,
+                    500
+                )
+            )
+        }
+        // Start another worker to replace the dead one
+        cluster.fork()
     }
 
     #handleWorkerItemRequest(workerId: number) {
@@ -60,8 +77,6 @@ export class PrimaryProcess {
     }
 
     #handleWorkerConversionSuccess(convertedItem: ConvertedItem) {
-        console.log('handleWorkerConversionSuccess')
-        // Add html to response collector
         const { requestId, dashboardItemId, html, css } = convertedItem
         const converterResult: ConverterResult = { html, css }
         this.#responseManager.addDashboardItemHtml(
@@ -69,10 +84,8 @@ export class PrimaryProcess {
             dashboardItemId,
             converterResult
         )
-        // Check if the received response completes the dashboard-items in the request
         if (this.#responseManager.isConversionComplete(requestId)) {
-            // If it does, then combine HTML and send 200 response
-            this.#responseManager.sendResponse(requestId)
+            this.#responseManager.sendSuccessResponse(requestId)
         }
     }
 
@@ -84,9 +97,12 @@ export class PrimaryProcess {
         // Send error response for request
     }
 
-    #onDashboardDetailsReceived(payload: AddDashboardOptions) {
-        this.#responseManager.addDashboard(payload)
-        this.#dashboardItemsQueue.addItemsToQueue(payload)
+    #onDashboardDetailsReceived(details: AddDashboardOptions) {
+        const onConversionTimeout = () => {
+            this.#handleConversionTimeout(details.requestId)
+        }
+        this.#responseManager.addDashboard(details, onConversionTimeout)
+        this.#dashboardItemsQueue.addItemsToQueue(details)
         this.#messageHandler.notifyWorkersAboutAddedDashboardItems()
     }
 
@@ -95,6 +111,17 @@ export class PrimaryProcess {
         // send error response
         // remove from response builder
         // remove from item queue
+    }
+
+    #handleConversionTimeout(requestId: number) {
+        this.#dashboardItemsQueue.removeItemsByRequestId(requestId)
+        this.#responseManager.sendErrorResponse(
+            requestId,
+            new HttpError(
+                'Conversion workers took too long to convert the dashboard',
+                504
+            )
+        )
     }
 
     #computeWorkerCount(maxThreads: string = ''): number {

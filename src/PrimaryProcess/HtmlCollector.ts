@@ -1,15 +1,20 @@
 import type { ConverterResult, DashboardItem } from '../types'
 
+// Conversions should not take longer than 60 seconds
+const MAX_CONVERSION_TIME = 60 * 1000
+
 export class HtmlCollector {
     #itemsHtml: Map<string, ConverterResult>
     #convertedItemsCount: number
+    #conversionTimeout: NodeJS.Timeout
 
-    constructor(dashboardItems: DashboardItem[]) {
+    constructor(dashboardItems: DashboardItem[], onConversionTimeout: () => void) {
         this.#convertedItemsCount = 0
         this.#itemsHtml = dashboardItems.reduce((itemsHtml, dashboardItem) => {
             itemsHtml.set(dashboardItem.id, { html: '', css: '' })
             return itemsHtml
         }, new Map())
+        this.#conversionTimeout = setTimeout(onConversionTimeout, MAX_CONVERSION_TIME)
     }
 
     addDashboardItemHtml(dashboardItemId: string, converterResult: ConverterResult) {
@@ -41,5 +46,9 @@ export class HtmlCollector {
                 css: '',
             }
         )
+    }
+
+    clearConversionTimeout() {
+        clearTimeout(this.#conversionTimeout)
     }
 }
