@@ -4,6 +4,7 @@ import cluster from 'node:cluster'
 import { availableParallelism } from 'node:os'
 import type {
     AddDashboardOptions,
+    ConversionErrorPayload,
     ConvertedItemPayload,
     ConverterResult,
     PushAnalyticsEnvVariables,
@@ -99,12 +100,18 @@ export class PrimaryProcess {
         }
     }
 
-    #handleWorkerConversionFailure() {
-        console.log('handleWorkerConversionFailure')
-        // Identify the request the worker failed conversion was part of
-        // Remove all queued dashboard items belonging to that request
-        // Ignore all future conversion results for that request
-        // Send error response for request
+    #handleWorkerConversionFailure(conversionErrorPayload: ConversionErrorPayload) {
+        const { requestId, errorMessage, errorCode, httpResponseStatusCode, errorName } =
+            conversionErrorPayload
+        // Turn the message into a proper error again
+        const error = new PushAnalyticsError(
+            errorMessage,
+            errorCode,
+            httpResponseStatusCode,
+            errorName
+        )
+        this.#dashboardItemsQueue.removeItemsByRequestId(requestId)
+        this.#responseManager.sendErrorResponse(requestId, error)
     }
 
     #onDashboardDetailsReceived(details: AddDashboardOptions) {
@@ -116,11 +123,9 @@ export class PrimaryProcess {
         this.#messageHandler.notifyWorkersAboutAddedDashboardItems()
     }
 
-    #handleRequestHandlerError() {
-        console.log('handleRequestHandlerError')
-        // send error response
-        // remove from response builder
-        // remove from item queue
+    #handleRequestHandlerError(requestId: number, error: unknown) {
+        this.#dashboardItemsQueue.removeItemsByRequestId(requestId)
+        this.#responseManager.sendErrorResponse(requestId, error)
     }
 
     #handleConversionTimeout(requestId: number) {

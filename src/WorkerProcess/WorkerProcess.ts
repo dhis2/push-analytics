@@ -78,14 +78,29 @@ export class WorkerProcess {
             )
             this.#messageHandler.sendConvertedItemToPrimaryProcess(convertedItem)
         } catch (error) {
-            const errorMessage =
-                error instanceof Error ? error.message : 'Conversion error'
+            let errorMessage = 'Internal error'
+            let errorName = 'UNKNOWN CONVERSION ERROR'
+            let errorCode = 'E2000'
+            let httpResponseStatusCode = 500
+
+            if (error instanceof PushAnalyticsError) {
+                errorMessage = error.message
+                errorName = error.name
+                errorCode = error.errorCode
+                httpResponseStatusCode = error.httpResponseStatusCode
+            } else if (error instanceof Error) {
+                errorMessage = error.message
+            }
+
             const conversionError: ConversionErrorPayload = {
                 requestId: queueItem.requestId,
                 dashboardId: queueItem.dashboardId,
                 username: queueItem.username,
                 dashboardItemId: queueItem.dashboardItem.id,
                 errorMessage,
+                errorName,
+                errorCode,
+                httpResponseStatusCode,
             }
             this.#messageHandler.sendItemConversionErrorToPrimaryProcess(conversionError)
         } finally {

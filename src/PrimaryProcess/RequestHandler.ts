@@ -55,18 +55,6 @@ export class RequestHandler {
             })
         } catch (error) {
             this.#onRequestHandlerError(requestId, error)
-            console.log(error)
-            // console.log(error)
-            // if (error instanceof HttpResponseStatusError) {
-            //     response.writeHead(error.status)
-            // } else {
-            //     response.writeHead(500)
-            // }
-            // if (error instanceof Error) {
-            //     response.end(error.message)
-            // } else {
-            //     response.end('An unknown error occurred')
-            // }
         }
     }
 

@@ -23,6 +23,9 @@ export type ConvertedItemPayload = {
 
 export type ConversionErrorPayload = Omit<ConvertedItemPayload, 'html' | 'css'> & {
     errorMessage: string
+    errorName: string
+    errorCode: string
+    httpResponseStatusCode: number
 }
 
 export type QueueItem = {

@@ -3,9 +3,14 @@ export class PushAnalyticsError extends Error {
     errorCode: string
     httpResponseStatusCode: number
 
-    constructor(message: string, errorCode: string, httpResponseStatusCode: number) {
+    constructor(
+        message: string,
+        errorCode: string,
+        httpResponseStatusCode: number,
+        name?: string
+    ) {
         super(message)
-        this.name = this.constructor.name
+        this.name = name ?? this.constructor.name
         this.httpResponseStatusCode = httpResponseStatusCode
         this.errorCode = errorCode
     }
