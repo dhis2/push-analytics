@@ -1,4 +1,3 @@
-import process from 'node:process'
 import type { Browser } from 'puppeteer'
 import type {
     ConvertedItemPayload,
@@ -40,11 +39,17 @@ class DashboardItemConverterError extends PushAnalyticsError {
 }
 
 export class DashboardItemConverter {
+    #env: PushAnalyticsEnvVariables
     #conversionInProgress: boolean
     #appScraper: AppScraper
     #itemParser: ItemParser
 
-    private constructor(appScraper: AppScraper, itemParser: ItemParser) {
+    private constructor(
+        env: PushAnalyticsEnvVariables,
+        appScraper: AppScraper,
+        itemParser: ItemParser
+    ) {
+        this.#env = env
         this.#conversionInProgress = false
         this.#appScraper = appScraper
         this.#itemParser = itemParser
@@ -53,7 +58,7 @@ export class DashboardItemConverter {
     static async create(env: PushAnalyticsEnvVariables, browser: Browser) {
         const appScraper = await AppScraper.create(env.baseUrl, browser)
         const itemParser = new ItemParser(env.baseUrl)
-        return new DashboardItemConverter(appScraper, itemParser)
+        return new DashboardItemConverter(env, appScraper, itemParser)
     }
 
     public isConverting() {
@@ -100,8 +105,10 @@ export class DashboardItemConverter {
                 : await this.#itemParser.convert(queueItem)
             return result
         } catch (error) {
-            // TODO: skip in production too?
-            if (this.isAppScraperConversion(queueItem)) {
+            if (
+                this.isAppScraperConversion(queueItem) &&
+                this.#env.context === 'development'
+            ) {
                 try {
                     await this.#appScraper.takeErrorScreenShot(queueItem)
                 } catch (error) {
