@@ -18,9 +18,20 @@ import {
     getDashboardItemVisualization,
     waitForFileToDownload,
 } from './scrapeUtils'
+import { PushAnalyticsError } from '../PushAnalyticsError'
 
 const DONWLOAD_PAGE_URL_PATTERN =
     /api\/analytics\/enrollments|events\/query\/[a-zA-Z0-9]{11}\.html\+css/
+
+class AppScraperError extends PushAnalyticsError {
+    constructor(
+        message: string,
+        errorCode: string = 'E2201',
+        httpResponseStatusCode: number = 500
+    ) {
+        super(message, errorCode, httpResponseStatusCode)
+    }
+}
 
 export class AppScraper implements Converter {
     baseUrl: string
@@ -54,7 +65,7 @@ export class AppScraper implements Converter {
 
     get browser() {
         if (!this.#browser) {
-            throw new Error('Browser has not been initialized')
+            throw new AppScraperError('Browser has not been initialized')
         } else {
             return this.#browser
         }
@@ -62,7 +73,7 @@ export class AppScraper implements Converter {
 
     get page() {
         if (!this.#page) {
-            throw new Error('Page has not been initialized')
+            throw new AppScraperError('Page has not been initialized')
         } else {
             return this.#page
         }
@@ -208,7 +219,7 @@ export class AppScraper implements Converter {
         } else if (strategy === 'interceptFileDownload') {
             return await this.#interceptFileDownload(visualization)
         } else {
-            throw new Error(
+            throw new AppScraperError(
                 'Invalid instructions received for obtaining the download artifact'
             )
         }
@@ -279,7 +290,7 @@ export class AppScraper implements Converter {
             .then((target) => target.page())
 
         if (!downloadPage) {
-            throw new Error('Could not find download page')
+            throw new AppScraperError('Could not find download page')
         }
         return downloadPage
     }
@@ -290,7 +301,7 @@ export class AppScraper implements Converter {
 
     async #setDownloadPathToItemId(id: string) {
         if (!this.#cdpSession) {
-            throw new Error('CDP Session has not been initialized')
+            throw new AppScraperError('CDP Session has not been initialized')
         }
 
         await this.#cdpSession.send('Browser.setDownloadBehavior', {
@@ -308,7 +319,9 @@ export class AppScraper implements Converter {
             } else if (step.goto && typeof step.goto === 'string') {
                 await this.page.goto(step.goto, { waitUntil: 'networkidle2' })
             } else {
-                throw new Error(`Failed to intepret step "${JSON.stringify(step)}"`)
+                throw new AppScraperError(
+                    `Failed to intepret step "${JSON.stringify(step)}"`
+                )
             }
         }
     }

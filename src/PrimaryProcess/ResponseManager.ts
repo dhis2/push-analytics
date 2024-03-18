@@ -8,8 +8,18 @@ import type {
     ConverterResult,
     PushAnalyticsEnvVariables,
 } from '../types'
-import { HttpError } from '../types'
 import { HtmlCollector } from './HtmlCollector'
+import { PushAnalyticsError } from '../PushAnalyticsError'
+
+class ResponseManagerError extends PushAnalyticsError {
+    constructor(
+        message: string,
+        errorCode: string = 'E1601',
+        httpResponseStatusCode: number = 500
+    ) {
+        super(message, errorCode, httpResponseStatusCode)
+    }
+}
 
 export class ResponseManager {
     #env: PushAnalyticsEnvVariables
@@ -86,11 +96,18 @@ export class ResponseManager {
 
     sendErrorResponse(requestId: number, error: unknown) {
         const { response } = this.#getResponseQueueItem(requestId)
-        const statusCode = error instanceof HttpError ? error.statusCode : 500
-        const message = error instanceof Error ? error.message : 'Internal error'
+
+        let statusCode = 500
+        let message = 'Internal error'
+
+        if (error instanceof PushAnalyticsError) {
+            statusCode = error.httpResponseStatusCode
+            message = error.formattedMessage()
+        } else if (error instanceof Error) {
+            message = error.message
+        }
 
         this.#responseQueue.delete(requestId)
-
         response.writeHead(statusCode)
         response.end(message)
     }
@@ -107,7 +124,7 @@ export class ResponseManager {
         const responseQueueItem = this.#responseQueue.get(requestId)
 
         if (!responseQueueItem) {
-            throw new Error(
+            throw new ResponseManagerError(
                 `Cannot find response queue item for request ID "${requestId}"`
             )
         }

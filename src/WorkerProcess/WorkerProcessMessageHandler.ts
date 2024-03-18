@@ -1,6 +1,7 @@
+import { PushAnalyticsError } from '../PushAnalyticsError'
 import type {
-    ConversionError,
-    ConvertedItem,
+    ConversionErrorPayload,
+    ConvertedItemPayload,
     ItemConversionErrorMessage,
     ItemConvertedMessage,
     ItemRequestedFromQueueMessage,
@@ -14,6 +15,16 @@ type OnItemTakenFromQueueFn = (queueItem: QueueItem) => void
 type WorkerProcessMessageHandlerOptions = {
     onItemsAddedToQueue: OnItemsAddedToQueueFn
     onItemTakenFromQueue: OnItemTakenFromQueueFn
+}
+
+class WorkerProcessMessageHandlerError extends PushAnalyticsError {
+    constructor(
+        message: string,
+        errorCode: string = 'E2701',
+        httpResponseStatusCode: number = 500
+    ) {
+        super(message, errorCode, httpResponseStatusCode)
+    }
 }
 
 export class WorkerProcessMessageHandler {
@@ -36,7 +47,7 @@ export class WorkerProcessMessageHandler {
         this.#notifyPrimaryProcess(message)
     }
 
-    sendConvertedItemToPrimaryProcess(convertedItem: ConvertedItem) {
+    sendConvertedItemToPrimaryProcess(convertedItem: ConvertedItemPayload) {
         const message: ItemConvertedMessage = {
             type: 'ITEM_CONVERTED',
             payload: convertedItem,
@@ -44,7 +55,7 @@ export class WorkerProcessMessageHandler {
         this.#notifyPrimaryProcess(message)
     }
 
-    sendItemConversionErrorToPrimaryProcess(conversionError: ConversionError) {
+    sendItemConversionErrorToPrimaryProcess(conversionError: ConversionErrorPayload) {
         const message: ItemConversionErrorMessage = {
             type: 'ITEM_CONVERSION_ERROR',
             payload: conversionError,
@@ -59,7 +70,9 @@ export class WorkerProcessMessageHandler {
             | ItemConversionErrorMessage
     ) {
         if (!process?.send) {
-            throw new Error('Cannont send message from worker to main thread')
+            throw new WorkerProcessMessageHandlerError(
+                'Cannont send message from worker to main thread'
+            )
         }
         process.send(message)
     }
@@ -73,7 +86,9 @@ export class WorkerProcessMessageHandler {
             case 'ITEM_TAKEN_FROM_QUEUE':
                 return this.#onItemTakenFromQueue(message.payload as QueueItem)
             default:
-                throw new Error('Received unknown message from primary process')
+                throw new WorkerProcessMessageHandlerError(
+                    'Received unknown message from primary process'
+                )
         }
     }
 }

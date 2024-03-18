@@ -1,13 +1,14 @@
 import process from 'node:process'
 import type { Browser } from 'puppeteer'
 import type {
-    ConvertedItem,
+    ConvertedItemPayload,
     ParsedScrapeInstructions,
     PushAnalyticsEnvVariables,
     QueueItem,
 } from '../types'
 import { AppScraper } from './AppScraper'
 import { ItemParser } from './ItemParser'
+import { PushAnalyticsError } from '../PushAnalyticsError'
 
 const SCRAPABLE_DASHBOARD_ITEM_TYPES = new Set([
     'VISUALIZATION',
@@ -27,6 +28,16 @@ const PARSABLE_DASHBOARD_ITEM_TYPES = new Set([
     'MESSAGES',
     'USERS',
 ])
+
+class DashboardItemConverterError extends PushAnalyticsError {
+    constructor(
+        message: string,
+        errorCode: string = 'E2401',
+        httpResponseStatusCode: number = 500
+    ) {
+        super(message, errorCode, httpResponseStatusCode)
+    }
+}
 
 export class DashboardItemConverter {
     #conversionInProgress: boolean
@@ -52,7 +63,7 @@ export class DashboardItemConverter {
     public async convert(
         queueItem: QueueItem,
         config?: ParsedScrapeInstructions
-    ): Promise<ConvertedItem> {
+    ): Promise<ConvertedItemPayload> {
         this.#conversionInProgress = true
         const result = await this.#convertItemType(queueItem, config)
 
@@ -72,7 +83,7 @@ export class DashboardItemConverter {
         } else if (PARSABLE_DASHBOARD_ITEM_TYPES) {
             return false
         } else {
-            throw new Error(
+            throw new DashboardItemConverterError(
                 `Encountered unknown dashboard item type ${queueItem.dashboardItem.type}`
             )
         }
@@ -100,9 +111,7 @@ export class DashboardItemConverter {
                 }
             }
 
-            throw new Error(
-                `Conversion failed for dashboard-id ${queueItem.dashboardId} item-id "${queueItem.dashboardItem.id}" of type "${queueItem.dashboardItem.type}" on worker with PID "${process.pid}"`
-            )
+            throw error
         } finally {
             this.#conversionInProgress = false
         }

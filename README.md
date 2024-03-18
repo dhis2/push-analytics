@@ -138,6 +138,39 @@ stateDiagram-v2
     action_output_empty_string --> html_template
 ```
 
+## Errors
+
+The push-analytics-service codebase contains various error classes which all extend the base `PushAnalyticsError`, which itself extends the native JavaScript `Error` class. Errors extending from `PushAnalyticsError` have some properties and methods of interest:
+
+-   `httpStatusCode`: This status code is used when sending the response
+-   `errorCode`: These codes are specific to the push analytics service. Currently they are not utilized but in the long term these codes could be used by API consumers to take specific actions or show particular messages. See an overview of current errors below, and note the following:
+    -   The `errorCode` is a string starting with and `E` followed by 4 digits, i.e. `E1000`
+    -   Primary process errors are all in the 1000 range, and worker errors are all in the 2000 range
+    -   Currently, each class in push-analytics throws its own error with its own error code and no further granularity has been applied.
+-   `formattedMessage()`: This method will return a formatted string which includes the error name, code and message.
+
+| Error code | HTTPS Status Code | Error Class (name)                  | Description                                           |
+| ---------- | ----------------- | ----------------------------------- | ----------------------------------------------------- |
+| `E1101`    | `500`             | `PrimaryProcessError`               | Generic error in `PrimaryProcess` class               |
+| `E1102`    | `500`             | `PrimaryProcessError`               | Worker crashed                                        |
+| `E1103`    | `504`             | `PrimaryProcessError`               | Conversion process timed out timed out                |
+| `E1201`    | `500`             | `DashboardItemsQueueError`          | Generic error in `DashboardItemsQueue` class          |
+| `E1301`    | `500`             | `HtmlCollectorError`                | Generic error in `HtmlCollector` class                |
+| `E1401`    | `500`             | `PrimaryProcessMessageHandlerError` | Generic error in `PrimaryProcessMessageHandler` class |
+| `E1501`    | `500`             | `RequestHandlerError`               | Generic error in `RequestHandler` class               |
+| `E1502`    | `400`             | `RequestHandlerError`               | Invalid query parameters in request                   |
+| `E1503`    | `404`             | `RequestHandlerError`               | Invalid pathname in request                           |
+| `E1504`    | `405`             | `RequestHandlerError`               | Invalid request method                                |
+| `E1505`    | `400`             | `RequestHandlerError`               | Invalid request headers                               |
+| `E1601`    | `500`             | `ResponseManagerError`              | Generic error in `ResponseManager` class              |
+| `E2101`    | `500`             | `WorkerProcessError`                | Generic error in `WorkerProcess` class                |
+| `E2201`    | `500`             | `AppScraperError`                   | Generic error in `AppScraper` class                   |
+| `E2301`    | `500`             | `AuthenticatorError`                | Generic error in `Authenticator` class                |
+| `E2401`    | `500`             | `DashboardItemConverterError`       | Generic error in `DashboardItemConverter` class       |
+| `E2501`    | `500`             | `ItemParserError`                   | Generic error in `ItemParser` class                   |
+| `E2601`    | `500`             | `ScrapeConfigCacheError`            | Generic error in `ScrapeConfigCache` class            |
+| `E2701`    | `500`             | `WorkerProcessMessageHandlerError`  | Generic error in `WorkerProcessMessageHandler` class  |
+
 ## TODO (To be removed before release)
 
 -   [x] Convert text-based element selection to DOM attribute based element selection. _Currently there is no way to uniquely identify the download dropdown-button or the download-menu-items based on DOM attributes, so to implement this we would need to add unique selectors to all apps. **This is currently blocking producing localized content.**_

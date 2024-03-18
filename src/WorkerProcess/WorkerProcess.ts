@@ -1,6 +1,7 @@
+import { PushAnalyticsError } from '../PushAnalyticsError'
 import type {
-    ConversionError,
-    ConvertedItem,
+    ConversionErrorPayload,
+    ConvertedItemPayload,
     PushAnalyticsEnvVariables,
     QueueItem,
 } from '../types'
@@ -9,6 +10,16 @@ import { DashboardItemConverter } from './DashboardItemConverter'
 import { ScrapeConfigCache } from './ScrapeConfigCache'
 import { WorkerProcessMessageHandler } from './WorkerProcessMessageHandler'
 import { createPuppeteerBrowser } from './scrapeUtils'
+
+class WorkerProcessError extends PushAnalyticsError {
+    constructor(
+        message: string,
+        errorCode: string = 'E2101',
+        httpResponseStatusCode: number = 500
+    ) {
+        super(message, errorCode, httpResponseStatusCode)
+    }
+}
 
 export class WorkerProcess {
     #messageHandler: WorkerProcessMessageHandler
@@ -50,7 +61,7 @@ export class WorkerProcess {
 
     async #handleItemTakenFromQueue(queueItem: QueueItem) {
         if (this.#converter.isConverting()) {
-            throw new Error(
+            throw new WorkerProcessError(
                 'Received a queueItem while converting, this should not happen'
             )
         }
@@ -61,7 +72,7 @@ export class WorkerProcess {
                 config = await this.#configCache.getScrapeConfig(queueItem.dashboardItem)
                 await this.#authenticator.impersonateUser(queueItem.username)
             }
-            const convertedItem: ConvertedItem = await this.#converter.convert(
+            const convertedItem: ConvertedItemPayload = await this.#converter.convert(
                 queueItem,
                 config
             )
@@ -69,7 +80,7 @@ export class WorkerProcess {
         } catch (error) {
             const errorMessage =
                 error instanceof Error ? error.message : 'Conversion error'
-            const conversionError: ConversionError = {
+            const conversionError: ConversionErrorPayload = {
                 requestId: queueItem.requestId,
                 dashboardId: queueItem.dashboardId,
                 username: queueItem.username,

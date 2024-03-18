@@ -1,8 +1,8 @@
 import type { Worker } from 'node:cluster'
 import cluster from 'node:cluster'
 import type {
-    ConversionError,
-    ConvertedItem,
+    ConversionErrorPayload,
+    ConvertedItemPayload,
     ItemConversionErrorMessage,
     ItemConvertedMessage,
     ItemRequestedFromQueueMessage,
@@ -10,10 +10,11 @@ import type {
     ItemsAddedToQueueMessage,
     QueueItem,
 } from '../types'
+import { PushAnalyticsError } from '../PushAnalyticsError'
 
 type OnWorkerItemRequestFn = (workerId: number) => void
-type OnWorkerConversionSuccessFn = (convertedItem: ConvertedItem) => void
-type OnWorkerConversionFailureFn = (conversionError: ConversionError) => void
+type OnWorkerConversionSuccessFn = (convertedItem: ConvertedItemPayload) => void
+type OnWorkerConversionFailureFn = (conversionError: ConversionErrorPayload) => void
 type OnWorkerExitFn = (worker: Worker) => void
 
 type PrimaryProcessMessageHandlerOptions = {
@@ -21,6 +22,16 @@ type PrimaryProcessMessageHandlerOptions = {
     onWorkerConversionSuccess: OnWorkerConversionSuccessFn
     onWorkerConversionFailure: OnWorkerConversionFailureFn
     onWorkerExit: OnWorkerExitFn
+}
+
+class PrimaryProcessMessageHandlerError extends PushAnalyticsError {
+    constructor(
+        message: string,
+        errorCode: string = 'E1401',
+        httpResponseStatusCode: number = 500
+    ) {
+        super(message, errorCode, httpResponseStatusCode)
+    }
 }
 
 export class PrimaryProcessMessageHandler {
@@ -47,14 +58,14 @@ export class PrimaryProcessMessageHandler {
         if (cluster?.workers) {
             return cluster.workers
         } else {
-            throw new Error('Could not get cluster workers')
+            throw new PrimaryProcessMessageHandlerError('Could not get cluster workers')
         }
     }
 
     notifyWorkersAboutAddedDashboardItems() {
         for (const worker of Object.values(this.clusterWorkers)) {
             if (!worker) {
-                throw new Error('Worker not found')
+                throw new PrimaryProcessMessageHandlerError('Worker not found')
             }
 
             worker.send({
@@ -67,7 +78,9 @@ export class PrimaryProcessMessageHandler {
         const worker = this.clusterWorkers[workerId]
 
         if (!worker) {
-            throw new Error(`Could not find worker with ID "${workerId}"`)
+            throw new PrimaryProcessMessageHandlerError(
+                `Could not find worker with ID "${workerId}"`
+            )
         }
 
         worker.send({
@@ -87,11 +100,17 @@ export class PrimaryProcessMessageHandler {
             case 'ITEM_REQUESTED_FROM_QUEUE':
                 return this.#onWorkerItemRequest(worker.id)
             case 'ITEM_CONVERTED':
-                return this.#onWorkerConversionSuccess(message.payload as ConvertedItem)
+                return this.#onWorkerConversionSuccess(
+                    message.payload as ConvertedItemPayload
+                )
             case 'ITEM_CONVERSION_ERROR':
-                return this.#onWorkerConversionFailure(message.payload as ConversionError)
+                return this.#onWorkerConversionFailure(
+                    message.payload as ConversionErrorPayload
+                )
             default:
-                throw new Error('Received unknown message from worker')
+                throw new PrimaryProcessMessageHandlerError(
+                    'Received unknown message from worker'
+                )
         }
     }
 }

@@ -1,6 +1,17 @@
 import MdParser from '@dhis2/d2-ui-rich-text/parser/MdParser'
 import type { Converter, ConverterResult, QueueItem, ReportType } from '../types'
 import { insertIntoAnchorListTemplate, insertIntoTextTemplate } from './htmlTemplates'
+import { PushAnalyticsError } from '../PushAnalyticsError'
+
+class ItemParserError extends PushAnalyticsError {
+    constructor(
+        message: string,
+        errorCode: string = 'E2501',
+        httpResponseStatusCode: number = 500
+    ) {
+        super(message, errorCode, httpResponseStatusCode)
+    }
+}
 
 export class ItemParser implements Converter {
     #baseUrl: string
@@ -22,7 +33,7 @@ export class ItemParser implements Converter {
             case 'USERS':
                 return Promise.resolve({ html: '', css: '' })
             default:
-                throw new Error(
+                throw new ItemParserError(
                     `Parser not implemented for dashboard item type "${queueItem.dashboardItem.type}"`
                 )
         }
@@ -32,7 +43,7 @@ export class ItemParser implements Converter {
         const text = queueItem.dashboardItem.text
 
         if (!text) {
-            throw new Error(
+            throw new ItemParserError(
                 'function `parseText` received a `dashboardItem` without a `text` string'
             )
         }
@@ -52,7 +63,7 @@ export class ItemParser implements Converter {
         const resources = queueItem?.dashboardItem?.resources
 
         if (!(Array.isArray(resources) && resources.length > 0)) {
-            throw new Error(
+            throw new ItemParserError(
                 'function `parseResources` received a `dashboardItem` without any resources'
             )
         }
@@ -73,7 +84,7 @@ export class ItemParser implements Converter {
         const reports = queueItem?.dashboardItem?.reports
 
         if (!(Array.isArray(reports) && reports.length > 0)) {
-            throw new Error(
+            throw new ItemParserError(
                 'method `#convertReports` received a `dashboardItem` without any reports'
             )
         }

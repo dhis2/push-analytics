@@ -1,7 +1,18 @@
+import { PushAnalyticsError } from '../PushAnalyticsError'
 import type { ConverterResult, DashboardItem } from '../types'
 
 // Conversions should not take longer than 60 seconds
 const MAX_CONVERSION_TIME = 60 * 1000
+
+class HtmlCollectorError extends PushAnalyticsError {
+    constructor(
+        message: string,
+        errorCode: string = 'E1301',
+        httpResponseStatusCode: number = 500
+    ) {
+        super(message, errorCode, httpResponseStatusCode)
+    }
+}
 
 export class HtmlCollector {
     #itemsHtml: Map<string, ConverterResult>
@@ -19,7 +30,7 @@ export class HtmlCollector {
 
     addDashboardItemHtml(dashboardItemId: string, converterResult: ConverterResult) {
         if (!this.#itemsHtml.has(dashboardItemId)) {
-            throw new Error(
+            throw new HtmlCollectorError(
                 `Provided dashboard item ID "${dashboardItemId}" not found in HTML collection`
             )
         }

@@ -12,7 +12,7 @@ export type AddDashboardOptions = {
     dashboardItems: DashboardItem[]
 }
 
-export type ConvertedItem = {
+export type ConvertedItemPayload = {
     requestId: number
     dashboardId: string
     username: string
@@ -21,7 +21,7 @@ export type ConvertedItem = {
     css: string
 }
 
-export type ConversionError = Omit<ConvertedItem, 'html' | 'css'> & {
+export type ConversionErrorPayload = Omit<ConvertedItemPayload, 'html' | 'css'> & {
     errorMessage: string
 }
 
@@ -53,9 +53,12 @@ export type ItemRequestedFromQueueMessage = Message<
 
 export type ItemTakenFromQueueMessage = Message<'ITEM_TAKEN_FROM_QUEUE', QueueItem>
 
-export type ItemConvertedMessage = Message<'ITEM_CONVERTED', ConvertedItem>
+export type ItemConvertedMessage = Message<'ITEM_CONVERTED', ConvertedItemPayload>
 
-export type ItemConversionErrorMessage = Message<'ITEM_CONVERSION_ERROR', ConversionError>
+export type ItemConversionErrorMessage = Message<
+    'ITEM_CONVERSION_ERROR',
+    ConversionErrorPayload
+>
 
 export type ConverterResult = {
     html: string

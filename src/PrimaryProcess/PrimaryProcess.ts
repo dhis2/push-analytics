@@ -4,16 +4,26 @@ import cluster from 'node:cluster'
 import { availableParallelism } from 'node:os'
 import type {
     AddDashboardOptions,
-    ConvertedItem,
+    ConvertedItemPayload,
     ConverterResult,
     PushAnalyticsEnvVariables,
     QueueItem,
 } from '../types'
-import { HttpError } from '../types'
 import { DashboardItemsQueue } from './DashboardItemQueue'
 import { PrimaryProcessMessageHandler } from './PrimaryProcessMessageHandler'
 import { RequestHandler } from './RequestHandler'
 import { ResponseManager } from './ResponseManager'
+import { PushAnalyticsError } from '../PushAnalyticsError'
+
+class PrimaryProcessError extends PushAnalyticsError {
+    constructor(
+        message: string,
+        errorCode: string = 'E1101',
+        httpResponseStatusCode: number = 500
+    ) {
+        super(message, errorCode, httpResponseStatusCode)
+    }
+}
 
 export class PrimaryProcess {
     #workerCount: number
@@ -58,9 +68,9 @@ export class PrimaryProcess {
         for (const requestId of this.#responseManager.getPendingRequestIds()) {
             this.#responseManager.sendErrorResponse(
                 requestId,
-                new HttpError(
+                new PrimaryProcessError(
                     `Conversion worker with ID "${worker.id}" crashed, need to restart`,
-                    500
+                    'E1102'
                 )
             )
         }
@@ -76,7 +86,7 @@ export class PrimaryProcess {
         }
     }
 
-    #handleWorkerConversionSuccess(convertedItem: ConvertedItem) {
+    #handleWorkerConversionSuccess(convertedItem: ConvertedItemPayload) {
         const { requestId, dashboardItemId, html, css } = convertedItem
         const converterResult: ConverterResult = { html, css }
         this.#responseManager.addDashboardItemHtml(
@@ -117,8 +127,9 @@ export class PrimaryProcess {
         this.#dashboardItemsQueue.removeItemsByRequestId(requestId)
         this.#responseManager.sendErrorResponse(
             requestId,
-            new HttpError(
+            new PrimaryProcessError(
                 'Conversion workers took too long to convert the dashboard',
+                'E1102',
                 504
             )
         )

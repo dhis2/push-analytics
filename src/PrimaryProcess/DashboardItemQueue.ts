@@ -1,4 +1,15 @@
+import { PushAnalyticsError } from '../PushAnalyticsError'
 import type { AddDashboardOptions, QueueItem } from '../types'
+
+class DashboardItemsQueueError extends PushAnalyticsError {
+    constructor(
+        message: string,
+        errorCode: string = 'E1201',
+        httpResponseStatusCode: number = 500
+    ) {
+        super(message, errorCode, httpResponseStatusCode)
+    }
+}
 
 export class DashboardItemsQueue {
     #dashboardItemsQueue: QueueItem[]
@@ -12,9 +23,7 @@ export class DashboardItemsQueue {
         const queueItem = this.#dashboardItemsQueue.shift()
 
         if (!queueItem) {
-            throw new Error(
-                'Queue is empty, call `hasQueuedItems` before calling this method'
-            )
+            throw new DashboardItemsQueueError('Failed to get item from empty queue')
         }
 
         return queueItem

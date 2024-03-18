@@ -1,3 +1,4 @@
+import { PushAnalyticsError } from '../PushAnalyticsError'
 import type {
     ConditionalDownloadInstructions,
     DashboardItem,
@@ -31,6 +32,16 @@ const APP_PATH_LOOKUP: Record<DashboardItemType, string | undefined> = {
     VISUALIZATION: 'dhis-web-data-visualizer',
 }
 
+class ScrapeConfigCacheError extends PushAnalyticsError {
+    constructor(
+        message: string,
+        errorCode: string = 'E2601',
+        httpResponseStatusCode: number = 500
+    ) {
+        super(message, errorCode, httpResponseStatusCode)
+    }
+}
+
 export class ScrapeConfigCache {
     #baseUrl: string
     #cachedConfigs: Map<string, ScrapeInstructions>
@@ -48,7 +59,7 @@ export class ScrapeConfigCache {
         const appPath = APP_PATH_LOOKUP[dashboardItem.type]
 
         if (!appPath) {
-            throw new Error(
+            throw new ScrapeConfigCacheError(
                 `Could not find app to scrape for dahsboard item type "${dashboardItem.type}"`
             )
         }
@@ -58,7 +69,7 @@ export class ScrapeConfigCache {
             (await this.#fetchJsonInstructions(appPath))
 
         if (!scrapeConfig) {
-            throw new Error(
+            throw new ScrapeConfigCacheError(
                 `Could not get config for dashboard-item-type "${dashboardItem.type}"`
             )
         }
@@ -77,7 +88,7 @@ export class ScrapeConfigCache {
             this.#cachedConfigs.set(appPath, instructions)
             return instructions
         } catch (error) {
-            throw new Error(
+            throw new ScrapeConfigCacheError(
                 `Could not fetch JSON scrape instructions from ${jsonFileUrl}`
             )
         }
@@ -149,7 +160,7 @@ export class ScrapeConfigCache {
         )
 
         if (!condition?.selector) {
-            throw new Error(
+            throw new ScrapeConfigCacheError(
                 `Could identify conditional for selector dashboard item of type ${dashboardItem.type}`
             )
         }
@@ -166,7 +177,7 @@ export class ScrapeConfigCache {
         )
 
         if (!condition?.strategy) {
-            throw new Error(
+            throw new ScrapeConfigCacheError(
                 `Could identify conditional download instructions for dashboard item of type ${dashboardItem.type}`
             )
         }

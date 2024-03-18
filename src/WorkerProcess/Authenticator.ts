@@ -1,6 +1,17 @@
 import type { Browser, Page, Protocol } from 'puppeteer'
 import type { PushAnalyticsEnvVariables } from '../types'
 import type { DashboardItemConverter } from './DashboardItemConverter'
+import { PushAnalyticsError } from '../PushAnalyticsError'
+
+class AuthenticationError extends PushAnalyticsError {
+    constructor(
+        message: string,
+        errorCode: string = 'E2301',
+        httpResponseStatusCode: number = 500
+    ) {
+        super(message, errorCode, httpResponseStatusCode)
+    }
+}
 
 export class Authenticator {
     #env: PushAnalyticsEnvVariables
@@ -36,7 +47,9 @@ export class Authenticator {
             await this.#setSessionCookie()
             this.#preventSessionExpiry()
         } catch (error) {
-            throw new Error('Admin user could not login to the DHIS2 Core instance')
+            throw new AuthenticationError(
+                'Admin user could not login to the DHIS2 Core instance'
+            )
         }
     }
 
@@ -63,7 +76,7 @@ export class Authenticator {
                 'POST'
             )
             if (exitImpersonateStatusCode !== 200) {
-                throw new Error(
+                throw new AuthenticationError(
                     `Could not exit impersonation mode. Received response status code ${exitImpersonateStatusCode}`
                 )
             }
@@ -76,7 +89,7 @@ export class Authenticator {
                 'POST'
             )
             if (impersonateStatusCode !== 200) {
-                throw new Error(
+                throw new AuthenticationError(
                     `Could not impersonate user. Received response status code ${impersonateStatusCode}`
                 )
             }
@@ -91,7 +104,9 @@ export class Authenticator {
         returnValueType: 'responseStatus' | 'responseBody' = 'responseStatus'
     ) {
         if (!this.#sessionCookie) {
-            throw new Error('Cookie not found, cannot issue an authenticated request')
+            throw new AuthenticationError(
+                'Cookie not found, cannot issue an authenticated request'
+            )
         }
 
         const options = {
@@ -162,7 +177,7 @@ export class Authenticator {
             (cookie: Protocol.Network.Cookie) => cookie.name === 'JSESSIONID'
         )
         if (!sessionCookie) {
-            throw new Error('Could not find session cookie')
+            throw new AuthenticationError('Could not find session cookie')
         }
 
         this.#sessionCookie = sessionCookie

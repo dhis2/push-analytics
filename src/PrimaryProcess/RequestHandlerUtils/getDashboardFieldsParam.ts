@@ -1,4 +1,5 @@
 import type { Field } from '../../types'
+import { RequestHandlerError } from './RequestHandlerError'
 
 export function getDashboardFieldsParam() {
     return [
@@ -32,6 +33,6 @@ function parseField(field: Field): string {
     } else if (field.name && Array.isArray(field.fields)) {
         return `${field.name}[${field.fields.map(parseField).join()}]`
     } else {
-        throw new Error('Could not parse query fields')
+        throw new RequestHandlerError('Could not parse query fields')
     }
 }

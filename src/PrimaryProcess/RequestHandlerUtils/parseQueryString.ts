@@ -1,5 +1,5 @@
 import { URL } from 'node:url'
-import { HttpError } from '../../types'
+import { RequestHandlerError } from './RequestHandlerError'
 
 const UID_REGEX = /^[a-zA-Z][a-zA-Z0-9]{10}$/
 const isValidUid = (id: string) => UID_REGEX.test(id)
@@ -10,11 +10,15 @@ export function parseQueryString(url = '', baseUrl: string) {
     const { dashboardId, username } = Object.fromEntries(searchParams)
 
     if (!isValidUid(dashboardId)) {
-        throw new HttpError(`Invalid dashhboard UID ${dashboardId}`, 400)
+        throw new RequestHandlerError(
+            `Invalid dashhboard UID "${dashboardId}"`,
+            'E1502',
+            400
+        )
     }
 
     if (!isNonEmptyString(username)) {
-        throw new HttpError(`Invalid username ${username}`, 400)
+        throw new RequestHandlerError(`Invalid username "${username}"`, 'E1502', 400)
     }
 
     return { dashboardId, username }
