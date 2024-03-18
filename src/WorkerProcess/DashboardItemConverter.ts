@@ -112,6 +112,8 @@ export class DashboardItemConverter {
                 try {
                     await this.#appScraper.takeErrorScreenShot(queueItem)
                 } catch (error) {
+                    /* Note that the error below is swallowed because the service
+                     * should not crash when a debug tool fails to work properly */
                     console.log(
                         `Error screenshot failed for item-id "${queueItem.dashboardItem.id}"`
                     )

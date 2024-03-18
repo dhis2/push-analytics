@@ -17,21 +17,11 @@ import {
     downloadPath,
     getDashboardItemVisualization,
     waitForFileToDownload,
-} from './scrapeUtils'
-import { PushAnalyticsError } from '../PushAnalyticsError'
+} from './AppScraperUtils'
+import { AppScraperError } from './AppScraperUtils/AppScraperError'
 
 const DONWLOAD_PAGE_URL_PATTERN =
     /api\/analytics\/enrollments|events\/query\/[a-zA-Z0-9]{11}\.html\+css/
-
-class AppScraperError extends PushAnalyticsError {
-    constructor(
-        message: string,
-        errorCode: string = 'E2201',
-        httpResponseStatusCode: number = 500
-    ) {
-        super(message, errorCode, httpResponseStatusCode)
-    }
-}
 
 export class AppScraper implements Converter {
     baseUrl: string

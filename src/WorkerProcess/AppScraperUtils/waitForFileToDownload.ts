@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import { AppScraperError } from './AppScraperError'
 
 /* Note that 20 * 500 = 10000 ms so we wait max 10 sec
  * for a file download to complete */
@@ -36,7 +37,7 @@ export async function waitForFileToDownload(dir: string): Promise<string> {
                 }
                 if (tries === MAX_TRIES) {
                     clearInterval(interval)
-                    reject('Could not find file')
+                    reject(new AppScraperError('Could not find file'))
                 }
             }, INTERVAL)
         }

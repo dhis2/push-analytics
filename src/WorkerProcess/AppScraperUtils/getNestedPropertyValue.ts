@@ -1,3 +1,5 @@
+import { AppScraperError } from './AppScraperError'
+
 export function getNestedPropertyValue(obj: object, propertyPath: string) {
     const nestedValue = propertyPath
         .split('.')
@@ -13,14 +15,16 @@ export function getNestedPropertyValue(obj: object, propertyPath: string) {
             try {
                 val = val[key as keyof typeof val]
             } catch {
-                throw new Error(`Found invalid dashboard item property "${propertyPath}"`)
+                throw new AppScraperError(
+                    `Found invalid dashboard item property "${propertyPath}"`
+                )
             }
 
             return val
         }, obj)
 
     if (typeof nestedValue === 'object') {
-        throw new Error('Value found on property path was not a primitive')
+        throw new AppScraperError('Value found on property path was not a primitive')
     }
 
     return nestedValue as string | boolean | number

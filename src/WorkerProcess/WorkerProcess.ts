@@ -9,7 +9,7 @@ import { Authenticator } from './Authenticator'
 import { DashboardItemConverter } from './DashboardItemConverter'
 import { ScrapeConfigCache } from './ScrapeConfigCache'
 import { WorkerProcessMessageHandler } from './WorkerProcessMessageHandler'
-import { createPuppeteerBrowser } from './scrapeUtils'
+import { createPuppeteerBrowser } from './AppScraperUtils'
 
 class WorkerProcessError extends PushAnalyticsError {
     constructor(

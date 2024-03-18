@@ -7,6 +7,7 @@ import type {
     EventVisualization,
     Visualization,
 } from '../../types'
+import { AppScraperError } from './AppScraperError'
 
 export function getDashboardItemVisualization(
     dashboardItem: DashboardItem
@@ -23,6 +24,6 @@ export function getDashboardItemVisualization(
         case 'VISUALIZATION':
             return dashboardItem.visualization as Visualization
         default:
-            throw new Error(`Received unsupported type ${dashboardItem.type}`)
+            throw new AppScraperError(`Received unsupported type ${dashboardItem.type}`)
     }
 }

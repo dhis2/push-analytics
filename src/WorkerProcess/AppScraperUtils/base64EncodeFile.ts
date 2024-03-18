@@ -1,9 +1,10 @@
 import fs from 'fs'
 import fsPromises from 'node:fs/promises'
+import { AppScraperError } from './AppScraperError'
 
 export async function base64EncodeFile(path: string): Promise<string> {
     if (!fs.existsSync(path)) {
-        throw new Error(`Did not find a file on path "${path}"`)
+        throw new AppScraperError(`Did not find a file on path "${path}"`)
     }
 
     const bitmap = await fsPromises.readFile(path)
@@ -16,9 +17,9 @@ export async function base64EncodeFile(path: string): Promise<string> {
             setTimeout(() => {
                 fs.readFile(path, (error, retriedBitmap) => {
                     if (error) {
-                        reject(error)
+                        reject(new AppScraperError(error.message))
                     } else if (retriedBitmap.byteLength === 0) {
-                        reject('Bitmap still empty after retry')
+                        reject(new AppScraperError('Bitmap still empty after retry'))
                     } else {
                         resolve(Buffer.from(retriedBitmap).toString('base64'))
                     }
