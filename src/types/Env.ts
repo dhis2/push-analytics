@@ -7,6 +7,9 @@ export type EnvVariableName =
     | 'DHIS2_CORE_ADMIN_PASSWORD'
     | 'DHIS2_CORE_SESSION_TIMEOUT'
     | 'MAX_THREADS'
+    | 'CONTEXT'
+
+export type PushAnalyticsContext = 'development' | 'production' | 'ci'
 
 export type PushAnalyticsEnvVariables = {
     host: string
@@ -17,4 +20,5 @@ export type PushAnalyticsEnvVariables = {
     adminPassword: string
     maxThreads: string
     sessionTimeout: string
+    context: PushAnalyticsContext
 }
