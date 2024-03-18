@@ -162,6 +162,7 @@ The push-analytics-service codebase contains various error classes which all ext
 | `E1503`    | `404`             | `RequestHandlerError`               | Invalid pathname in request                           |
 | `E1504`    | `405`             | `RequestHandlerError`               | Invalid request method                                |
 | `E1505`    | `400`             | `RequestHandlerError`               | Invalid request headers                               |
+| `E1505`    | `403`             | `RequestHandlerError`               | Remote IP not allowed                                 |
 | `E1601`    | `500`             | `ResponseManagerError`              | Generic error in `ResponseManager` class              |
 | `E2101`    | `500`             | `WorkerProcessError`                | Generic error in `WorkerProcess` class                |
 | `E2201`    | `500`             | `AppScraperError`                   | Generic error in `AppScraper` class                   |
