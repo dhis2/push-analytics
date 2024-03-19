@@ -9,7 +9,7 @@ import type {
     PushAnalyticsEnvVariables,
 } from '../types'
 import { HtmlCollector } from './HtmlCollector'
-import { PushAnalyticsError } from '../PushAnalyticsError'
+import { PushAnalyticsError, parseError } from '../Error'
 
 class ResponseManagerError extends PushAnalyticsError {
     constructor(
@@ -85,9 +85,9 @@ export class ResponseManager {
         const { response, headerHtml, itemsHtmlCollection } =
             this.#getResponseQueueItem(requestId)
         const { html, css } = itemsHtmlCollection.combineItemsHtml()
-        itemsHtmlCollection.clearConversionTimeout()
         const fullHtml = insertIntoEmailTemplate(headerHtml + html, css)
 
+        itemsHtmlCollection.clearConversionTimeout()
         this.#responseQueue.delete(requestId)
 
         response.writeHead(200)
@@ -96,19 +96,10 @@ export class ResponseManager {
 
     sendErrorResponse(requestId: number, error: unknown) {
         const { response } = this.#getResponseQueueItem(requestId)
-
-        let statusCode = 500
-        let message = 'Internal error'
-
-        if (error instanceof PushAnalyticsError) {
-            statusCode = error.httpResponseStatusCode
-            message = error.formattedMessage()
-        } else if (error instanceof Error) {
-            message = error.message
-        }
+        const { httpStatusCode, message } = parseError(error)
 
         this.#responseQueue.delete(requestId)
-        response.writeHead(statusCode)
+        response.writeHead(httpStatusCode)
         response.end(message)
     }
 

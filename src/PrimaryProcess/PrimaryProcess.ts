@@ -14,7 +14,7 @@ import { DashboardItemsQueue } from './DashboardItemQueue'
 import { PrimaryProcessMessageHandler } from './PrimaryProcessMessageHandler'
 import { RequestHandler } from './RequestHandler'
 import { ResponseManager } from './ResponseManager'
-import { PushAnalyticsError } from '../PushAnalyticsError'
+import { PushAnalyticsError } from '../Error'
 
 class PrimaryProcessError extends PushAnalyticsError {
     constructor(

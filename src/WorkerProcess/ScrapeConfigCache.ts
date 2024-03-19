@@ -1,4 +1,4 @@
-import { PushAnalyticsError } from '../PushAnalyticsError'
+import { PushAnalyticsError } from '../Error'
 import type {
     ConditionalDownloadInstructions,
     DashboardItem,

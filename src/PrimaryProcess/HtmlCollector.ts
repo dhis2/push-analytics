@@ -1,4 +1,4 @@
-import { PushAnalyticsError } from '../PushAnalyticsError'
+import { PushAnalyticsError } from '../Error'
 import type { ConverterResult, DashboardItem } from '../types'
 
 // Conversions should not take longer than 60 seconds

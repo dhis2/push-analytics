@@ -7,7 +7,7 @@ import type {
 } from '../types'
 import { AppScraper } from './AppScraper'
 import { ItemParser } from './ItemParser'
-import { PushAnalyticsError } from '../PushAnalyticsError'
+import { PushAnalyticsError } from '../Error'
 
 const SCRAPABLE_DASHBOARD_ITEM_TYPES = new Set([
     'VISUALIZATION',

@@ -10,7 +10,7 @@ import type {
     ItemsAddedToQueueMessage,
     QueueItem,
 } from '../types'
-import { PushAnalyticsError } from '../PushAnalyticsError'
+import { PushAnalyticsError } from '../Error'
 
 type OnWorkerItemRequestFn = (workerId: number) => void
 type OnWorkerConversionSuccessFn = (convertedItem: ConvertedItemPayload) => void
