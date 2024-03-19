@@ -1,18 +1,19 @@
-import { Browser } from 'puppeteer'
-import type { DashboardItem } from '.'
-import { Authenticator } from '../worker/Authenticator'
-
-export type OnConversionCompleteFn = (html: string) => void
+import type { ServerResponse } from 'node:http'
+import type { Browser } from 'puppeteer'
+import type { DashboardItem, ParsedScrapeInstructions } from '.'
+import type { Authenticator } from '../WorkerProcess/Authenticator'
 
 export type AddDashboardOptions = {
-    dashboardId: string
+    requestId: number
+    response: ServerResponse
     username: string
+    dashboardId: string
     displayName: string
     dashboardItems: DashboardItem[]
-    onComplete: OnConversionCompleteFn
 }
 
-export type ConvertedItem = {
+export type ConvertedItemPayload = {
+    requestId: number
     dashboardId: string
     username: string
     dashboardItemId: string
@@ -20,33 +21,47 @@ export type ConvertedItem = {
     css: string
 }
 
+export type ConversionErrorPayload = Omit<ConvertedItemPayload, 'html' | 'css'> & {
+    errorMessage: string
+    errorName: string
+    errorCode: string
+    httpResponseStatusCode: number
+}
+
 export type QueueItem = {
+    requestId: number
     dashboardId: string
     dashboardItem: DashboardItem
     username: string
 }
 
 export type MessageType =
-    | 'WORKER_INITIALIZED'
-    | 'ITEM_CONVERSION_REQUEST'
-    | 'ITEM_CONVERSION_RESULT'
+    | 'ITEMS_ADDED_TO_QUEUE'
+    | 'ITEM_REQUESTED_FROM_QUEUE'
+    | 'ITEM_TAKEN_FROM_QUEUE'
+    | 'ITEM_CONVERTED'
+    | 'ITEM_CONVERSION_ERROR'
 
 export type Message<T extends MessageType, P> = {
     type: T
     payload?: P
 }
 
-export type ConversionRequestMessage = Message<
-    'ITEM_CONVERSION_REQUEST',
-    QueueItem
+export type ItemsAddedToQueueMessage = Message<'ITEMS_ADDED_TO_QUEUE', undefined>
+
+export type ItemRequestedFromQueueMessage = Message<
+    'ITEM_REQUESTED_FROM_QUEUE',
+    undefined
 >
 
-export type ConversionResultMessage = Message<
-    'ITEM_CONVERSION_RESULT',
-    ConvertedItem
->
+export type ItemTakenFromQueueMessage = Message<'ITEM_TAKEN_FROM_QUEUE', QueueItem>
 
-export type WorkerInitializedMessage = Message<'WORKER_INITIALIZED', undefined>
+export type ItemConvertedMessage = Message<'ITEM_CONVERTED', ConvertedItemPayload>
+
+export type ItemConversionErrorMessage = Message<
+    'ITEM_CONVERSION_ERROR',
+    ConversionErrorPayload
+>
 
 export type ConverterResult = {
     html: string
@@ -54,7 +69,10 @@ export type ConverterResult = {
 }
 
 export interface Converter {
-    convert: (queueItem: QueueItem) => Promise<ConverterResult>
+    convert: (
+        queueItem: QueueItem,
+        config: ParsedScrapeInstructions
+    ) => Promise<ConverterResult>
     init?: (browser: Browser, authenticator: Authenticator) => Promise<void>
     takeErrorScreenShot?: (queueItem: QueueItem) => Promise<void>
 }

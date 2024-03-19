@@ -6,6 +6,7 @@ module.exports = {
     root: true,
     rules: {
         '@typescript-eslint/no-var-requires': 'off',
+        '@typescript-eslint/consistent-type-imports': 'error',
     },
     env: {
         browser: true,
