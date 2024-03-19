@@ -21,21 +21,29 @@ export class ItemParser implements Converter {
     }
 
     async convert(queueItem: QueueItem): Promise<ConverterResult> {
-        switch (queueItem.dashboardItem.type) {
-            case 'REPORTS':
-                return await this.#convertReports(queueItem)
-            case 'RESOURCES':
-                return await this.#convertResources(queueItem)
-            case 'TEXT':
-                return await this.#convertText(queueItem)
-            case 'APP':
-            case 'MESSAGES':
-            case 'USERS':
-                return Promise.resolve({ html: '', css: '' })
-            default:
-                throw new ItemParserError(
-                    `Parser not implemented for dashboard item type "${queueItem.dashboardItem.type}"`
-                )
+        try {
+            switch (queueItem.dashboardItem.type) {
+                case 'REPORTS':
+                    return await this.#convertReports(queueItem)
+                case 'RESOURCES':
+                    return await this.#convertResources(queueItem)
+                case 'TEXT':
+                    return await this.#convertText(queueItem)
+                case 'APP':
+                case 'MESSAGES':
+                case 'USERS':
+                    return Promise.resolve({ html: '', css: '' })
+                default:
+                    throw new ItemParserError(
+                        `Parser not implemented for dashboard item type "${queueItem.dashboardItem.type}"`
+                    )
+            }
+        } catch (error) {
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : 'An unknown conversion error occurred'
+            throw new ItemParserError(message)
         }
     }
 
