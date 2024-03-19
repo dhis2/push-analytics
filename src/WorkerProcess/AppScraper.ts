@@ -235,6 +235,7 @@ export class AppScraper implements Converter {
             css: css ?? '',
         }
     }
+
     async #screenShotImgOnDownloadPage(
         downloadPage: Page,
         name: string,
@@ -246,6 +247,7 @@ export class AppScraper implements Converter {
 
         return { html: insertIntoImageTemplate(base64Str, name), css: '' }
     }
+
     async #interceptFileDownload(
         visualization: AnyVisualization
     ): Promise<ConverterResult> {
