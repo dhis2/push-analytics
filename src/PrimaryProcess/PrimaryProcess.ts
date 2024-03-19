@@ -46,7 +46,6 @@ export class PrimaryProcess {
         this.requestHandler = new RequestHandler({
             env,
             onDashboardDetailsReceived: this.#onDashboardDetailsReceived.bind(this),
-            onRequestHandlerError: this.#handleRequestHandlerError.bind(this),
         })
         this.#responseManager = new ResponseManager(env)
         this.requestListener = this.requestHandler.handleRequest.bind(this.requestHandler)
@@ -121,11 +120,6 @@ export class PrimaryProcess {
         this.#responseManager.addDashboard(details, onConversionTimeout)
         this.#dashboardItemsQueue.addItemsToQueue(details)
         this.#messageHandler.notifyWorkersAboutAddedDashboardItems()
-    }
-
-    #handleRequestHandlerError(requestId: number, error: unknown) {
-        this.#dashboardItemsQueue.removeItemsByRequestId(requestId)
-        this.#responseManager.sendErrorResponse(requestId, error)
     }
 
     #handleConversionTimeout(requestId: number) {

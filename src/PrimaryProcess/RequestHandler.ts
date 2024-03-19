@@ -6,27 +6,23 @@ import {
     parseQueryString,
     validateRequest,
 } from './RequestHandlerUtils'
+import { parseError } from '../Error'
+
+type DashboardDetails = Omit<AddDashboardOptions, 'requestId' | 'response'>
 
 type RequestHandlerOptions = {
     env: PushAnalyticsEnvVariables
     onDashboardDetailsReceived: (options: AddDashboardOptions) => void
-    onRequestHandlerError: (requestId: number, error: unknown) => void
 }
 
 export class RequestHandler {
     #env: PushAnalyticsEnvVariables
     #requestId: number
     #onDashboardDetailsReceived: (options: AddDashboardOptions) => void
-    #onRequestHandlerError: (requestId: number, error: unknown) => void
 
-    constructor({
-        env,
-        onDashboardDetailsReceived,
-        onRequestHandlerError,
-    }: RequestHandlerOptions) {
+    constructor({ env, onDashboardDetailsReceived }: RequestHandlerOptions) {
         this.#env = env
         this.#onDashboardDetailsReceived = onDashboardDetailsReceived
-        this.#onRequestHandlerError = onRequestHandlerError
         this.#requestId = 0
     }
 
@@ -36,25 +32,39 @@ export class RequestHandler {
          * the dashboard items are fetched the value of this.requestId
          * would be off-by-one. */
         const requestId = ++this.#requestId
+        let dashboardDetails = undefined
 
         try {
-            validateRequest(request, this.#env.baseUrl)
+            dashboardDetails = await this.#getDashboardDetails(request)
+        } catch (error) {
+            /* Note that this is failing before the dashboard (items)
+             * are queued, so we can just send an error from here */
+            const { httpStatusCode, message } = parseError(error)
+            response.writeHead(httpStatusCode)
+            response.end(message)
+        }
 
-            const { dashboardId, username } = parseQueryString(
-                request.url,
-                this.#env.baseUrl
-            )
-            const { displayName, dashboardItems } = await this.#getDashboard(dashboardId)
+        if (dashboardDetails) {
             this.#onDashboardDetailsReceived({
                 requestId,
                 response,
-                username,
-                dashboardId,
-                displayName,
-                dashboardItems,
+                ...dashboardDetails,
             })
-        } catch (error) {
-            this.#onRequestHandlerError(requestId, error)
+        }
+    }
+
+    async #getDashboardDetails(
+        request: IncomingMessage
+    ): Promise<DashboardDetails | undefined> {
+        validateRequest(request, this.#env.baseUrl)
+
+        const { dashboardId, username } = parseQueryString(request.url, this.#env.baseUrl)
+        const { displayName, dashboardItems } = await this.#getDashboard(dashboardId)
+        return {
+            dashboardId,
+            username,
+            displayName,
+            dashboardItems,
         }
     }
 
