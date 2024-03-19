@@ -66,37 +66,37 @@ services:
             mynetwork:
                 ipv4_address: 172.26.0.8
 
-    # fake-smtp-server:
-    #     image: gessnerfl/fake-smtp-server:2.2.0
-    #     hostname: 'fake-smtp-server'
-    #     restart: always
-    #     environment:
-    #         - FAKESMTP_AUTHENTICATION_USERNAME=myuser
-    #         - FAKESMTP_AUTHENTICATION_PASSWORD=mysecretpassword
-    #         - FAKESMTP_PORT=8030
-    #         - SERVER_PORT=8031
-    #         - MANAGEMENT_SERVER_PORT=8032
-    #     ports:
-    #         - 8030:8030 #expose smtp port
-    #         - 8031:8031 #expose web ui
-    #         - 8032:8032 #expose management api
-    #     networks:
-    #         mynetwork:
-    #             ipv4_address: 172.26.0.9
+    fake-smtp-server:
+        image: gessnerfl/fake-smtp-server:2.2.0
+        hostname: 'fake-smtp-server'
+        restart: always
+        environment:
+            - FAKESMTP_AUTHENTICATION_USERNAME=myuser
+            - FAKESMTP_AUTHENTICATION_PASSWORD=mysecretpassword
+            - FAKESMTP_PORT=8030
+            - SERVER_PORT=8031
+            - MANAGEMENT_SERVER_PORT=8032
+        ports:
+            - 8030:8030 #expose smtp port
+            - 8031:8031 #expose web ui
+            - 8032:8032 #expose management api
+        networks:
+            mynetwork:
+                ipv4_address: 172.26.0.9
 
-    # push-analytics:
-    #     hostname: 'push-analytics'
-    #     build:
-    #         context: .
-    #         dockerfile: Dockerfile.dev
-    #     volumes:
-    #         - ./:/usr/src/app
-    #         - /usr/src/app/node_modules
-    #     ports:
-    #         - '${PORT}:${PORT}'
-    #     networks:
-    #         mynetwork:
-    #             ipv4_address: 172.26.0.10
+    push-analytics:
+        hostname: 'push-analytics'
+        build:
+            context: .
+            dockerfile: Dockerfile.dev
+        volumes:
+            - ./:/usr/src/app
+            - /usr/src/app/node_modules
+        ports:
+            - '${PORT}:${PORT}'
+        networks:
+            mynetwork:
+                ipv4_address: 172.26.0.10
 
 # volumes:
 #   db-dump:
