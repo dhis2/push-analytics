@@ -73,29 +73,40 @@ export class AppScraper implements Converter {
         queueItem: QueueItem,
         config: ParsedScrapeInstructions
     ): Promise<ConverterResult> {
-        const visualization = getDashboardItemVisualization(queueItem.dashboardItem)
+        try {
+            const visualization = getDashboardItemVisualization(queueItem.dashboardItem)
 
-        if (
-            queueItem.dashboardItem.type === 'EVENT_VISUALIZATION' &&
-            visualization.type !== 'LINE_LIST'
-        ) {
-            /* We only support event-visualizations of type line-lists.
-             * For any other type we return empty HTML as we do for all
-             * all unsupported dashboard item types */
-            return Promise.resolve({ html: '', css: '' })
+            if (
+                queueItem.dashboardItem.type === 'EVENT_VISUALIZATION' &&
+                visualization.type !== 'LINE_LIST'
+            ) {
+                /* We only support event-visualizations of type line-lists.
+                 * For any other type we return empty HTML as we do for all
+                 * all unsupported dashboard item types */
+                return Promise.resolve({ html: '', css: '' })
+            }
+
+            await this.page.bringToFront()
+            await this.#clearVisualization(config)
+            /* Make sure we download the exported file to `./images/${PID}_${dashboardItemId}`,
+             * which allows us to track the download process in a relatively sane way */
+            await this.#setDownloadPathToItemId(visualization.id)
+            await this.#modifyDownloadUrl(config)
+            await this.#showVisualization(config)
+            await this.#triggerDownload(config)
+            const { html, css } = await this.#obtainDownloadArtifact(
+                config,
+                visualization
+            )
+
+            return { html, css }
+        } catch (error) {
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : 'An unknown conversion error occurred'
+            throw new AppScraperError(message)
         }
-
-        await this.page.bringToFront()
-        await this.#clearVisualization(config)
-        /* Make sure we download the exported file to `./images/${PID}_${dashboardItemId}`,
-         * which allows us to track the download process in a relatively sane way */
-        await this.#setDownloadPathToItemId(visualization.id)
-        await this.#modifyDownloadUrl(config)
-        await this.#showVisualization(config)
-        await this.#triggerDownload(config)
-        const { html, css } = await this.#obtainDownloadArtifact(config, visualization)
-
-        return { html, css }
     }
 
     public async takeErrorScreenShot(queueItem: QueueItem) {
