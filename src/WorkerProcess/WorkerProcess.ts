@@ -5,11 +5,11 @@ import type {
     PushAnalyticsEnvVariables,
     QueueItem,
 } from '../types'
+import { createPuppeteerBrowser } from './AppScraperUtils'
 import { Authenticator } from './Authenticator'
 import { DashboardItemConverter } from './DashboardItemConverter'
 import { ScrapeConfigCache } from './ScrapeConfigCache'
 import { WorkerProcessMessageHandler } from './WorkerProcessMessageHandler'
-import { createPuppeteerBrowser } from './AppScraperUtils'
 
 class WorkerProcessError extends PushAnalyticsError {
     constructor(

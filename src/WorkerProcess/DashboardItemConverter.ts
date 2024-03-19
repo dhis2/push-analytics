@@ -1,4 +1,5 @@
 import type { Browser } from 'puppeteer'
+import { PushAnalyticsError } from '../Error'
 import type {
     ConvertedItemPayload,
     ParsedScrapeInstructions,
@@ -7,7 +8,6 @@ import type {
 } from '../types'
 import { AppScraper } from './AppScraper'
 import { ItemParser } from './ItemParser'
-import { PushAnalyticsError } from '../Error'
 
 const SCRAPABLE_DASHBOARD_ITEM_TYPES = new Set([
     'VISUALIZATION',

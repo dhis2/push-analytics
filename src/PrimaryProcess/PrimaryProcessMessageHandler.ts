@@ -1,5 +1,6 @@
 import type { Worker } from 'node:cluster'
 import cluster from 'node:cluster'
+import { PushAnalyticsError } from '../Error'
 import type {
     ConversionErrorPayload,
     ConvertedItemPayload,
@@ -10,7 +11,6 @@ import type {
     ItemsAddedToQueueMessage,
     QueueItem,
 } from '../types'
-import { PushAnalyticsError } from '../Error'
 
 type OnWorkerItemRequestFn = (workerId: number) => void
 type OnWorkerConversionSuccessFn = (convertedItem: ConvertedItemPayload) => void

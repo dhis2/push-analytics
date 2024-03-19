@@ -1,4 +1,5 @@
 import type { ServerResponse } from 'http'
+import { PushAnalyticsError, parseError } from '../Error'
 import {
     insertIntoDashboardHeaderTemplate,
     insertIntoEmailTemplate,
@@ -9,7 +10,6 @@ import type {
     PushAnalyticsEnvVariables,
 } from '../types'
 import { HtmlCollector } from './HtmlCollector'
-import { PushAnalyticsError, parseError } from '../Error'
 
 class ResponseManagerError extends PushAnalyticsError {
     constructor(

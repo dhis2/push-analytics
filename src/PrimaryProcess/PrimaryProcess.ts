@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'http'
 import type { Worker } from 'node:cluster'
 import cluster from 'node:cluster'
 import { availableParallelism } from 'node:os'
+import { PushAnalyticsError } from '../Error'
 import type {
     AddDashboardOptions,
     ConversionErrorPayload,
@@ -14,7 +15,6 @@ import { DashboardItemsQueue } from './DashboardItemQueue'
 import { PrimaryProcessMessageHandler } from './PrimaryProcessMessageHandler'
 import { RequestHandler } from './RequestHandler'
 import { ResponseManager } from './ResponseManager'
-import { PushAnalyticsError } from '../Error'
 
 class PrimaryProcessError extends PushAnalyticsError {
     constructor(

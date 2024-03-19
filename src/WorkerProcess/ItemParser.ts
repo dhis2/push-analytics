@@ -1,7 +1,7 @@
 import MdParser from '@dhis2/d2-ui-rich-text/parser/MdParser'
+import { PushAnalyticsError } from '../Error'
 import type { Converter, ConverterResult, QueueItem, ReportType } from '../types'
 import { insertIntoAnchorListTemplate, insertIntoTextTemplate } from './htmlTemplates'
-import { PushAnalyticsError } from '../Error'
 
 class ItemParserError extends PushAnalyticsError {
     constructor(

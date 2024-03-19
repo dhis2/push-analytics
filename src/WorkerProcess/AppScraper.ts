@@ -10,7 +10,6 @@ import type {
     QueueItem,
     Steps,
 } from '../types'
-import { insertIntoDivTemplate, insertIntoImageTemplate } from './htmlTemplates'
 import {
     base64EncodeFile,
     clearDir,
@@ -19,6 +18,7 @@ import {
     waitForFileToDownload,
 } from './AppScraperUtils'
 import { AppScraperError } from './AppScraperUtils/AppScraperError'
+import { insertIntoDivTemplate, insertIntoImageTemplate } from './htmlTemplates'
 
 const DONWLOAD_PAGE_URL_PATTERN =
     /api\/analytics\/enrollments|events\/query\/[a-zA-Z0-9]{11}\.html\+css/

@@ -1,12 +1,12 @@
 import axios from 'axios'
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import { parseError } from '../Error'
 import type { AddDashboardOptions, Dashboard, PushAnalyticsEnvVariables } from '../types'
 import {
     getDashboardFieldsParam,
     parseQueryString,
     validateRequest,
 } from './RequestHandlerUtils'
-import { parseError } from '../Error'
 
 type DashboardDetails = Omit<AddDashboardOptions, 'requestId' | 'response'>
 
