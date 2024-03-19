@@ -79,7 +79,7 @@ export class WorkerProcess {
             this.#messageHandler.sendConvertedItemToPrimaryProcess(convertedItem)
         } catch (error) {
             let errorMessage = 'Internal error'
-            let errorName = 'UNKNOWN CONVERSION ERROR'
+            let errorName = 'UnknownConversionError'
             let errorCode = 'E2000'
             let httpResponseStatusCode = 500
 
