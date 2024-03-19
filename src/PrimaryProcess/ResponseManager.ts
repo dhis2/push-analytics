@@ -82,8 +82,15 @@ export class ResponseManager {
     }
 
     sendSuccessResponse(requestId: number) {
-        const { response, headerHtml, itemsHtmlCollection } =
-            this.#getResponseQueueItem(requestId)
+        const queueItem = this.#responseQueue.get(requestId)
+
+        if (!queueItem) {
+            throw new ResponseManagerError(
+                `Cannot find response queue item for request ID "${requestId}"`
+            )
+        }
+
+        const { response, headerHtml, itemsHtmlCollection } = queueItem
         const { html, css } = itemsHtmlCollection.combineItemsHtml()
         const fullHtml = insertIntoEmailTemplate(headerHtml + html, css)
 
@@ -95,12 +102,18 @@ export class ResponseManager {
     }
 
     sendErrorResponse(requestId: number, error: unknown) {
-        const { response } = this.#getResponseQueueItem(requestId)
-        const { httpStatusCode, message } = parseError(error)
+        const queueItem = this.#responseQueue.get(requestId)
 
-        this.#responseQueue.delete(requestId)
-        response.writeHead(httpStatusCode)
-        response.end(message)
+        /* Not finding a queue item is a valid scenario which occurs
+         * when a single dashboard has multiple failing conversions
+         * being processed simultanuiously. */
+        if (queueItem) {
+            const { httpStatusCode, message } = parseError(error)
+
+            this.#responseQueue.delete(requestId)
+            queueItem.response.writeHead(httpStatusCode)
+            queueItem.response.end(message)
+        }
     }
 
     getPendingRequestIds() {
@@ -109,17 +122,5 @@ export class ResponseManager {
 
     getItemsHtmlCollection(requestId: number) {
         return this.#responseQueue.get(requestId)?.itemsHtmlCollection
-    }
-
-    #getResponseQueueItem(requestId: number) {
-        const responseQueueItem = this.#responseQueue.get(requestId)
-
-        if (!responseQueueItem) {
-            throw new ResponseManagerError(
-                `Cannot find response queue item for request ID "${requestId}"`
-            )
-        }
-
-        return responseQueueItem
     }
 }
