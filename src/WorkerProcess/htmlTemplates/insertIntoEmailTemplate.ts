@@ -44,7 +44,7 @@ const template = `
             margin: 0;
             padding: 0;
             background-color: #f4f6f8;
-            font-family: sans-serif;
+            font-family: sans-serif, arial;
         }
         body {
             -webkit-font-smoothing: antialiased;
@@ -115,6 +115,18 @@ const template = `
         .dashboard-header > .dashboard-link {
             color: inherit;
             text-decoration: none;
+        }
+        .dashboard-item table {
+            border-collapse: collapse;
+            font-size: 11pt;
+        }
+        .dashboard-item th, .dashboard-item td {
+            padding: 8px 4px 7px 4px;
+            border: 1px solid #e7e7e7;
+        }
+        .dashboard-item th {
+            background-color: #f3f3f3;
+            font-weight: bold;
         }
         {{css}}
     </style>
