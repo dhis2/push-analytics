@@ -28,6 +28,7 @@
     "dependencies": {
         "@dhis2/d2-ui-rich-text": "^7.4.3",
         "axios": "^1.6.2",
+        "minimatch": "^9.0.3",
         "puppeteer": "^21.3.8"
     }
 }
