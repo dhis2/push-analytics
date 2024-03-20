@@ -1,6 +1,7 @@
 import { PushAnalyticsError } from '../Error'
 import type {
     ConditionalDownloadInstructions,
+    ConditionalTriggerDownloadInstructions,
     DashboardItem,
     DashboardItemType,
     DownloadInstructions,
@@ -10,6 +11,7 @@ import type {
     SelectorConditions,
     Step,
     Steps,
+    TriggerDownloadInstructions,
 } from '../types'
 import { getDashboardItemVisualization, getNestedPropertyValue } from './AppScraperUtils'
 import type { Authenticator } from './Authenticator'
@@ -73,8 +75,8 @@ export class ScrapeConfigCache {
                 `Could not get config for dashboard-item-type "${dashboardItem.type}"`
             )
         }
-
-        return this.#parse(scrapeConfig, dashboardItem)
+        const parsedConfig = this.#parse(scrapeConfig, dashboardItem)
+        return parsedConfig
     }
 
     async #fetchJsonInstructions(appPath: string) {
@@ -127,7 +129,12 @@ export class ScrapeConfigCache {
                     return step
                 }) as Steps,
             },
-            triggerDownload: scrapeConfig.triggerDownload,
+            triggerDownload:
+                scrapeConfig.triggerDownload ??
+                this.#parseConditionalTriggerInstructions(
+                    scrapeConfig.triggerDownloadConditionally,
+                    dashboardItem
+                ),
             obtainDownloadArtifact:
                 // Transform conditional download instructions into unconditional
                 scrapeConfig.obtainDownloadArtifact ??
@@ -168,6 +175,26 @@ export class ScrapeConfigCache {
         return { waitForSelector: condition?.selector }
     }
 
+    #parseConditionalTriggerInstructions(
+        conditions: ConditionalTriggerDownloadInstructions[],
+        dashboardItem: DashboardItem
+    ): TriggerDownloadInstructions {
+        const condition = conditions.find((condition) =>
+            this.#isConditionMatch(condition, dashboardItem)
+        )
+
+        if (!condition?.strategy) {
+            throw new ScrapeConfigCacheError(
+                `Could identify conditional trigger download instructions for dashboard item of type ${dashboardItem.type}`
+            )
+        }
+
+        return {
+            strategy: condition.strategy,
+            steps: condition.steps,
+        }
+    }
+
     #parseConditionalDownloadInstructions(
         conditions: ConditionalDownloadInstructions[],
         dashboardItem: DashboardItem
@@ -189,11 +216,15 @@ export class ScrapeConfigCache {
             htmlSelector: condition.htmlSelector,
             cssSelector: condition.cssSelector,
             modifyDownloadUrl: condition.modifyDownloadUrl,
+            urlGlob: condition.urlGlob,
         }
     }
 
     #isConditionMatch(
-        condition: SelectorCondition | ConditionalDownloadInstructions,
+        condition:
+            | SelectorCondition
+            | ConditionalDownloadInstructions
+            | ConditionalTriggerDownloadInstructions,
         dashboardItem: DashboardItem
     ): boolean {
         const itemValue = getNestedPropertyValue(

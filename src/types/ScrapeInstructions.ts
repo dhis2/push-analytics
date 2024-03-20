@@ -4,6 +4,8 @@ type Strategy =
     | 'scrapeDownloadPage'
     | 'interceptFileDownload'
     | 'screenShotImgOnDownloadPage'
+    | 'interceptResponse'
+    | 'noop'
 
 export type StepKind =
     | 'goto'
@@ -23,6 +25,16 @@ export type SelectorConditions = Array<SelectorCondition>
 export type Step = Record<StepKind, string>
 export type Steps = Step[]
 
+export type TriggerDownloadInstructions = {
+    strategy: Strategy
+    steps: Steps
+}
+
+export type ConditionalTriggerDownloadInstructions = TriggerDownloadInstructions & {
+    dashboardItemProperty: string
+    value: string | string[]
+}
+
 export type DownloadInstructions = {
     strategy: Strategy
     HtmlOutput: HtmlOutput
@@ -33,6 +45,7 @@ export type DownloadInstructions = {
         searchValue: string
         replaceValue: string
     }
+    urlGlob?: string
 }
 
 export type ConditionalDownloadInstructions = DownloadInstructions & {
@@ -47,10 +60,8 @@ export type ScrapeInstructions = {
         strategy: Strategy
         steps: Record<StepKind, string | SelectorConditions>[]
     }
-    triggerDownload: {
-        strategy: Strategy
-        steps: Steps
-    }
+    triggerDownload: TriggerDownloadInstructions
+    triggerDownloadConditionally: ConditionalTriggerDownloadInstructions[]
     obtainDownloadArtifact: DownloadInstructions
     obtainDownloadArtifactConditionally: ConditionalDownloadInstructions[]
     clearVisualization: {
@@ -64,7 +75,9 @@ export type ScrapeInstructions = {
  * `showVisualization` is overridden so it does not contain a conditional selector */
 export type ParsedScrapeInstructions = Omit<
     ScrapeInstructions,
-    'obtainDownloadArtifactConditionally' | 'showVisualization'
+    | 'obtainDownloadArtifactConditionally'
+    | 'triggerDownloadConditionally'
+    | 'showVisualization'
 > & {
     showVisualization: {
         strategy: Strategy
