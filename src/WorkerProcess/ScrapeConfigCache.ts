@@ -75,10 +75,7 @@ export class ScrapeConfigCache {
                 `Could not get config for dashboard-item-type "${dashboardItem.type}"`
             )
         }
-        console.log('DASHBOARD_ITEM: ', JSON.stringify(dashboardItem, null, 4))
-        console.log('ORIGINAL: ', JSON.stringify(scrapeConfig, null, 4))
         const parsedConfig = this.#parse(scrapeConfig, dashboardItem)
-        console.log('PARSED: ', JSON.stringify(parsedConfig, null, 4))
         return parsedConfig
     }
 
