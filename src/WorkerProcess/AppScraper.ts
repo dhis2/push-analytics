@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import type { Browser, CDPSession, Page } from 'puppeteer'
+import type { Browser, CDPSession, HTTPResponse, Page } from 'puppeteer'
 import type {
     AnyVisualization,
     Converter,
@@ -18,7 +18,12 @@ import {
     waitForFileToDownload,
 } from './AppScraperUtils'
 import { AppScraperError } from './AppScraperUtils/AppScraperError'
-import { insertIntoDivTemplate, insertIntoImageTemplate } from './htmlTemplates'
+import {
+    insertIntoDivTemplate,
+    insertIntoImageTemplate,
+    parseResponseDataToTable,
+} from './htmlTemplates'
+import { minimatch } from 'minimatch'
 
 const DONWLOAD_PAGE_URL_PATTERN =
     /api\/analytics\/enrollments|events\/query\/[a-zA-Z0-9]{11}\.html\+css/
@@ -28,6 +33,8 @@ export class AppScraper implements Converter {
     #browser: Browser
     #page: Page
     #cdpSession: CDPSession
+    #currentRequestUrlGlob: string
+    #interceptedResponseHtml: ConverterResult | null
 
     private constructor(
         baseUrl: string,
@@ -39,6 +46,9 @@ export class AppScraper implements Converter {
         this.#browser = browser
         this.#page = page
         this.#cdpSession = cdpSession
+        this.#currentRequestUrlGlob = ''
+        this.#interceptedResponseHtml = null
+        page.on('response', this.#interceptResponse.bind(this))
     }
 
     static async create(baseUrl: string, browser: Browser) {
@@ -85,8 +95,8 @@ export class AppScraper implements Converter {
                  * all unsupported dashboard item types */
                 return Promise.resolve({ html: '', css: '' })
             }
-
             await this.page.bringToFront()
+            await this.#updateRequestUrlGlob(config)
             await this.#clearVisualization(config)
             /* Make sure we download the exported file to `./images/${PID}_${dashboardItemId}`,
              * which allows us to track the download process in a relatively sane way */
@@ -168,11 +178,15 @@ export class AppScraper implements Converter {
     }
 
     async #showVisualization(config: ParsedScrapeInstructions) {
-        await this.#executeSteps(config.showVisualization.steps)
+        if (config.showVisualization.strategy !== 'noop') {
+            await this.#executeSteps(config.showVisualization.steps)
+        }
     }
 
     async #triggerDownload(config: ParsedScrapeInstructions) {
-        await this.#executeSteps(config.triggerDownload.steps)
+        if (config.triggerDownload.strategy !== 'noop') {
+            await this.#executeSteps(config.triggerDownload.steps)
+        }
     }
 
     async #obtainDownloadArtifact(
@@ -219,6 +233,8 @@ export class AppScraper implements Converter {
             )
         } else if (strategy === 'interceptFileDownload') {
             return await this.#interceptFileDownload(visualization)
+        } else if (strategy === 'interceptResponse') {
+            return this.#getAndClearInterceptedResponseHtml(downloadInstructions)
         } else {
             throw new AppScraperError(
                 'Invalid instructions received for obtaining the download artifact'
@@ -299,7 +315,9 @@ export class AppScraper implements Converter {
     }
 
     async #clearVisualization(config: ParsedScrapeInstructions) {
-        await this.#executeSteps(config.clearVisualization.steps)
+        if (config.clearVisualization.strategy !== 'noop') {
+            await this.#executeSteps(config.clearVisualization.steps)
+        }
     }
 
     async #setDownloadPathToItemId(id: string) {
@@ -311,6 +329,43 @@ export class AppScraper implements Converter {
             behavior: 'allow',
             downloadPath: this.#getItemDownloadPath(id),
         })
+    }
+
+    async #updateRequestUrlGlob(config: ParsedScrapeInstructions) {
+        if (config.obtainDownloadArtifact.strategy === 'interceptResponse') {
+            this.#currentRequestUrlGlob = config.obtainDownloadArtifact.urlGlob ?? ''
+        } else {
+            this.#currentRequestUrlGlob = ''
+        }
+    }
+
+    async #interceptResponse(response: HTTPResponse): Promise<void> {
+        if (
+            this.#currentRequestUrlGlob &&
+            minimatch(response.url(), this.#currentRequestUrlGlob)
+        ) {
+            const responseData = await response.json()
+            this.#interceptedResponseHtml = {
+                html: parseResponseDataToTable(responseData),
+                css: '',
+            }
+        }
+    }
+
+    #getAndClearInterceptedResponseHtml(downloadInstructions: DownloadInstructions) {
+        // Store a "snapshot" so the global property can be cleared
+        const interceptedResponseHtml = this.#interceptedResponseHtml
+
+        this.#currentRequestUrlGlob = ''
+        this.#interceptedResponseHtml = null
+
+        if (!interceptedResponseHtml) {
+            throw new AppScraperError(
+                `Failed to intercept response data for request matching glob "${downloadInstructions.urlGlob}"`
+            )
+        }
+
+        return interceptedResponseHtml
     }
 
     async #executeSteps(steps: Steps) {

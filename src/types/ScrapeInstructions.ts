@@ -4,6 +4,8 @@ type Strategy =
     | 'scrapeDownloadPage'
     | 'interceptFileDownload'
     | 'screenShotImgOnDownloadPage'
+    | 'interceptResponse'
+    | 'noop'
 
 export type StepKind =
     | 'goto'
