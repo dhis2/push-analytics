@@ -211,8 +211,6 @@ export class ScrapeConfigCache {
 
         return {
             strategy: condition.strategy,
-            HtmlOutput: condition.HtmlOutput,
-            openerUrl: condition.openerUrl,
             htmlSelector: condition.htmlSelector,
             cssSelector: condition.cssSelector,
             modifyDownloadUrl: condition.modifyDownloadUrl,
