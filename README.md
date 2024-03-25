@@ -1,10 +1,13 @@
 # Push Analytics
 
+A service to convert DHIS2 Core Dashboards into static HTML, which can be sent by email. This service is intended to be used in conjunction with the DHIS2 Core Job Scheduler, where a job can be configured to email converted dashboard content to user-groups.
+
 ## Setup instructions
 
 ### Prerequisites for the Push Analytics Service
 
-NodeJS with a min version `20.11.0` (LTS at the time of writing). Lower version may also suffice, as far as I am aware, the most modern API feature used by the push-analytics-service is [os.availableParallelism()](https://nodejs.org/api/os.html#osavailableparallelism).
+-   NodeJS with a min version `20.11.0` (LTS at the time of writing). Lower version may also suffice, as far as I am aware, the most modern API feature used by the push-analytics-service is [os.availableParallelism()](https://nodejs.org/api/os.html#osavailableparallelism).
+-   Push Analytics uses [Puppeteer](https://pptr.dev/), which is _"a Node.js library which provides a high-level API to control Chrome/Chromium over the DevTools Protocol"_. When installing Puppeteer, a version of the Chrome browser is installed along with it, but the system does need to have a few tools installed in order for Chrome to work. Please refer to the [Puppeteer Docker file](https://github.com/puppeteer/puppeteer/blob/main/docker/Dockerfile) to see which libs are needed.
 
 ### Prerequisites for the DHIS2 Core Instance
 
@@ -45,11 +48,33 @@ Run `yarn install`
 
 ### Starting the push-analytics-service
 
-To start the service in development mode, run `yarn start:dev`, for production, run `yarn start`. We are also planning on adding a `Dockerfile` and `docker-compose.yml` which will enable developers to get a working development setup up-and-running without too much effort.
+To start the service in development mode, run `yarn start:dev`, for production, run `yarn start:prod`.
+
+### Docker
+
+_**TODO: ADD INFO HERE ABOUT DOCKER**_
+
+#### Docker based development setup
+
+#### Docker based test/CI setup
+
+#### Docker image for production
+
+## API
 
 ### Requesting a dashboard
 
-The push-analytics-service currently only converts dashboards to static HTML and its API is very simple: we only support a GET request in the following form: `host:port/?dashboardId=<DASHBOARD_ID>&username=<USERNAME>` (i.e. with default environment variable values, and using a dashboard ID from the Sierra Leone database, the following URL would be valid `http://localhost:1337/?dashboardId=WSogaXf2eMq&username=test_user`).
+The push-analytics-service currently only converts dashboards to static HTML and its API is very simple: we only support a GET request in the following form:
+
+```
+host:port/?dashboardId=<DASHBOARD_ID>&username=<USERNAME>
+```
+
+With default environment variable values, and using a dashboard ID from the Sierra Leone database, the following URL would be valid:
+
+```
+http://localhost:1337/?dashboardId=WSogaXf2eMq&username=test_user
+```
 
 #### About the `username` query parameter
 
@@ -58,95 +83,14 @@ This user account will be **impersonated** by the push-analytics-service. The st
 -   When issuing a GET request and providing the `username` with elevated privileges and then distributing this content to users (a user-group) with lower privileges could cause a problem in the sense that these users may be seeing content they are normally not allowed to see. This is something to keep in mind when creating push-analytics-jobs in the DHIS2 Core instance, since the push-analytics-service is blissfully unaware of user authorities in DHIS2 Core.
 -   Users with the `ALL` authority cannot be impersonated, so all GET request which specify a `username` param for a user account with the `ALL` authority will fail.
 
-## How things work (NO LONGER CORRECT - NEEDS UPDATE)
-
-The flowchart below describes the inner working of the dashboard-to-email-html process in detail and the following general principles have been used:
-
-1. A lot of our visualizations are produced client-side and we don't want to have a client-side and server-side implementation of each visualization. So we use a headless browser which visits DHIS2 apps to avoid this duplication.
-1. An app is interactive and an email is not. As a result just taking a screenshot from an app does not always produce useable output. A downloaded file is static, so output produced by an app's export/download functionality should be fairly suitable to insert into an email. So we directly use the apps' file download capabilities instead of taking screenshots.
-1. Some dashboard item types are rendered directly in the dashboards-app itself and are very simple. These types are parsed directly by push-analytics as well. So for these types we run the theoretical risk of the implementations going out-of-sync. It would be possible to extract the HTML from the dashboard-app itself, but this would impact, but the current implementation favours parsing it directly, because this requires very little code and has a much smaller execution time.
-1. Even though the codebase contains many async function calls, everything is being executed sequentially. The reason for this is mainly related to how a headless browsers works. It is technically possible to let things happen at once by using `Promise.all()`, but this does not always work as expected. One example is the maps-app: if the tab becomes inactive, the map stops rendering the layers and it won't continue until the tab becomes active again, and since a browser can only have one active tab, wrapping things in `Promise.all()` makes the map conversion fails. Perhaps it is possible to optimise performance by letting some things happen sequentially and other things in parallel, but this would also make the codebase harder to maintain due to increased complexity. So at least for now everything happens sequentially.
-1. When processing things sequentially, we first group items by type and then convert items one type at a time. The thinking behind this is that, when visiting an app, the initial load takes quite some time, but loading a new item within an app takes a shorter time. By processing items per type we ensure that the initial loading time will only be experienced by the first item of that type. After that first item, the client will not reload fully, it will simply navigate to a new ID and fetch whatever that visualization requires.
-1. The Puppeteer code looks quite a lot like e2e-test code, but there is one notable difference: when writing e2e tests it is recommended to get elements by text content if possible. But since it should be possible to pass different user credentials to produce emails in different locales, we should **never** select any element by text.
-
-### Conversion flowchart (NO LONGER CORRECT - NEEDS UPDATE)
-
-```mermaid
-stateDiagram-v2
-    state fork_items_by_type <<fork>>
-    state fork_visualizations_by_type <<fork>>
-
-    dashboard_json: Dashboard items JSON
-    type_visualization: VISUALIZATION
-    subtype_visualization_chart: Chart
-    subtype_visualization_pivot_table: Pivot table
-    type_event_visualization: EVENT_VISUALIZATION (Line Lists)
-    type_event_chart: EVENT_CHART
-    type_map: MAP
-    type_event_report: EVENT_REPORT
-    type_reports: REPORTS
-    type_resources: RESOURCES
-    type_text: TEXT
-    type_users: USERS
-    type_messages: MESSAGES
-    type_app: APP
-    action_output_empty_string: Output empty string
-    action_parse_directly: Parse directly as HTML string
-    action_take_screenshot_of_image_in_new_tab: <b>[PUPPETEER]</b><br>Take screenshot of image<br>that opens in new tab as<br>base64 encoded string and<br>insert into <code>img</code> template
-    action_capture_html_in_new_tab: <b>[PUPPETEER]</b><br>Capture HTML and CSS that opens<br>in a new tab<br><i>(For line-lists the request is also<br>intercepted to limit the page size<br>to 50)</i>
-    action_capture_downloaded_file: <b>[PUPPETEER]</b><br>Get downloaded file and convert<br>to base64 encoded string and<br>insert into <code>img</code> template
-    html_template: Email HTML string
-
-
-    [*] --> dashboard_json: Request with dashboard ID in path
-
-    dashboard_json --> fork_items_by_type: Group items by type
-    fork_items_by_type --> type_visualization
-    fork_items_by_type --> type_event_visualization
-    fork_items_by_type --> type_event_chart
-    fork_items_by_type --> type_map
-    fork_items_by_type --> type_event_report
-    fork_items_by_type --> type_reports
-    fork_items_by_type --> type_resources
-    fork_items_by_type --> type_text
-    fork_items_by_type --> type_users
-    fork_items_by_type --> type_messages
-    fork_items_by_type --> type_app
-
-    type_visualization --> fork_visualizations_by_type: Process based on output types
-    fork_visualizations_by_type --> subtype_visualization_chart
-    fork_visualizations_by_type --> subtype_visualization_pivot_table
-
-    subtype_visualization_chart --> action_take_screenshot_of_image_in_new_tab
-    subtype_visualization_pivot_table --> action_capture_html_in_new_tab
-    type_event_visualization --> action_capture_html_in_new_tab
-    type_event_chart --> action_capture_downloaded_file
-    type_map --> action_capture_downloaded_file
-    type_event_report --> action_capture_html_in_new_tab
-    type_reports --> action_parse_directly
-    type_resources --> action_parse_directly
-    type_text --> action_parse_directly
-    type_users --> action_output_empty_string
-    type_messages --> action_output_empty_string
-    type_app --> action_output_empty_string
-
-
-    action_take_screenshot_of_image_in_new_tab --> html_template
-    action_capture_html_in_new_tab --> html_template
-    action_capture_downloaded_file --> html_template
-    action_parse_directly --> html_template
-    action_output_empty_string --> html_template
-```
-
-## Errors
+### Errors
 
 The push-analytics-service codebase contains various error classes which all extend the base `PushAnalyticsError`, which itself extends the native JavaScript `Error` class. Errors extending from `PushAnalyticsError` have some properties and methods of interest:
 
--   `httpStatusCode`: This status code is used when sending the response
+-   `httpStatusCode`: This status code is used when sending the error response
 -   `errorCode`: These codes are specific to the push analytics service. Currently they are not utilized but in the long term these codes could be used by API consumers to take specific actions or show particular messages. See an overview of current errors below, and note the following:
     -   The `errorCode` is a string starting with and `E` followed by 4 digits, i.e. `E1000`
     -   Primary process errors are all in the 1000 range, and worker errors are all in the 2000 range
-    -   Currently, each class in push-analytics throws its own error with its own error code and no further granularity has been applied.
 -   `formattedMessage()`: This method will return a formatted string which includes the error name, code and message.
 
 | Error code | HTTPS Status Code | Error Class (name)                  | Description                                           |
@@ -172,19 +116,95 @@ The push-analytics-service codebase contains various error classes which all ext
 | `E2601`    | `500`             | `ScrapeConfigCacheError`            | Generic error in `ScrapeConfigCache` class            |
 | `E2701`    | `500`             | `WorkerProcessMessageHandlerError`  | Generic error in `WorkerProcessMessageHandler` class  |
 
-## TODO (To be removed before release)
+## Architecture
 
--   [x] Convert text-based element selection to DOM attribute based element selection. _Currently there is no way to uniquely identify the download dropdown-button or the download-menu-items based on DOM attributes, so to implement this we would need to add unique selectors to all apps. **This is currently blocking producing localized content.**_
--   [ ] Discuss and implement a way for core instances to use this application. Currently it is implemented as a stand-alone service but this could easily be just a NodeJS script called by the DHIS2 Core instance.
--   [ ] Add tests. Since the conversion from dashboard to email HTML is fully linear, the simplest way to add a good level of test coverage would be to simply see if for a given dashboard we produce the same HTML output. In the long term it would be advisable to run this test on a daily basis and send a Slack notification once it starts failing. This app will break if things change too much in the web API or in one of the apps that Puppeteer visits. We can also consider adding unit tests for each individual function, but IMO that's probably not required because testing if a known input produces the correct output implicitly tests the underlying functions too.
--   [ ] Handle concurrent requests
--   [x] Ensure file downloading doesn't hang (max tries)
--   [x] Always clear files
--   [ ] Return error if >= 1 dashboard-items fail. Otherwise return HTML string
--   [ ] Only allow request from localhost or from DHIS2_CORE_URL
--   [ ] Ensure requests are queued until all workers have logged in successfully
--   [ ] Ensure main worker does not crash but returns errors when stuff goes wrong
--   [ ] Update docs/readme
--   [ ] Ensure items are sorted correctly
--   [ ] Eliminate the need for a request-queue: it should be possible to add items to the dashboard-item queue across requests
--   [ ] Error monitoring / restarting when shuts down
+### Guiding principles
+
+1. Visualizations in DHIS2 Core are produced client-side and the job scheduler is a server side feature. To supply the job scheduler with the correct HTML could be done by also implementing all available visualizations server side, but maintaining both a client-side and server-side implementation for each and ensuring the output is consistent is error prone and represents a huge maintenance burden. So, instead we use a headless browser which "scrapes" DHIS2 apps to avoid this duplication.
+1. An app is interactive and an email is not. As a result just taking a screenshot from an app does not always produce the desired output. A downloaded file is static, so output produced by an app's export/download functionality should be fairly suitable to insert into an email. So we prefer to directly use the apps' file download capabilities instead of taking screenshots. For cases where there is no download artifact, we do support scraping content or taking screenshots directly from the app.
+1. Some dashboard item types are rendered directly in the dashboards-app itself and do not have a corresponding app. These types are parsed directly by push-analytics as well. So for these types we run the theoretical risk of the implementations going out-of-sync. It would be possible to extract the HTML from the dashboard-app itself, but the current implementation favours parsing it directly, because this requires very little code and has a much shorter execution time.
+1. Using Puppeteer to "scrape" the apps to convert a dashboard is a slow process. To speed things up, we have implemented the service as a [NodeJS Cluster](https://nodejs.org/api/cluster.html).
+
+### Cluster
+
+A NodeJS Cluster consists of a primary process and one or more worker processes. These processes can communicate with one another by sending and receiving messages that can contain serializable data. Below is a diagram that illustrates how the push analytics cluster has been designed:
+
+![Schematic overview of Push analytics Cluster](./docs/assets/push_analytics_diagram.png)
+
+_This diagram was made using Google Presentation and anyone with a DHIS2 email account is allowed to edit it ([source](https://docs.google.com/presentation/d/1F_XevdnXvpvE7bEDmQW4EReftrSoMdDtA6PtcbE_0to/edit?usp=sharing))._
+
+Some additional notes:
+
+-   To get a good understanding of the codebase, it is recommended to start at looking at these three files:
+    1. The cluster is initialized and HTTP server is created in [`initializeCluster`](https://github.com/dhis2/push-analytics/blob/master/src/Cluster/initializeCluster.ts)
+    2. The [`PrimaryProcess`](https://github.com/dhis2/push-analytics/blob/master/src/PrimaryProcess/PrimaryProcess.ts) class is responsible for orchestrating the primary process. It mainly implements methods that determine how to respond to various "events" and as such a good starting place.
+    3. The [`WorkerProcess`](https://github.com/dhis2/push-analytics/blob/master/src/WorkerProcess/WorkerProcess.ts) class is the equivalent for the worker processes.
+-   The push analytics service can handle multiple HTTP GET requests in parallel. Dashboard items for the incoming request are simply added to back of the dashboard items queue and once all items for a dashboard/request have been converted the response is sent. This means that one worker can be converting an item for dashboard A while another is already converting an item for dashboard B, so no workers need to sit idle when there is work to do.
+-   There are three main error scenarios which are handled differently:
+    1. Request handler errors happen before anything is added to the dashboard items queue and response manager. For these types of errors, a error response can be sent directly.
+    2. Conversion errors happen after the dashboard items queue has been updated. So for these types of errors all queued dashboard items belonging to the same dashboard as the failed conversion need to be removed before an error request can be sent.
+    3. A third type of error, which is not depicted in the diagram but _is_ handled, is when a worker dies. When this happens an error response returned for all pending requests and the dashboard items queue is cleared.
+
+### Dashboard Item Conversion
+
+In general there are three categories of dashboard items:
+
+1. App plugin items: on a live dashboard these items are rendered by [a plugin](https://developers.dhis2.org/docs/app-runtime/components/plugin) and in push analytics these types of dashboard items are converted by visiting the app. This category of dashboard item is the most complex to convert and more information on how this is done is provided in the subsequent text.
+2. Directly parsed items: on a live dashboard these items are parsed directly in the dashboards-app and push analytics follows the same process.
+3. Unsupported items: dashboard items of type `APP`, `USERS` and `MESSAGES` are not (yet) supported by push analytics. Technically speaking they are not skipped but converted to an empty string. As such they do not show in the converted HTML, but also do not cause conversion errors.
+
+#### Converting an app plugin dashboard item
+
+Converting an app plugin dashboard item is done using Puppeteer and "web scraping" techniques, using the following steps:
+
+1. Get the `push-analytics.json` scrape instructions for the app corresponding to the dashboard-item (or read the file from the cache once it was fetched)
+2. Parse the scrape instructions for the current visualization type (a single app can display various types of visualizations which may need to be scraped differently).
+3. Execute the steps defined in the parsed scrape instructions
+
+These `push-analytics.json` files are expected to be found at the app's root folder, and this approach was chosen for the following reasons:
+
+-   By colocating the instructions with the app, we make the app responsible for ensuring that they are correct for the current state of the codebase. By doing so, and by implementing a generic scraping mechanism, we avoid having to implement app or version specific logic in push analytics itself. The only time push analytics needs to be updated after changes in an app is when it introduces a new type of visualization which needs to be scraped differently.
+-   By implementing this generic scraping mechanism, we also enable future support for scraping custom apps (i.e. type `APP`). If the instruction file is found and contains instructions which are supported in push-analytics, then any app can be scraped. In fact, the only reason why converting custom apps is not possible right now, is because there is no way to link a dashboard-item to an app's URL. Currently, we just keep some hardcoded URLs for bundled apps [here](https://github.com/dhis2/push-analytics/blob/master/src/WorkerProcess/ScrapeConfigCache.ts#L23-L35).
+
+#### Scrape instructions
+
+An example for of a `push-analytics.json` file, containing instructions for push analytics [can be found here](https://github.com/dhis2/maps-app/blob/dev/public/push-analytics.json). Every file needs to contain an entry for all the following **tasks**:
+
+-   `showVisualization`: instructions on how to get the app to show a visualization by ID. If an app has implemented client-side routing, the easiest way to do this is usually just to navigate to a URL and wait for a particular element to be in the DOM.
+-   `clearVisualization`: instructions on how to get the app into a state where no visualisation is showing. This task is not strictly speaking part of the scraping/extraction process, but it is required to avoid problems in the `showVisualization` task. If the visualization is not cleared prior to showing a new one, Puppeteer can identify an old visualization as the new one and convert that.
+-   `triggerDownload`: instructions for this task are needed when we want Puppeteer to leverage the existing download mechanism in an app. If an app has a download/export menu it is recommended to use that so that the (static) artefact in the converted email HTML matches the (static) asset that is exported. If an app does not have a download/export menu or it is not suitable for whatever reason, then this task can be skipped.
+-   `obtainDownloadArtifact`: these are probably the most important instructions, because they instruct push-analytics how to actually obtain and convert the download artifact.
+
+The `showVisualization`, `clearVisualization` and `triggerDownload` task have a `strategy` and a `steps` field:
+
+-   The following values can be provided for `strategy`:
+    -   `navigateToUrl`: navigate to a URL
+    -   `useUiElements`: in the current implementation only `click` is a supported key. Puppeteer will click on the provided selectors.
+    -   `noop`: do nothing / skip task (no steps expected)
+-   The `steps` field is an array of steps, where each step can be one of the following (note that the terms use match the Puppeteer API):
+    -   `goto`: navigation
+    -   `waitForSelector`: wait until element with specified selector is visible
+    -   `click`: click on element with specified selector
+
+The `obtainDownloadArtifact` does have a `strategy` field and a number of strategies are supported. This task can not clearly be defined using "steps", so each strategy comes with its own set of additional fields:
+
+-   `scrapeDownloadPage` describes a strategy where an app's download-menu will trigger a new tab to open which contains an HTML table (and some CSS). Puppeteer must scrape the content from that page. When using this strategy, the following additional fields need to be provided in the task:
+    -   `htmlSelector`: A selector string for the HTML of interest (e.g, `table`)
+    -   `cssSelector`: A selector string for the element containing the styles (e.g. `style`)
+-   `screenShotImgOnDownloadPage`: almost identical to `scrapeDownloadPage`, but instead of extracting HTML from the page an image needs to be converted to a base64 encoded string. This strategy only needs one additional field:
+    -   `htmlSelector`: A selector string for the HTML of interest (e.g, `img`)
+-   `interceptFileDownload`: This strategy can be used if an app has a download menu which causes a file to download to the user's download folder. The downloaded file will be intercepted and converted to a base64 string. This strategy requires no additional fields.
+-   `interceptResponse`: This strategy is for apps (or visualizations within an app) that do not have a download menu and render a table. Instead of scraping the app itself the data that is used to populate the data-table is intercepted and push analytics parses the intercepted data into a HTML table itself. This strategy requires no additional fields.
+
+The above covers the key strategies currently in use, but because some apps [like the data-visualizer-app](https://github.com/dhis2/data-visualizer-app/blob/dev/public/push-analytics.json) can produce various types of output which needs to be scraped in slightly different ways, we also have some conditional variations on some of the strategies and steps above in place:
+
+-   `triggerDownloadConditionally` (strategy)
+-   `obtainDownloadArtifactConditionally` (strategy)
+-   `waitForSelectorConditionally` (step)
+
+For these the following applies:
+
+-   The value is an object-array instead of an object
+-   Each object in the array looks exactly like the unconditional variant of the task/step, but with the following additional fields:
+    -   `dashboardItemProperty`: the property to match on, can be a nested property with dot-notation, i.e. `'visualization.type'`
+    -   `value`: the value to match on. Can be either a string, or an array of strings. When providing an array this interpreted as an OR condition.
