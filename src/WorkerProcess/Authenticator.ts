@@ -13,14 +13,19 @@ class AuthenticationError extends PushAnalyticsError {
     }
 }
 
-export class Authenticator {
+export interface IAuthenticator {
+    establishNonExpiringAdminSession: () => Promise<void>
+    impersonateUser: (username: string) => Promise<void>
+}
+
+export class Authenticator implements IAuthenticator {
     #env: PushAnalyticsEnvVariables
     #page: Page
     #converter: DashboardItemConverter
     #sessionCookie: Protocol.Network.Cookie | null
     #impersonatedUser: string | null
 
-    private constructor(
+    protected constructor(
         env: PushAnalyticsEnvVariables,
         page: Page,
         converter: DashboardItemConverter
@@ -41,7 +46,7 @@ export class Authenticator {
         return new Authenticator(env, firstBlankPage, converter)
     }
 
-    async establishNonExpiringAdminSession(): Promise<void> {
+    public async establishNonExpiringAdminSession(): Promise<void> {
         try {
             await this.#loginViaForm()
             await this.#setSessionCookie()
@@ -53,17 +58,7 @@ export class Authenticator {
         }
     }
 
-    async #loginViaForm() {
-        await this.#page.bringToFront()
-        await this.#page.goto(
-            `${this.#env.baseUrl}/dhis-web-commons/security/login.action`
-        )
-        await this.#page.type('#j_username', this.#env.adminUsername)
-        await this.#page.type('#j_password', this.#env.adminPassword)
-        await this.#page.click('#submit')
-    }
-
-    async impersonateUser(username: string) {
+    public async impersonateUser(username: string): Promise<void> {
         // No need to take action if it is the same user as before
         if (this.#impersonatedUser === username) {
             return
@@ -145,6 +140,16 @@ export class Authenticator {
                     options.returnValueType === 'responseStatus' ? 500 : { Error: true }
                 )
         }, options)
+    }
+
+    async #loginViaForm() {
+        await this.#page.bringToFront()
+        await this.#page.goto(
+            `${this.#env.baseUrl}/dhis-web-commons/security/login.action`
+        )
+        await this.#page.type('#j_username', this.#env.adminUsername)
+        await this.#page.type('#j_password', this.#env.adminPassword)
+        await this.#page.click('#submit')
     }
 
     async #preventSessionExpiry() {

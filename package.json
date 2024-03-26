@@ -11,18 +11,23 @@
         "start:prod": "npm run build && node build/index.js",
         "build": "rimraf ./build && tsc",
         "lint": "d2-style check",
-        "format": "d2-style apply"
+        "format": "d2-style apply",
+        "test": "yarn tsc --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --require ts-node/register $(find ./src -name '*.test.ts')",
+        "test:watch": "yarn tsc --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --watch --require ts-node/register $(find ./src -name '*.test.ts')"
     },
     "devDependencies": {
         "@dhis2/cli-style": "^10.5.1",
         "@types/node": "^20.8.3",
+        "@types/supertest": "^6.0.2",
         "@typescript-eslint/eslint-plugin": "^6.7.4",
         "@typescript-eslint/parser": "^6.7.4",
         "dotenv": "^16.3.1",
         "eslint": "^8.51.0",
+        "nock": "^13.5.4",
         "nodemon": "^3.0.1",
         "rimraf": "^5.0.5",
-        "ts-node": "^10.9.1",
+        "supertest": "^6.3.4",
+        "ts-node": "^10.9.2",
         "typescript": "^5.2.2"
     },
     "dependencies": {

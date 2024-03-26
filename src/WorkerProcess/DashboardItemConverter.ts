@@ -38,13 +38,22 @@ class DashboardItemConverterError extends PushAnalyticsError {
     }
 }
 
-export class DashboardItemConverter {
+export interface IDashboardItemConverter {
+    isConverting: () => boolean
+    convert: (
+        queueItem: QueueItem,
+        config?: ParsedScrapeInstructions
+    ) => Promise<ConvertedItemPayload>
+    isAppScraperConversion: (queueItem: QueueItem) => boolean
+}
+
+export class DashboardItemConverter implements IDashboardItemConverter {
     #env: PushAnalyticsEnvVariables
     #conversionInProgress: boolean
     #appScraper: AppScraper
     #itemParser: ItemParser
 
-    private constructor(
+    protected constructor(
         env: PushAnalyticsEnvVariables,
         appScraper: AppScraper,
         itemParser: ItemParser

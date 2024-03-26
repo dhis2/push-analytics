@@ -6,8 +6,11 @@ import type {
     QueueItem,
 } from '../types'
 import { createPuppeteerBrowser } from './AppScraperUtils'
+import type { IAuthenticator } from './Authenticator'
 import { Authenticator } from './Authenticator'
+import type { IDashboardItemConverter } from './DashboardItemConverter'
 import { DashboardItemConverter } from './DashboardItemConverter'
+import type { IScrapeConfigCache } from './ScrapeConfigCache'
 import { ScrapeConfigCache } from './ScrapeConfigCache'
 import { WorkerProcessMessageHandler } from './WorkerProcessMessageHandler'
 
@@ -23,14 +26,14 @@ class WorkerProcessError extends PushAnalyticsError {
 
 export class WorkerProcess {
     #messageHandler: WorkerProcessMessageHandler
-    #converter: DashboardItemConverter
-    #authenticator: Authenticator
-    #configCache: ScrapeConfigCache
+    #converter: IDashboardItemConverter
+    #authenticator: IAuthenticator
+    #configCache: IScrapeConfigCache
 
-    private constructor(
-        converter: DashboardItemConverter,
-        authenticator: Authenticator,
-        configCache: ScrapeConfigCache
+    protected constructor(
+        converter: IDashboardItemConverter,
+        authenticator: IAuthenticator,
+        configCache: IScrapeConfigCache
     ) {
         this.#converter = converter
         this.#authenticator = authenticator

@@ -2,7 +2,7 @@ import { PushAnalyticsError } from '../Error'
 import type { ConverterResult, DashboardItem } from '../types'
 
 // Conversions should not take longer than 60 seconds
-const MAX_CONVERSION_TIME = 60 * 1000
+export const MAX_CONVERSION_TIME = 60 * 1000
 
 class HtmlCollectorError extends PushAnalyticsError {
     constructor(

@@ -9,7 +9,7 @@ export type EnvVariableName =
     | 'MAX_THREADS'
     | 'CONTEXT'
 
-export type PushAnalyticsContext = 'development' | 'production' | 'ci'
+export type PushAnalyticsContext = 'development' | 'production' | 'ci' | 'testing'
 
 export type PushAnalyticsEnvVariables = {
     host: string

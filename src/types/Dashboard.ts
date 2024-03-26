@@ -99,6 +99,5 @@ export type AnyVisualization =
 
 export type Dashboard = {
     displayName: string
-    itemCount: number
     dashboardItems: DashboardItem[]
 }

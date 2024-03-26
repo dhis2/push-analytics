@@ -44,7 +44,11 @@ class ScrapeConfigCacheError extends PushAnalyticsError {
     }
 }
 
-export class ScrapeConfigCache {
+export interface IScrapeConfigCache {
+    getScrapeConfig: (dashboardItem: DashboardItem) => Promise<ParsedScrapeInstructions>
+}
+
+export class ScrapeConfigCache implements IScrapeConfigCache {
     #baseUrl: string
     #cachedConfigs: Map<string, ScrapeInstructions>
     #authenticator
@@ -55,7 +59,7 @@ export class ScrapeConfigCache {
         this.#authenticator = authenticator
     }
 
-    async getScrapeConfig(
+    public async getScrapeConfig(
         dashboardItem: DashboardItem
     ): Promise<ParsedScrapeInstructions> {
         const appPath = APP_PATH_LOOKUP[dashboardItem.type]
