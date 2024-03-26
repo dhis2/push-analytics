@@ -13,8 +13,6 @@ export type StepKind =
     | 'waitForSelectorConditionally'
     | 'click'
 
-export type HtmlOutput = 'image' | 'table'
-
 export type SelectorCondition = {
     dashboardItemProperty: string
     value: string | string[]
@@ -37,8 +35,6 @@ export type ConditionalTriggerDownloadInstructions = TriggerDownloadInstructions
 
 export type DownloadInstructions = {
     strategy: Strategy
-    HtmlOutput: HtmlOutput
-    openerUrl?: string
     htmlSelector?: string
     cssSelector?: string
     modifyDownloadUrl?: {
