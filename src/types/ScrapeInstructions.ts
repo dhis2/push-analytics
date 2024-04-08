@@ -12,6 +12,8 @@ export type StepKind =
     | 'waitForSelector'
     | 'waitForSelectorConditionally'
     | 'click'
+export type Step = Partial<Record<StepKind, string>>
+export type Steps = Step[]
 
 export type SelectorCondition = {
     dashboardItemProperty: string
@@ -19,9 +21,6 @@ export type SelectorCondition = {
     selector: string
 }
 export type SelectorConditions = Array<SelectorCondition>
-
-export type Step = Record<StepKind, string>
-export type Steps = Step[]
 
 export type TriggerDownloadInstructions = {
     strategy: Strategy

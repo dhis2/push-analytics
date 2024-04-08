@@ -36,7 +36,7 @@ export class AppScraper implements Converter {
     #currentRequestUrlGlob: string
     #interceptedResponseHtml: ConverterResult | null
 
-    private constructor(
+    protected constructor(
         baseUrl: string,
         browser: Browser,
         page: Page,

@@ -1,0 +1,113 @@
+{
+    "restrictFilters": false,
+    "allowedFilters": [],
+    "displayName": "Antenatal Care data",
+    "access": {
+        "manage": true,
+        "externalize": true,
+        "write": true,
+        "read": true,
+        "update": true,
+        "delete": true
+    },
+    "id": "rmPiJIPFL4U",
+    "dashboardItems": [
+        {
+            "visualization": {
+                "type": "STACKED_COLUMN",
+                "id": "BPo0varc91o",
+                "name": "ANC: Visits by quarter and facility type (two-category)"
+            },
+            "users": [],
+            "x": 20,
+            "y": 0,
+            "type": "VISUALIZATION",
+            "id": "HFRstwQIUY6",
+            "reports": [],
+            "resources": [],
+            "h": 27,
+            "w": 19
+        },
+        {
+            "visualization": {
+                "type": "COLUMN",
+                "id": "xiLNqnSaWP3",
+                "name": "ANC: Coverage by quarter and district (two-category)"
+            },
+            "users": [],
+            "x": 39,
+            "y": 27,
+            "type": "VISUALIZATION",
+            "id": "ap4F2iRwDlP",
+            "reports": [],
+            "resources": [],
+            "h": 26,
+            "w": 19
+        },
+        {
+            "visualization": {
+                "type": "COLUMN",
+                "id": "kX8PQ5M5t2C",
+                "name": "ANC: Coverage, drop-out and visits (multi-axis)"
+            },
+            "users": [],
+            "x": 0,
+            "y": 27,
+            "type": "VISUALIZATION",
+            "id": "Esbn2H6fmir",
+            "reports": [],
+            "resources": [],
+            "h": 26,
+            "w": 20
+        },
+        {
+            "visualization": {
+                "type": "COLUMN",
+                "id": "IQi3K2PMxdb",
+                "name": "ANC: LLITN coverage (combination)"
+            },
+            "users": [],
+            "x": 0,
+            "y": 0,
+            "type": "VISUALIZATION",
+            "id": "N0N4L7qV1HF",
+            "reports": [],
+            "resources": [],
+            "h": 27,
+            "w": 20
+        },
+        {
+            "visualization": {
+                "type": "COLUMN",
+                "id": "TFTNw7gToPb",
+                "name": "ANC: Coverage and visits (multi-axis combination)"
+            },
+            "users": [],
+            "x": 20,
+            "y": 27,
+            "type": "VISUALIZATION",
+            "id": "PVwZ3F8uCkB",
+            "reports": [],
+            "resources": [],
+            "h": 26,
+            "w": 19
+        },
+        {
+            "visualization": {
+                "type": "SCATTER",
+                "id": "EF4os1mklwE",
+                "name": "ANC: 1st vs 4th visits (scatter plot)"
+            },
+            "users": [],
+            "x": 39,
+            "y": 0,
+            "type": "VISUALIZATION",
+            "id": "U4AfvsVf5rP",
+            "reports": [],
+            "resources": [],
+            "h": 27,
+            "w": 19
+        }
+    ],
+    "starred": false
+}

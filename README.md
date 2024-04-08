@@ -208,3 +208,29 @@ For these the following applies:
 -   Each object in the array looks exactly like the unconditional variant of the task/step, but with the following additional fields:
     -   `dashboardItemProperty`: the property to match on, can be a nested property with dot-notation, i.e. `'visualization.type'`
     -   `value`: the value to match on. Can be either a string, or an array of strings. When providing an array this interpreted as an OR condition.
+
+## Tests
+
+The push analytics service two distinct areas of functionality which both require a different test approach.
+
+### Unit tests for the NodeJS Cluster
+
+The NodeJS Cluster manages the request-response cycle and the dashboard items queue. Its behaviour can be verified by issuing a request and asserting that the expected messages are being sent between the primary process and the worker processes and that ultimately the correct response is sent. It was possible to implement this part of the test suite as integration tests by mocking all parts of the service that interact with the DHIS2 Core instance:
+
+-   The request for the dashboard details (in the primary process)
+-   The parts of the worker process that either issue requests or visit the UI. This actually represents a significant chunk of the worker process logic, the parts that are _not_ mocked are the `WorkerProcess` and `WorkerProcessMessageHandler` class.
+
+The cluster integration are located in `src/Cluster/integration` folder. Our usual test framework of choice, Jest, did not have support for running tests in a NodeJS Cluster, so we had to switch to the native NodeJS test runner instead. To get all the tests on both the primary and the worker thread to complete successfully we have had to introduce quite a few mocks and custom helpers. We also were forced to add some timeouts in places. However, these tests cover the majority of the cluster's functionality and therefore are very useful. They are also very quick to execute.
+
+While the tests in `src/Cluster/integration` cover the bulk of the behaviour of the NodeJS Cluster, some individual parts are tested elsewhere:
+
+-   Since the dashboard items request in the primary process was mocked in the cluster tests, tests for request validation were added to ensure that invalid requests are handled correctly. This is covered in these files:
+    -   `src/PrimaryProcess/RequestHandlerUtils/parseQueryString.test.ts`
+    -   `src/PrimaryProcess/RequestHandlerUtils/validateRequest.test.ts`
+-   The request timeout behaviour could not be tested in the cluster tests due to the presence of timeouts in the test setup itself. It was possible to test this behaviour in a regular unit test though, which resides in the `src/PrimaryProcess/HtmlCollector.test.ts` file.
+
+### E2E tests for dashboard item conversion
+
+Actual dashboard item conversions are done by interacting with DHIS2 Core, so this behaviour can only be tested in an e2e setup.
+
+_[TODO]: Add information about the e2e suite once it's been added._

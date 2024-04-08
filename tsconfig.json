@@ -11,8 +11,10 @@
         "resolveJsonModule": true,
         "rootDir": "src",
         "skipLibCheck": true,
-        "strict": true
+        "strict": true,
+        "sourceMap": true
     },
+    "include": ["src/**/*"],
     "ts-node": {
         "files": true
     }

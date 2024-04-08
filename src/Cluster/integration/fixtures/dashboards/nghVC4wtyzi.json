@@ -1,0 +1,194 @@
+{
+    "restrictFilters": false,
+    "allowedFilters": [],
+    "displayName": "Antenatal Care",
+    "access": {
+        "manage": true,
+        "externalize": true,
+        "write": true,
+        "read": true,
+        "update": true,
+        "delete": true
+    },
+    "id": "nghVC4wtyzi",
+    "dashboardItems": [
+        {
+            "visualization": {
+                "type": "COLUMN",
+                "id": "xiLNqnSaWP3",
+                "name": "ANC: Coverage by quarter and district (two-category)"
+            },
+            "users": [],
+            "x": 16,
+            "y": 20,
+            "type": "VISUALIZATION",
+            "id": "rOehBDv4LGG",
+            "reports": [],
+            "resources": [],
+            "h": 20,
+            "w": 18
+        },
+        {
+            "text": "*ANC Overview*\n\nThe ANC dashboard provides a _comprehensive_ overview of ANC activity.\n\nClick on the *arrow* next to each item to explore the data further.\n\nYou can switch between visualization types by clicking on the table/chart/map icons for each item.",
+            "users": [],
+            "x": 0,
+            "y": 0,
+            "type": "TEXT",
+            "id": "ILRTXgXvurM",
+            "reports": [],
+            "resources": [],
+            "h": 20,
+            "w": 9
+        },
+        {
+            "visualization": {
+                "type": "YEAR_OVER_YEAR_LINE",
+                "id": "YCra7cCtsw9",
+                "name": "ANC: ANC 1 coverage year over year"
+            },
+            "users": [],
+            "x": 0,
+            "y": 40,
+            "type": "VISUALIZATION",
+            "id": "Mfc8okt2ACJ",
+            "reports": [],
+            "resources": [],
+            "h": 20,
+            "w": 29
+        },
+        {
+            "visualization": {
+                "type": "COLUMN",
+                "id": "DeRrc1gTMjn",
+                "name": "ANC: ANC 3 coverage by districts last 12 months"
+            },
+            "users": [],
+            "x": 9,
+            "y": 0,
+            "type": "VISUALIZATION",
+            "id": "azz0KRlHgLs",
+            "reports": [],
+            "resources": [],
+            "h": 20,
+            "w": 25
+        },
+        {
+            "map": {
+                "id": "voX07ulo2Bq",
+                "name": "ANC: IPT 2 Coverage this year"
+            },
+            "users": [],
+            "shape": "NORMAL",
+            "x": 0,
+            "y": 20,
+            "type": "MAP",
+            "id": "i6NTSuDsk6l",
+            "reports": [],
+            "resources": [],
+            "h": 20,
+            "w": 16
+        },
+        {
+            "map": {
+                "id": "ZBjCfSaLSqD",
+                "name": "ANC: LLITN coverage district and facility"
+            },
+            "users": [],
+            "shape": "NORMAL",
+            "x": 34,
+            "y": 0,
+            "type": "MAP",
+            "id": "OiyMNoXzSdY",
+            "reports": [],
+            "resources": [],
+            "h": 20,
+            "w": 24
+        },
+        {
+            "visualization": {
+                "type": "COLUMN",
+                "id": "zKl0LcQyxPl",
+                "name": "ANC: ANC 1 coverage western chiefdoms this year"
+            },
+            "users": [],
+            "shape": "DOUBLE_WIDTH",
+            "x": 29,
+            "y": 40,
+            "type": "VISUALIZATION",
+            "id": "YZ7U25Japom",
+            "reports": [],
+            "resources": [],
+            "h": 20,
+            "w": 29
+        },
+        {
+            "visualization": {
+                "type": "LINE",
+                "id": "hQxZGXqnLS9",
+                "name": "ANC: ANC 1st visits last 12 months cumulative values"
+            },
+            "users": [],
+            "shape": "NORMAL",
+            "x": 29,
+            "y": 60,
+            "type": "VISUALIZATION",
+            "id": "ctlS5cTa4tt",
+            "reports": [],
+            "resources": [],
+            "h": 20,
+            "w": 29
+        },
+        {
+            "visualization": {
+                "type": "PIE",
+                "id": "ZfQMIA4o2s3",
+                "name": "ANC: 4+ visits by Facility Type last year"
+            },
+            "users": [],
+            "shape": "NORMAL",
+            "x": 0,
+            "y": 60,
+            "type": "VISUALIZATION",
+            "id": "kHRSFUr3dYe",
+            "reports": [],
+            "resources": [],
+            "h": 20,
+            "w": 14
+        },
+        {
+            "visualization": {
+                "type": "STACKED_COLUMN",
+                "id": "NjK24B1oGYF",
+                "name": "ANC: ANC 3rd visits by facility type last 12 months 100% stacked columns"
+            },
+            "users": [],
+            "shape": "DOUBLE_WIDTH",
+            "x": 34,
+            "y": 20,
+            "type": "VISUALIZATION",
+            "id": "tgtgBRAPNUT",
+            "reports": [],
+            "resources": [],
+            "h": 20,
+            "w": 24
+        },
+        {
+            "visualization": {
+                "type": "STACKED_COLUMN",
+                "id": "AVZpYsdG44G",
+                "name": "ANC: Fixed vs Outreach last year"
+            },
+            "users": [],
+            "shape": "NORMAL",
+            "x": 14,
+            "y": 60,
+            "type": "VISUALIZATION",
+            "id": "xS4X0ZL6GCI",
+            "reports": [],
+            "resources": [],
+            "h": 20,
+            "w": 15
+        }
+    ],
+    "starred": false
+}

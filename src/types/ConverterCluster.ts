@@ -63,6 +63,15 @@ export type ItemConversionErrorMessage = Message<
     ConversionErrorPayload
 >
 
+export type PrimaryProcessEmittedMessage =
+    | ItemsAddedToQueueMessage
+    | ItemTakenFromQueueMessage
+
+export type WorkerProcessEmittedMessage =
+    | ItemRequestedFromQueueMessage
+    | ItemConvertedMessage
+    | ItemConversionErrorMessage
+
 export type ConverterResult = {
     html: string
     css: string

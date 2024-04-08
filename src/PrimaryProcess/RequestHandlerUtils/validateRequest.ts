@@ -37,7 +37,7 @@ export function validateRequest(request: IncomingMessage, baseUrl: string) {
 
     if (!isAllowedHeaderFieldType(request, 'content-type')) {
         throw new RequestHandlerError(
-            `"content-type" request header must be "${TYPE_JSON}"`,
+            `"content-type" request header must be "${TYPE_JSON}" or "${TYPE_ANY}"`,
             'E1505',
             400
         )

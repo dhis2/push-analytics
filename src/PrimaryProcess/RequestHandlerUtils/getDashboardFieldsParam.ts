@@ -4,7 +4,6 @@ import { RequestHandlerError } from './RequestHandlerError'
 export function getDashboardFieldsParam() {
     return [
         'displayName',
-        'itemCount',
         {
             name: 'dashboardItems',
             fields: [
