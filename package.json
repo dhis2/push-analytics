@@ -7,18 +7,16 @@
     "license": "MIT",
     "private": true,
     "scripts": {
-        "prepare": "husky",
-        "build": "./scripts/build.sh",
+        "build:clear": "rimraf ./build && mkdir ./build && mkdir ./build/images",
+        "build:deps": "cp ./package.json ./yarn.lock ./build/ && cd ./build && yarn install --production --ignore-scripts --prefer-offline",
+        "build:src": "rimraf ./build && tsc -p tsconfig.prod.json",
+        "build": "yarn build:clear && yarn build:deps && yarn build:src",
         "start:dev": "nodemon --exec ts-node -r dotenv/config src/index.ts",
-        "start:prod": "npm run build && node ./dist/index.js",
-        "lint:tsc": "npx tsc --noEmit -p ./tsconfig.prod.json",
-        "lint:eslint": "npx eslint --quiet --ext .js,.ts .",
-        "lint:prettier": "npx prettier --check .",
-        "lint": "npm run lint:tsc && npm run lint:eslint && npm run lint:prettier",
-        "format": "npx prettier --write . && npx eslint --quiet --fix --ext .js,.ts .",
-        "test": "npx tsc --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --require ts-node/register $(find ./src -name '*.test.ts')",
-        "test:watch": "npx tsc --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --watch --require ts-node/register $(find ./src -name '*.test.ts')",
-        "release": "release-it"
+        "start:prod": "yarn build && node build/index.js",
+        "lint": "d2-style check",
+        "format": "d2-style apply",
+        "test": "yarn tsc --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --require ts-node/register $(find ./src -name '*.test.ts')",
+        "test:watch": "yarn tsc --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --watch --require ts-node/register $(find ./src -name '*.test.ts')"
     },
     "devDependencies": {
         "@commitlint/cli": "^19.2.1",
