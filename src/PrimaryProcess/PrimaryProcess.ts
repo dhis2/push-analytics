@@ -28,6 +28,7 @@ class PrimaryProcessError extends PushAnalyticsError {
 
 export class PrimaryProcess {
     #workerCount: number
+    #workerExitLog: number[]
     #messageHandler: PrimaryProcessMessageHandler
     #dashboardItemsQueue: DashboardItemsQueue
     requestHandler: RequestHandler
@@ -36,6 +37,7 @@ export class PrimaryProcess {
 
     constructor(env: PushAnalyticsEnvVariables) {
         this.#workerCount = this.#computeWorkerCount(env.maxThreads)
+        this.#workerExitLog = []
         this.#messageHandler = new PrimaryProcessMessageHandler({
             onWorkerItemRequest: this.#handleWorkerItemRequest.bind(this),
             onWorkerConversionSuccess: this.#handleWorkerConversionSuccess.bind(this),
@@ -64,18 +66,30 @@ export class PrimaryProcess {
          * for a long time. So we just go with this simple but quite drastic
          * approach of sending error responses to all pending requests and
          * and clearing the dashboard item queue. */
+        this.#workerExitLog.push(Date.now())
+        const hasFrequentExits = this.#hasFrequentExits()
         this.#dashboardItemsQueue.clearQueue()
+
         for (const requestId of this.#responseManager.getPendingRequestIds()) {
+            const message = hasFrequentExits
+                ? 'Too many workers have crashed, push-analytics-service will terminate'
+                : `Conversion worker with ID "${worker.id}" crashed, need to restart`
             this.#responseManager.sendErrorResponse(
                 requestId,
-                new PrimaryProcessError(
-                    `Conversion worker with ID "${worker.id}" crashed, need to restart`,
-                    'E1102'
-                )
+                new PrimaryProcessError(message, 'E1102')
             )
         }
-        // Start another worker to replace the dead one
-        cluster.fork()
+
+        // Prevent infinite worker-restart loops
+        if (hasFrequentExits) {
+            for (const id in cluster.workers) {
+                cluster.workers[id]?.kill()
+            }
+            process.exit(0)
+        } else {
+            // Start another worker to replace the dead one
+            cluster.fork()
+        }
     }
 
     #handleWorkerItemRequest(workerId: number) {
@@ -151,5 +165,15 @@ export class PrimaryProcess {
         for (let i = 0; i < this.#workerCount; i++) {
             cluster.fork()
         }
+    }
+
+    #hasFrequentExits() {
+        const lasTimestamp = this.#workerExitLog[this.#workerExitLog.length - 1]
+        const tenMinutesAgoTimestamp = lasTimestamp - 10 * 60 * 1000
+        return (
+            this.#workerExitLog.filter(
+                (exitTimestamp) => exitTimestamp >= tenMinutesAgoTimestamp
+            ).length > 10
+        )
     }
 }
