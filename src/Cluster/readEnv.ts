@@ -1,3 +1,4 @@
+import cluster from 'node:cluster'
 import type {
     EnvVariableName,
     PushAnalyticsContext,
@@ -20,9 +21,11 @@ function readEnvVariable(name: EnvVariableName): string | PushAnalyticsContext {
     if (process.env[name]) {
         return process.env[name] ?? ''
     } else {
-        console.log(
-            `Env variable "${name}" not found. Using default value "${envVariableDefaults[name]}" instead`
-        )
+        if (cluster.isPrimary) {
+            console.log(
+                `Env variable "${name}" not found. Using default value "${envVariableDefaults[name]}" instead`
+            )
+        }
         return envVariableDefaults[name]
     }
 }
