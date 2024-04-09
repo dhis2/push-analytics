@@ -1,9 +1,5 @@
 import cluster from 'node:cluster'
-import type {
-    EnvVariableName,
-    PushAnalyticsContext,
-    PushAnalyticsEnvVariables,
-} from '../types'
+import type { EnvVariableName, NodeEnvContext, PushAnalyticsEnvVariables } from '../types'
 
 const envVariableDefaults: Record<EnvVariableName, string> = {
     HOST: 'localhost',
