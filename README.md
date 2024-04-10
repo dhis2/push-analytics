@@ -45,11 +45,11 @@ In development mode this application uses [dotenv](https://github.com/motdotla/d
 
 ### Installing dependencies
 
-Run `yarn install`
+Run `npm install`
 
 ### Starting the push-analytics-service
 
-To start the service in development mode, run `yarn start:dev`, for production, run `yarn start:prod`.
+To start the service in development mode, run `npm run start:dev`, for production, run `npm run start:prod`.
 
 ### Docker
 
