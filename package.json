@@ -7,9 +7,9 @@
     "license": "MIT",
     "private": true,
     "scripts": {
-        "build:clear": "rimraf ./build && mkdir ./build && mkdir ./build/images",
-        "build:deps": "cp ./package.json ./package-lock.json ./build/ && cd ./build && npm install --omit=dev",
-        "build:src": "npx tsc -p tsconfig.prod.json",
+        "build:clear": "rimraf ./dist && mkdir ./dist && mkdir ./dist/images",
+        "build:deps": "cp ./package.json ./package-lock.json ./dist/ && cd ./dist && npm install --omit=dev",
+        "build:src": "npx -y tsc -p ./tsconfig.prod.json",
         "build": "npm run build:clear && npm run build:deps && npm run build:src",
         "start:dev": "nodemon --exec ts-node -r dotenv/config src/index.ts",
         "start:prod": "npm run build && node build/index.js",
