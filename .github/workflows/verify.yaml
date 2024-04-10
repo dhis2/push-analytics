@@ -14,19 +14,15 @@ jobs:
     verify:
         runs-on: ubuntu-latest
         steps:
-            - name: Checkout repo
-              uses: actions/checkout@v4
-            - name: Setup Node JS
-              uses: actions/setup-node@v4
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
               with:
-                  node-version: lts/*
+                  node-version: lts
                   cache: 'npm'
-            - name: Install dependencies (incl. devDependencies)
-              run: npm ci --include=dev
-            - name: Build the project
-              # Building includes TypeScript compilations so type errors are caught here too
-              run: npm run build
-            - name: Lint code
-              run: npm run lint
-            - name: Run tests
-              run: npm run test
+            # Include dev dependencies in order to run tests
+            - run: npm ci --include=dev
+            # Building includes TypeScript compilations so type errors are caught here
+            - run: npm run build
+            # Actual verification steps
+            - run: npm run lint
+            - run: npm run test
