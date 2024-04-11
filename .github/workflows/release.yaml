@@ -1,7 +1,8 @@
 name: Release to GitHub and Docker Hub
 
 # We trigger releases manually
-on: workflow_dispatch
+on:
+    workflow_dispatch:
 
 jobs:
     # Only allow releases from the master branch
