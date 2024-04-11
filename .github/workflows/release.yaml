@@ -53,6 +53,10 @@ jobs:
               run: tar -zcvf ./push-analytics.tar.gz ./dist
             - name: Report file size
               run: echo "Size of 'push-analytics.tar.gz' is $(stat -c%s './push-analytics.tar.gz') bytes."
+            - name: Release
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: npx -y semantic-release
 
     # Create zip from build
     # Create GitHub release with changelog and include zip

@@ -1,0 +1,16 @@
+{
+    "branches": ["master", "DHIS2-17121-deployment-ci-and-docker"],
+    "dryRun": true,
+    "plugins": [
+        "@semantic-release/commit-analyzer",
+        "@semantic-release/release-notes-generator",
+        [
+            "@semantic-release/github",
+            {
+                "assets": [
+                    { "path": "./push-analytics.tar.gz", "label": "Bundled application" }
+                ]
+            }
+        ]
+    ]
+}
