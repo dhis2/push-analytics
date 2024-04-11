@@ -2,14 +2,14 @@ name: Release to GitHub and Docker Hub
 
 # We trigger releases manually
 on:
-    # TODO: I don't want to run this workflow on every push,
-    # but can't get it to show up in the GitHub UI so trying this
-    # push:
-    workflow_dispatch:
-        inputs:
-            testInput:
-                description: A test input
-                required: false
+    # TODO: I don't want to run this workflow on every push, but triggered manually instead
+    # using `workflow_dispatch`, but that would only work from the master branch:
+    # The workflow file must be committed in the default branch (master/main) if you want to
+    # use the workflow_dispatch event.
+    # https://github.com/orgs/community/discussions/25219#discussioncomment-3246909
+    # So we use `push` for now should undo this once everything has been found to work.
+    push
+    # workflow_dispatch
 
 jobs:
     # Only allow releases from the master branch
@@ -20,9 +20,9 @@ jobs:
               # TODO: IMPORTANT: change to the correct branch name:
               #  "refs/heads/DHIS2-17121-deployment-ci-and-docker" -> "refs/heads/master"
               run: |
-                  if [ "${{ github.ref }}" = "refs/heads/DHIS2-17121-deployment-ci-and-docker" ]
+                  if [ "${{ github.ref }}" = "refs/heads/master" ]
                   then
-                      echo "On master branch, deployment is allowed"
+                      echo "On the master branch, release is allowed"
                       exit 0
                   else
                       echo "Releases are only allowed from the master branch"
