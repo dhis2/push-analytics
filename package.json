@@ -1,6 +1,6 @@
 {
     "name": "push-analytics",
-    "version": "0.2.0",
+    "version": "0.1.0",
     "description": "A NodeJS service using Puppeteer to generate images and HTML to insert into an email",
     "main": "dist/index.js",
     "author": "Hendrik de Graaf",
@@ -17,7 +17,8 @@
         "format": "npx prettier --write . && npx eslint --quiet --fix --ext .js,.ts .",
         "test": "npx tsc --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --require ts-node/register $(find ./src -name '*.test.ts')",
         "test:watch": "npx tsc --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --watch --require ts-node/register $(find ./src -name '*.test.ts')",
-        "release": "release-it"
+        "release": "release-it",
+        "prepare": "husky"
     },
     "devDependencies": {
         "@commitlint/cli": "^19.2.1",
