@@ -6,6 +6,10 @@ on:
     # but can't get it to show up in the GitHub UI so trying this
     # push:
     workflow_dispatch:
+        inputs:
+            testInput:
+                description: A test input
+                required: false
 
 jobs:
     # Only allow releases from the master branch
