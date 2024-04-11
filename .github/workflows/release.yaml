@@ -13,8 +13,10 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Exit if branch is not master
+              # TODO: IMPORTANT: change to the correct branch name:
+              #  "refs/heads/DHIS2-17121-deployment-ci-and-docker" -> "refs/heads/master"
               run: |
-                  if [ "${{ github.ref }}" = "refs/heads/master" ]
+                  if [ "${{ github.ref }}" = "refs/heads/DHIS2-17121-deployment-ci-and-docker" ]
                   then
                       echo "On master branch, deployment is allowed"
                       exit 0
