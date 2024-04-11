@@ -19,6 +19,8 @@ jobs:
                   exit 1
 
     build:
+        # Avoid running this if check_if_allowed fails
+        needs: check_if_allowed
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
