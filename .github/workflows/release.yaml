@@ -4,7 +4,7 @@ name: Release to GitHub and Docker Hub
 on:
     # TODO: I don't want to run this workflow on every push,
     # but can't get it to show up in the GitHub UI so trying this
-    push:
+    # push:
     workflow_dispatch:
 
 jobs:
