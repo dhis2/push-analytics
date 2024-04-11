@@ -16,7 +16,8 @@
         "lint": "npx prettier --check . && npx eslint --quiet --ext .js,.ts .",
         "format": "npx prettier --write . && npx eslint --quiet --fix --ext .js,.ts .",
         "test": "npx tsc --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --require ts-node/register $(find ./src -name '*.test.ts')",
-        "test:watch": "npx tsc --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --watch --require ts-node/register $(find ./src -name '*.test.ts')"
+        "test:watch": "npx tsc --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --watch --require ts-node/register $(find ./src -name '*.test.ts')",
+        "release": "release-it"
     },
     "devDependencies": {
         "@commitlint/cli": "^19.2.1",
@@ -33,7 +34,7 @@
         "husky": "^9.0.11",
         "nock": "^13.5.4",
         "nodemon": "^3.0.1",
-        "release-it": "^17.2.0",
+        "release-it": "^17.1.1",
         "rimraf": "^5.0.5",
         "supertest": "^6.3.4",
         "ts-node": "^10.9.2",
