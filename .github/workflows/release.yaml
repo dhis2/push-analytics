@@ -13,10 +13,15 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Exit if branch is not master
-              if: github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/main'
               run: |
-                  echo "Releases are only allowed from the master branch"
-                  exit 1
+                  if [ "${{ github.ref }}" = "refs/heads/master" ]
+                  then
+                      echo "On master branch, deployment is allowed"
+                      exit 0
+                  else
+                      echo "Releases are only allowed from the master branch"
+                      exit 1
+                  fi
 
     build:
         # Avoid running this if check_if_allowed fails
