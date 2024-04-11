@@ -12,37 +12,50 @@ on:
     # workflow_dispatch
 
 jobs:
+    # TODO: re-enable this (it has been tested and works well)
     # Only allow releases from the master branch
-    check_if_allowed:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Exit if branch is not master
-              # TODO: IMPORTANT: change to the correct branch name:
-              #  "refs/heads/DHIS2-17121-deployment-ci-and-docker" -> "refs/heads/master"
-              run: |
-                  if [ "${{ github.ref }}" = "refs/heads/master" ]
-                  then
-                      echo "On the master branch, release is allowed"
-                      exit 0
-                  else
-                      echo "Releases are only allowed from the master branch"
-                      exit 1
-                  fi
+    # check_if_allowed:
+    #     runs-on: ubuntu-latest
+    #     steps:
+    #         - name: Exit if branch is not master
+    #           run: |
+    #               if [ "${{ github.ref }}" = "refs/heads/master" ]
+    #               then
+    #                   echo "On the master branch, release is allowed"
+    #                   exit 0
+    #               else
+    #                   echo "Releases are only allowed from the master branch"
+    #                   exit 1
+    #               fi
 
     build:
         # Avoid running this if check_if_allowed fails
-        needs: check_if_allowed
+        # needs: check_if_allowed
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-node@v3
+            - name: Checkout repo
+              uses: actions/checkout@v3
+            - name: Setup NodeJS
+              uses: actions/setup-node@v3
               with:
                   node-version: lts/*
                   cache: 'npm'
-            - run: npm ci --include=dev
-            - run: npm run lint
-            - run: npm run test
-            - run: npm run build
+            - name: Install dependencies (incl. devDependencies)
+              run: npm ci --include=dev
+            - name: Lint code
+              run: npm run lint
+            - name: Run tests
+              run: npm run test
+            - name: Build the project
+              run: npm run build
+            - name: Compress the "/dist" directory
+              uses: a7ul/tar-action@v1.1.0
+              id: compress
+              with:
+                  command: c
+                  files: |
+                      ./dist
+                  outPath: push-analytics.tar.gz
 
     # Create zip from build
     # Create GitHub release with changelog and include zip
