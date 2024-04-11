@@ -16,10 +16,12 @@
         "lint": "npx prettier --check . && npx eslint --quiet --ext .js,.ts .",
         "format": "npx prettier --write . && npx eslint --quiet --fix --ext .js,.ts .",
         "test": "npx tsc --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --require ts-node/register $(find ./src -name '*.test.ts')",
-        "test:watch": "npx tsc --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --watch --require ts-node/register $(find ./src -name '*.test.ts')"
+        "test:watch": "npx tsc --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --watch --require ts-node/register $(find ./src -name '*.test.ts')",
+        "release": "release-it"
     },
     "devDependencies": {
         "@dhis2/cli-style": "^10.5.1",
+        "@release-it/conventional-changelog": "^8.0.1",
         "@types/node": "^20.8.3",
         "@types/supertest": "^6.0.2",
         "@typescript-eslint/eslint-plugin": "^6.7.4",
@@ -28,6 +30,7 @@
         "eslint": "^8.51.0",
         "nock": "^13.5.4",
         "nodemon": "^3.0.1",
+        "release-it": "^17.1.1",
         "rimraf": "^5.0.5",
         "supertest": "^6.3.4",
         "ts-node": "^10.9.2",

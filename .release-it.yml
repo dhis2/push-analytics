@@ -1,0 +1,39 @@
+git:
+    commitMessage: 'chore: release v${version}'
+    tagName: v${version}
+    # Enable the line below when all is working
+    # We only want to release from the master branch
+    # requireBranch: master
+    requireCleanWorkingDir: true
+    requireCommits: true
+github:
+    release: true
+    # Not sure about this setting...
+    # May fail due to absence of env variable....
+    web: false
+    autoGenerate: true
+npm:
+    publish: false
+plugins:
+    '@release-it/conventional-changelog':
+        infile: CHANGELOG.md
+        header: '# Changelog'
+        preset:
+            name: conventionalcommits
+            types:
+                - type: feat
+                  section: Features
+                - type: fix
+                  section: Bug Fixes
+                - type: chore
+                  hidden: true
+                - type: docs
+                  hidden: true
+                - type: style
+                  hidden: true
+                - type: refactor
+                  hidden: true
+                - type: perf
+                  hidden: true
+                - type: test
+                  hidden: true
