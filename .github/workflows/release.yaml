@@ -1,12 +1,48 @@
 name: Release to GitHub and Docker Hub
 
+# We trigger releases manually
 on: workflow_dispatch
 
 jobs:
-    create_github_release:
+    # Only allow releases from the master branch
+    check_if_allowed:
         runs-on: ubuntu-latest
         steps:
-            - name: Checkout repo
-              uses: actions/checkout@v4
-            - name: Hello world
-              run: echo "Hellow world"
+            - name: Exit if branch is not master
+              if: github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/main'
+              run: |
+                  echo "Releases are only allowed from the master branch"
+                  exit 1
+
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
+              with:
+                  node-version: 16
+            - run: npm ci --include=dev
+            - run: npm run lint
+            - run: npm run test
+            - run: npm run build
+
+    # Create zip from build
+    # Create GitHub release with changelog and include zip
+    # Deploy to docker-hub
+
+    # publish-gpr:
+    #     needs: build
+    #     runs-on: ubuntu-latest
+    #     permissions:
+    #         contents: read
+    #         packages: write
+    #     steps:
+    #         - uses: actions/checkout@v3
+    #         - uses: actions/setup-node@v3
+    #           with:
+    #               node-version: 16
+    #               registry-url: https://npm.pkg.github.com/
+    #         - run: npm ci
+    #         - run: npm publish
+    #           env:
+    #               NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
