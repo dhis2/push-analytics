@@ -29,7 +29,7 @@ jobs:
     #               fi
 
     build:
-        # Avoid running this if check_if_allowed fails
+        # Will not run if check_if_allowed fails
         # needs: check_if_allowed
         runs-on: ubuntu-latest
         steps:
@@ -49,9 +49,10 @@ jobs:
             - name: Build the project
               run: npm run build
             - name: Compress the "/dist" directory
+              id: compressed-dist
               run: tar -zcvf ./push-analytics.tar.gz ./dist
             - name: Report file size
-              run: echo "Size of push-analytics.tar.gz is $(stat -c%s './push-analytics.tar.gz') bytes."
+              run: echo "Size of 'push-analytics.tar.gz' is $(stat -c%s './push-analytics.tar.gz') bytes."
 
     # Create zip from build
     # Create GitHub release with changelog and include zip
