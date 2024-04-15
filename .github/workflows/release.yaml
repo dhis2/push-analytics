@@ -1,15 +1,7 @@
 name: Release to GitHub and Docker Hub
 
 # We trigger releases manually
-on:
-    # TODO: I don't want to run this workflow on every push, but triggered manually instead
-    # using `workflow_dispatch`, but that would only work from the master branch:
-    # The workflow file must be committed in the default branch (master/main) if you want to
-    # use the workflow_dispatch event.
-    # https://github.com/orgs/community/discussions/25219#discussioncomment-3246909
-    # So we use `push` for now should undo this once everything has been found to work.
-    push
-    # workflow_dispatch
+on: workflow_dispatch
 
 jobs:
     # TODO: re-enable this (it has been tested and works well)
