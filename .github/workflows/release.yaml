@@ -5,13 +5,17 @@ on: workflow_dispatch
 
 jobs:
     # TODO: re-enable this (it has been tested and works well)
-    # Only allow releases from the master branch
+    # Only allow releases from the release branches branch
     # check_if_allowed:
     #     runs-on: ubuntu-latest
     #     steps:
-    #         - name: Exit if branch is not master
+    #         - name: Exit if branch is not a release branch
+    #           # Add more branches if we want to release from there
     #           run: |
-    #               if [ "${{ github.ref }}" = "refs/heads/master" ]
+    #               if [ "${{ github.ref }}" = "refs/heads/master" ] || \
+    #                  [ "${{ github.ref }}" = "refs/heads/alpha" ] || \
+    #                  [ "${{ github.ref }}" = "refs/heads/beta" ] || \
+    #                  [ "${{ github.ref }}" = "refs/heads/next" ] ||
     #               then
     #                   echo "On the master branch, release is allowed"
     #                   exit 0
