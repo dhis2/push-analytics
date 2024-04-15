@@ -1,7 +1,13 @@
 {
     "git": {
         "commitMessage": "chore: release v${version}",
-        "requireBranch": ["master", "beta", "alpha", "next"]
+        "requireBranch": [
+            "master",
+            "beta",
+            "alpha",
+            "next",
+            "DHIS2-17121-deployment-ci-and-docker"
+        ]
     },
     "github": {
         "release": true,
@@ -27,7 +33,9 @@
         }
     },
     "npm": {
-        "publish": false
+        "publish": false,
+        "skipChecks": true,
+        "ignoreVersion": true
     },
     "hooks": {
         "before:init": ["npm run lint", "npm run test"],
