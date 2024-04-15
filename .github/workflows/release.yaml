@@ -32,7 +32,7 @@ jobs:
               with:
                   node-version: lts/*
                   cache: 'npm'
-            - name: Install dependencies (incl. devDependencies)
+            - name: Install (dev) dependencies
               run: npm ci --include=dev
             - name: Lint code
               run: npm run lint
@@ -43,9 +43,9 @@ jobs:
             - name: Compress the "/dist" directory
               id: compressed-dist
               # Send to dev/null to prevent long list of files in GHA output
-              run: tar -zcvf ./push-analytics.tar.gz ./dist >/dev/null 2>&1
-            - name: Report file size
-              run: echo "Size of 'push-analytics.tar.gz' is $(stat -c%s './push-analytics.tar.gz') bytes."
+              run: |
+                  tar -zcvf ./push-analytics.tar.gz ./dist >/dev/null 2>&1
+                  echo "Size of 'push-analytics.tar.gz' is $(stat -c%s './push-analytics.tar.gz') bytes."
             - name: Release
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
