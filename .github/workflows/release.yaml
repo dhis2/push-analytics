@@ -1,0 +1,12 @@
+name: Release to GitHub and Docker Hub
+
+on: workflow_dispatch
+
+jobs:
+    create_github_release:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v4
+            - name: Hello world
+              run: echo "Hellow world"
