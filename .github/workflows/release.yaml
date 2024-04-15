@@ -28,7 +28,7 @@ jobs:
     #                   exit 1
     #               fi
 
-    build:
+    create_github_release:
         # Will not run if check_if_allowed fails
         # needs: check_if_allowed
         runs-on: ubuntu-latest
