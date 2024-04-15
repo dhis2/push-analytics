@@ -1,13 +1,7 @@
 {
     "git": {
         "commitMessage": "chore: release v${version}",
-        "requireBranch": [
-            "master",
-            "beta",
-            "alpha",
-            "next",
-            "DHIS2-17121-deployment-ci-and-docker"
-        ]
+        "requireBranch": ["master", "beta", "alpha", "next"]
     },
     "github": {
         "release": true,
