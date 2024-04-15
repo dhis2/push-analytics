@@ -27,7 +27,9 @@
         }
     },
     "npm": {
-        "publish": false
+        "publish": false,
+        "skipChecks": true,
+        "ignoreVersion": true
     },
     "hooks": {
         "before:init": ["npm run lint", "npm run test"],
