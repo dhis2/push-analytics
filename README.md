@@ -35,20 +35,21 @@ The push analytics service needs to establish an authenticated connection to a D
 | `PORT`                       | `1337`                  | Port for the HTTP server                                                                                                                                                                                                                                 |
 | `DHIS2_CORE_URL`             | `http://localhost:8080` | Host of the DHIS2 Core instance                                                                                                                                                                                                                          |
 | `DHIS2_CORE_MAJOR_VERSION`   | `40`                    | API version to use when issuing API requests to the DHIS2 Core instance                                                                                                                                                                                  |
-| `DHIS2_CORE_USERNAME`        | `admin`                 | DHIS2 Core username                                                                                                                                                                                                                                      |
-| `DHIS2_CORE_PASSWORD`        | `district`              | DHIS2 Core password                                                                                                                                                                                                                                      |
-| `MAX_THREADS`                | `4`                     | Max number of threads (worker nodes) to use. If set to "max", all available threads will be used. If a number is provided this will be used (capped by number of available threads). If this variable is not set, 50% of available threads will be used. |
+| `DHIS2_CORE_ADMIN_USERNAME`  | `admin`                 | DHIS2 Core username                                                                                                                                                                                                                                      |
+| `DHIS2_CORE_ADMIN_PASSWORD`  | `district`              | DHIS2 Core password                                                                                                                                                                                                                                      |
 | `DHIS2_CORE_SESSION_TIMEOUT` | `3600`                  | Session expiry on the DHIS2 Core instance. Ensure that this value matches the actual session expiry timeout on the core instance to prevent authentication issues in the push analytics service.                                                         |
+| `MAX_THREADS`                | `4`                     | Max number of threads (worker nodes) to use. If set to "max", all available threads will be used. If a number is provided this will be used (capped by number of available threads). If this variable is not set, 50% of available threads will be used. |
+| `NODE_ENV`                   | `production`            | Environment context, can be one of the following values `development`, `production`, `ci` or `testing`                                                                                                                                                   |
 
 In development mode this application uses [dotenv](https://github.com/motdotla/dotenv#readme) to load environment variables from a `.env` file at the project root. This file is being gitignored, because it may contain sensitive information. The `.env.template` file, can be used to get started.
 
 ### Installing dependencies
 
-Run `yarn install`
+Run `npm install`
 
 ### Starting the push-analytics-service
 
-To start the service in development mode, run `yarn start:dev`, for production, run `yarn start:prod`.
+To start the service in development mode, run `npm run start:dev`, for production, run `npm run start:prod`.
 
 ### Docker
 

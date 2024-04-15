@@ -116,7 +116,7 @@ export class DashboardItemConverter implements IDashboardItemConverter {
         } catch (error) {
             if (
                 this.isAppScraperConversion(queueItem) &&
-                this.#env.context === 'development'
+                this.#env.nodeEnv === 'development'
             ) {
                 try {
                     await this.#appScraper.takeErrorScreenShot(queueItem)

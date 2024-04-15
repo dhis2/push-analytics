@@ -1,0 +1,32 @@
+name: Verify Push Analytics Service
+
+on:
+    push:
+        branches: ['master']
+    pull_request:
+        types: ['opened', 'edited', 'reopened', 'synchronize']
+        branches: ['master']
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+
+jobs:
+    verify:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v4
+            - name: Setup Node JS
+              uses: actions/setup-node@v4
+              with:
+                  node-version: lts/*
+                  cache: 'npm'
+            - name: Install dependencies (incl. devDependencies)
+              run: npm ci --include=dev
+            - name: Build the project
+              # Building includes TypeScript compilations so type errors are caught here too
+              run: npm run build
+            - name: Lint code
+              run: npm run lint
+            - name: Run tests
+              run: npm run test
