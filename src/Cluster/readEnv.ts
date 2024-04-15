@@ -1,8 +1,5 @@
-import type {
-    EnvVariableName,
-    PushAnalyticsContext,
-    PushAnalyticsEnvVariables,
-} from '../types'
+import cluster from 'node:cluster'
+import type { EnvVariableName, NodeEnvContext, PushAnalyticsEnvVariables } from '../types'
 
 const envVariableDefaults: Record<EnvVariableName, string> = {
     HOST: 'localhost',
@@ -13,16 +10,18 @@ const envVariableDefaults: Record<EnvVariableName, string> = {
     DHIS2_CORE_ADMIN_PASSWORD: 'district',
     MAX_THREADS: '4',
     DHIS2_CORE_SESSION_TIMEOUT: '3600',
-    CONTEXT: 'production',
+    NODE_ENV: 'production',
 }
 
-function readEnvVariable(name: EnvVariableName): string | PushAnalyticsContext {
+function readEnvVariable(name: EnvVariableName): string | NodeEnvContext {
     if (process.env[name]) {
         return process.env[name] ?? ''
     } else {
-        console.log(
-            `Env variable "${name}" not found. Using default value "${envVariableDefaults[name]}" instead`
-        )
+        if (cluster.isPrimary) {
+            console.log(
+                `Env variable "${name}" not found. Using default value "${envVariableDefaults[name]}" instead`
+            )
+        }
         return envVariableDefaults[name]
     }
 }
@@ -37,6 +36,6 @@ export function readEnv(): PushAnalyticsEnvVariables {
         adminPassword: readEnvVariable('DHIS2_CORE_ADMIN_PASSWORD'),
         maxThreads: readEnvVariable('MAX_THREADS'),
         sessionTimeout: readEnvVariable('DHIS2_CORE_SESSION_TIMEOUT'),
-        context: readEnvVariable('CONTEXT') as PushAnalyticsContext,
+        nodeEnv: readEnvVariable('NODE_ENV') as NodeEnvContext,
     }
 }

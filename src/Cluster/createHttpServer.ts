@@ -9,7 +9,7 @@ export function createHttpServer(
     return http
         .createServer(primaryProcess.requestListener)
         .listen(env.port, parseInt(env.host), () => {
-            if (env.context !== 'testing') {
+            if (env.nodeEnv !== 'testing') {
                 console.log(
                     `DHIS2 Push Analytics Service is running on http://${env.host}:${env.port}`
                 )

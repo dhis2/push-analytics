@@ -9,14 +9,14 @@ import { HtmlCollector, MAX_CONVERSION_TIME } from './HtmlCollector'
  * feasible to add a test for that in the intergration test. */
 describe('HtmlCollector - request timeout', () => {
     it('should call the `onConversionCallback` function when the timeout expires', (context) => {
-        context.mock.timers.enable(['setTimeout'])
+        context.mock.timers.enable({ apis: ['setTimeout'] })
         const onConversionCallbackMock = context.mock.fn()
         new HtmlCollector([], onConversionCallbackMock)
         context.mock.timers.tick(MAX_CONVERSION_TIME + 10)
         assert.strictEqual(onConversionCallbackMock.mock.calls.length, 1)
     })
     it('should not call the `onConversionCallback` function if clearConversionTimeout is called before the timeout expires', (context) => {
-        context.mock.timers.enable(['setTimeout'])
+        context.mock.timers.enable({ apis: ['setTimeout'] })
         const onConversionCallbackMock = context.mock.fn()
         const htmlCollector = new HtmlCollector([], onConversionCallbackMock)
         // 100ms before timeout

@@ -36,7 +36,7 @@ const initializeMockCluster = async (
         adminPassword: 'district',
         maxThreads: maxThreads,
         sessionTimeout: '3600',
-        context: 'testing',
+        nodeEnv: 'testing',
     }
 
     if (cluster.isPrimary) {
