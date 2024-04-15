@@ -1,5 +1,4 @@
 {
-    "branches": ["master", "DHIS2-17121-deployment-ci-and-docker"],
     "dryRun": true,
     "plugins": [
         "@semantic-release/commit-analyzer",
