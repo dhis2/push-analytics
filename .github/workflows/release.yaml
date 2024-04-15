@@ -42,7 +42,8 @@ jobs:
               run: npm run build
             - name: Compress the "/dist" directory
               id: compressed-dist
-              run: tar -zcvf ./push-analytics.tar.gz ./dist
+              # Send to dev/null to prevent long list of files in GHA output
+              run: tar -zcvf ./push-analytics.tar.gz ./dist >/dev/null 2>&1
             - name: Report file size
               run: echo "Size of 'push-analytics.tar.gz' is $(stat -c%s './push-analytics.tar.gz') bytes."
             - name: Release
