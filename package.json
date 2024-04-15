@@ -7,6 +7,7 @@
     "license": "MIT",
     "private": false,
     "scripts": {
+        "prepare": "husky",
         "build:clear": "rimraf ./dist && mkdir ./dist && mkdir ./dist/images",
         "build:deps": "cp ./package.json ./package-lock.json ./dist/ && cd ./dist && npm install --omit=dev",
         "build:src": "npx -y tsc -p ./tsconfig.prod.json",
@@ -17,17 +18,14 @@
         "format": "npx prettier --write . && npx eslint --quiet --fix --ext .js,.ts .",
         "test": "npx tsc --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --require ts-node/register $(find ./src -name '*.test.ts')",
         "test:watch": "npx tsc --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --watch --require ts-node/register $(find ./src -name '*.test.ts')",
-        "release": "release-it",
-        "prepare": "husky"
+        "release": "release-it"
     },
     "devDependencies": {
         "@commitlint/cli": "^19.2.1",
         "@commitlint/config-conventional": "^19.1.0",
         "@commitlint/types": "^19.0.3",
         "@dhis2/cli-style": "^10.5.1",
-        "@semantic-release/commit-analyzer": "^12.0.0",
-        "@semantic-release/github": "^10.0.3",
-        "@semantic-release/release-notes-generator": "^13.0.0",
+        "@release-it/conventional-changelog": "^8.0.1",
         "@types/node": "^20.8.3",
         "@types/supertest": "^6.0.2",
         "@typescript-eslint/eslint-plugin": "^6.7.4",
@@ -37,8 +35,8 @@
         "husky": "^9.0.11",
         "nock": "^13.5.4",
         "nodemon": "^3.0.1",
+        "release-it": "^17.2.0",
         "rimraf": "^5.0.5",
-        "semantic-release": "^23.0.8",
         "supertest": "^6.3.4",
         "ts-node": "^10.9.2",
         "typescript": "^5.2.2"
