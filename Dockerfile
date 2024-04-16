@@ -9,8 +9,7 @@ FROM node:lts AS builder
 WORKDIR /usr/src/app
 COPY . .
 RUN --mount=type=cache,target=/root/.npm npm ci --include=dev
-RUN npm run build:clear
-RUN npm run build:src
+RUN ./scripts/build.sh
 
 # The prod stage only installs dev dependencies and then gets the
 # compiled JS assets from the builder stage
@@ -22,6 +21,7 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV CHROME_PATH=/usr/bin/chromium
 ENV DEBIAN_FRONTEND=noninteractive
+
 # Install Chromium etc. into the Ubuntu image (for any architecture)
 RUN apt update -qq \
     && apt install -qq -y --no-install-recommends \
@@ -40,11 +40,13 @@ RUN apt update -qq \
     fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /src/*.deb
+
+# Only copy compiled JS files
 COPY --from=builder ./usr/src/app/dist ./dist
-COPY ./package.json .
-COPY ./package-lock.json .
-# Production dependencies only
-RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev
-COPY ./node_modules .
+COPY package.json .
+COPY package-lock.json .
+# Install production dependencies only, husky hooks skipped by --only=production --ignore-scripts
+RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev --only=production --ignore-scripts
+COPY node_modules .
 USER node
 CMD node ./dist/index.js

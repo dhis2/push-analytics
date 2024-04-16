@@ -8,7 +8,9 @@
     "private": true,
     "scripts": {
         "prepare": "husky",
-        "build": "./scripts/build.sh",
+        "build:compile": "./scripts/build.sh",
+        "build:compress": "./scripts/compress.sh",
+        "build": "npm run build:compile && npm run build:compress",
         "start:dev": "nodemon --exec ts-node -r dotenv/config src/index.ts",
         "start:prod": "npm run build && node ./dist/index.js",
         "lint:tsc": "npx tsc --noEmit -p ./tsconfig.prod.json",
