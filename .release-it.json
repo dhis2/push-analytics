@@ -31,7 +31,7 @@
     },
     "hooks": {
         "before:init": ["npm run lint", "npm run test"],
-        "after:bump": "npm run build ${version}",
+        "after:bump": "npm run build:compile && npm run build:compress ${version}",
         "after:release": "echo Successfully released ${name} v${version} to ${repo.repository}."
     }
 }
