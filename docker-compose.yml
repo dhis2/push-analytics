@@ -86,9 +86,7 @@ services:
 
     push-analytics:
         hostname: 'push-analytics'
-        build:
-            context: .
-            dockerfile: Dockerfile.dev
+        image: 'dhis2/core-dev:alpha'
         volumes:
             - ./:/usr/src/app
             - /usr/src/app/node_modules
