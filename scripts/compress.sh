@@ -4,8 +4,8 @@ VERSION="${1:-UNKNOWN_VERSION}"
 FILE_NAME=push-analytics-$VERSION.tar.gz
 
 # This script fully assumes the build script has done its thing
-# Compress the ./dist folder (suppress output)
-tar -zcvf ./$FILE_NAME ./dist ./dist >/dev/null 2>&1
+# Compress the ./dist folder
+tar -zcvf ./$FILE_NAME ./dist ./dist
 # Colocate the compressed file with the uncompressed assets
 mv ./$FILE_NAME ./dist/$FILE_NAME
 # Compute the file size
