@@ -43,10 +43,9 @@ RUN apt update -qq \
 
 # Only copy compiled JS files
 COPY --from=builder ./usr/src/app/dist ./dist
-COPY package.json .
-COPY package-lock.json .
+COPY ./package.json .
+COPY ./package-lock.json .
 # Install production dependencies only, husky hooks skipped by --only=production --ignore-scripts
 RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev --only=production --ignore-scripts
-COPY node_modules .
 USER node
 CMD node ./dist/index.js
