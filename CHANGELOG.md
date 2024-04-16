@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.6-alpha.0 (2024-04-16)
+
+
+### Bug Fixes
+
+* use correct path to pre release flag ([0b940cc](https://github.com/dhis2/push-analytics/commit/0b940ccabc040e9307ac5933d15abc8a730966ba))
+
 ## 0.1.5 (2024-04-16)
 
 ## 0.1.4 (2024-04-16)
