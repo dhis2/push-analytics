@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.1.6-alpha.8](https://github.com/dhis2/push-analytics/compare/0.1.6-alpha.7...0.1.6-alpha.8) (2024-04-16)
+
 ## 0.1.6-alpha.7 (2024-04-16)
 
 ## 0.1.6-alpha.6 (2024-04-16)
