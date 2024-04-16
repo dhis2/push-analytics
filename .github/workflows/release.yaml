@@ -77,6 +77,8 @@ jobs:
               uses: docker/metadata-action@v5
               with:
                   images: dhis2/push-analytics
+                  tags: |
+                      type=semver,pattern={{raw}}
 
             - name: Build and push Docker image
               uses: docker/build-push-action@v5
