@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.6-alpha.2 (2024-04-16)
+
+
+### Bug Fixes
+
+* use relative path in each docker COPY statement ([6c0a415](https://github.com/dhis2/push-analytics/commit/6c0a4156fca5a232ef6a5d78c9a6d696bf9cf130))
+
 ## 0.1.6-alpha.1 (2024-04-16)
 
 ## 0.1.6-alpha.0 (2024-04-16)
