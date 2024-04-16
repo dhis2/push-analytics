@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.6-alpha.6 (2024-04-16)
+
+
+### Bug Fixes
+
+* use full semver number for docker image tags ([5b8d79c](https://github.com/dhis2/push-analytics/commit/5b8d79cb8ac03a3e47f741aa024db4b0ab3460c8))
+
 ## 0.1.6-alpha.5 (2024-04-16)
 
 ## 0.1.6-alpha.4 (2024-04-16)
