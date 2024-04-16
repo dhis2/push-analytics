@@ -4,30 +4,27 @@ name: Release to GitHub and Docker Hub
 on: workflow_dispatch
 
 jobs:
-    # TODO: re-enable this (it has been tested and works well)
     # Only allow releases from the release branches branch
-    # check_if_allowed:
-    #     runs-on: ubuntu-latest
-    #     steps:
-    #         - name: Exit if branch is not a release branch
-    #           # Add more branches if we want to release from there
-    #           run: |
-    #               if [ "${{ github.ref }}" = "refs/heads/master" ] || \
-    #                  [ "${{ github.ref }}" = "refs/heads/alpha" ] || \
-    #                  [ "${{ github.ref }}" = "refs/heads/beta" ] || \
-    #                  [ "${{ github.ref }}" = "refs/heads/next" ] ||
-    #               then
-    #                   echo "On the master branch, release is allowed"
-    #                   exit 0
-    #               else
-    #                   echo "Releases are only allowed from the master branch"
-    #                   exit 1
-    #               fi
+    check_if_allowed:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Exit if branch is not a release branch
+              run: |
+                  if [ "${{ github.ref }}" = "refs/heads/master" ] || \
+                     [ "${{ github.ref }}" = "refs/heads/alpha" ] || \
+                     [ "${{ github.ref }}" = "refs/heads/beta" ] || \
+                     [ "${{ github.ref }}" = "refs/heads/next" ] ||
+                  then
+                      echo "On a release branch, proceeding to release."
+                      exit 0
+                  else
+                      echo "This is not a release branch, cancelling release."
+                      exit 1
+                  fi
 
     create_github_release:
         # Will not run if check_if_allowed fails
-        # TODO: uncomment this
-        # needs: check_if_allowed
+        needs: check_if_allowed
         runs-on: ubuntu-latest
         name: Create a GitHub Release with release artefact
         steps:
@@ -56,39 +53,36 @@ jobs:
                   else
                     echo "pre_release_flag=''" >> $GITHUB_OUTPUT
                   fi
-
             - name: Release
               run: npx -y release-it --ci ${{ steps.extract_pre_release_flag.outputs.pre_release_flag }}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    # push_to_docker_hub:
-    #     # Will not run if check_if_allowed fails
-    #     # TODO: uncomment this
-    #     # needs: check_if_allowed
-    #     runs-on: ubuntu-latest
-    #     name: Push new image to Docker Hub
-    #     steps:
-    #         - name: Check out the repo
-    #           uses: actions/checkout@v4
+    push_to_docker_hub:
+        needs: [check_if_allowed, create_github_release]
+        runs-on: ubuntu-latest
+        name: Push new image to Docker Hub
+        steps:
+            - name: Check out the repo
+              uses: actions/checkout@v4
 
-    #         - name: Log in to Docker Hub
-    #           uses: docker/login-action@v3
-    #           with:
-    #               username: ${{ secrets.DHIS2_BOT_DOCKER_HUB_USERNAME }}
-    #               password: ${{ secrets.DHIS2_BOT_DOCKER_HUB_PASSWORD }}
+            - name: Log in to Docker Hub
+              uses: docker/login-action@v3
+              with:
+                  username: ${{ secrets.DHIS2_BOT_DOCKER_HUB_USERNAME }}
+                  password: ${{ secrets.DHIS2_BOT_DOCKER_HUB_PASSWORD }}
 
-    #         - name: Extract metadata (tags, labels) for Docker
-    #           id: meta
-    #           uses: docker/metadata-action@v5
-    #           with:
-    #               images: dhis2/push-analytics
+            - name: Extract metadata (tags, labels) for Docker
+              id: meta
+              uses: docker/metadata-action@v5
+              with:
+                  images: dhis2/push-analytics
 
-    #         - name: Build and push Docker image
-    #           uses: docker/build-push-action@v5
-    #           with:
-    #               context: .
-    #               file: ./Dockerfile
-    #               push: true
-    #               tags: ${{ steps.meta.outputs.tags }}
-    #               labels: ${{ steps.meta.outputs.labels }}
+            - name: Build and push Docker image
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  file: ./Dockerfile
+                  push: true
+                  tags: ${{ steps.meta.outputs.tags }}
+                  labels: ${{ steps.meta.outputs.labels }}
