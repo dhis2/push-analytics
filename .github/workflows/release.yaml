@@ -45,7 +45,7 @@ jobs:
                   git config --global user.name "@dhis2-bot"
                   git config --global user.email "apps@dhis2.org"
             - name: Release
-              run: npx -y release-it --ci
+              run: npx -y release-it --ci --dry-run
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

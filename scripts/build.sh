@@ -2,7 +2,8 @@
 
 # Note: showing the output of various commands is confusing so output
 # is surpressed by piping to >/dev/null 2>&1
-
+echo "arg 1 $1"
+echo "version var $version"
 # Clear previous builds
 rimraf ./dist && mkdir ./dist && mkdir ./dist/images
 # Copy package.jsnon and lockfile to dist
