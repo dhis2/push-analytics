@@ -4,7 +4,7 @@
 # is surpressed by piping to >/dev/null 2>&1
 
 # Clear previous builds
-rm -r ./dist && mkdir ./dist && mkdir ./dist/images
+rm -rf ./dist && mkdir ./dist && mkdir ./dist/images
 # Copy package.jsnon and lockfile to dist
 cp ./package.json ./package-lock.json ./dist/
 # Install dependencies in build dir
