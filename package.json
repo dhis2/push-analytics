@@ -33,12 +33,14 @@
         "dotenv": "^16.3.1",
         "eslint": "^8.51.0",
         "husky": "^9.0.11",
+        "lint-staged": "^15.2.2",
         "nock": "^13.5.4",
         "nodemon": "^3.0.1",
         "release-it": "^17.2.0",
         "rimraf": "^5.0.5",
         "supertest": "^6.3.4",
         "ts-node": "^10.9.2",
+        "tsc-files": "^1.1.4",
         "typescript": "^5.2.2"
     },
     "dependencies": {
@@ -46,5 +48,17 @@
         "axios": "^1.7.4",
         "minimatch": "^9.0.3",
         "puppeteer": "^21.3.8"
+    },
+    "lint-staged": {
+        "*.ts": [
+            "tsc-files --noEmit",
+            "eslint --quiet --fix",
+            "prettier --write --ignore-unknown"
+        ],
+        "*.js": [
+            "eslint --quiet --fix",
+            "prettier --write --ignore-unknown"
+        ],
+        "*.{json,html,md}": "prettier --write --ignore-unknown"
     }
 }
