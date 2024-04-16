@@ -13,8 +13,7 @@ jobs:
                   if [ "${{ github.ref }}" = "refs/heads/master" ] || \
                      [ "${{ github.ref }}" = "refs/heads/alpha" ] || \
                      [ "${{ github.ref }}" = "refs/heads/beta" ] || \
-                     [ "${{ github.ref }}" = "refs/heads/next" ] ||
-                  then
+                     [ "${{ github.ref }}" = "refs/heads/next" ]; then
                       echo "On a release branch, proceeding to release."
                       exit 0
                   else
