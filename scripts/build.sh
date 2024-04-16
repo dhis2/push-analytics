@@ -3,7 +3,7 @@
 # Note: showing the output of various commands is confusing so output
 # is surpressed by piping to >/dev/null 2>&1
 
-VERSION="${1:-latest}"
+VERSION="${1:-UNKNOWN_VERSION}"
 FILE_NAME=push-analytics-$VERSION.tar.gz
 
 # Clear previous builds

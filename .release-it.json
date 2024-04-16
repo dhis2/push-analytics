@@ -5,7 +5,7 @@
     },
     "github": {
         "release": true,
-        "assets": ["dist/push-analytics.tar.gz"]
+        "assets": ["dist/push-analytics-${version}.tar.gz"]
     },
     "plugins": {
         "@release-it/conventional-changelog": {
