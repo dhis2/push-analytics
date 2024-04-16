@@ -6,6 +6,7 @@ on: workflow_dispatch
 jobs:
     # Only allow releases from the release branches branch
     check_if_allowed:
+        name: Check if on a release branch
         runs-on: ubuntu-latest
         steps:
             - name: Exit if branch is not a release branch
