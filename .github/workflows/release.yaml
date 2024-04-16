@@ -44,8 +44,21 @@ jobs:
               run: |
                   git config --global user.name "@dhis2-bot"
                   git config --global user.email "apps@dhis2.org"
+            - name: Compute pre release tag
+              id: extract_pre_release_flag
+              run: |
+                  if [ "${{ github.ref }}" = "refs/heads/alpha" ]; then
+                    echo "pre_release_flag=--preRelease=alpha" >> $GITHUB_OUTPUT
+                  elif [ "${{ github.ref }}" = "refs/heads/beta" ]; then
+                      echo "pre_release_flag=--preRelease=beta" >> $GITHUB_OUTPUT
+                  elif [ "${{ github.ref }}" = "refs/heads/next" ]; then
+                      echo "pre_release_flag=--preRelease=rc" >> $GITHUB_OUTPUT
+                  else
+                    echo "pre_release_flag=''" >> $GITHUB_OUTPUT
+                  fi
+
             - name: Release
-              run: npx -y release-it --ci
+              run: npx -y release-it --ci ${{ steps.extract_pre_release_flag.pre_release_flag }}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
