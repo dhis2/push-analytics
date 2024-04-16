@@ -41,10 +41,10 @@ RUN apt update -qq \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /src/*.deb
 COPY --from=builder ./usr/src/app/dist ./dist
-COPY package.json .
-COPY package-lock.json .
+COPY ./package.json .
+COPY ./package-lock.json .
 # Production dependencies only
 RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev
-COPY node_modules .
+COPY ./node_modules .
 USER node
 CMD node ./dist/index.js
