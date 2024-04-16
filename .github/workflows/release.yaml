@@ -58,7 +58,7 @@ jobs:
                   fi
 
             - name: Release
-              run: npx -y release-it --ci ${{ steps.extract_pre_release_flag.pre_release_flag }}
+              run: npx -y release-it --ci ${{ steps.extract_pre_release_flag.outputs.pre_release_flag }}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
