@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3 (2024-04-16)
+
+
+### Bug Fixes
+
+* append version to release asset so file is found ([9bb43c4](https://github.com/dhis2/push-analytics/commit/9bb43c4ea4bf36f2f64ebce5df89c9bd3fc924ab))
+
 ## 0.1.2 (2024-04-16)
 
 
