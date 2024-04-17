@@ -1,4 +1,4 @@
-name: Create GitHub Release
+name: Create GitHub Release and push to Docker Hub
 
 # We trigger releases manually
 on: workflow_dispatch
@@ -84,8 +84,8 @@ jobs:
                       type=semver,pattern={{raw}}
 
             # To debug
-            - name: Output the tags
-              run: echo "tags ${{ steps.meta.outputs.tags }}"
+            # - name: Output the tags
+            #   run: echo "tags ${{ steps.meta.outputs.tags }}"
             # - uses: docker/setup-qemu-action@v3
             # - uses: docker/setup-buildx-action@v3
             - name: Build and push Docker image
