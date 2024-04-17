@@ -40,17 +40,17 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v4
-            # - name: Setup NodeJS
-            #   uses: actions/setup-node@v4
-            #   with:
-            #       node-version: lts/*
-            #       cache: 'npm'
-            # - name: Install dependencies
-            #   run: npm ci --include=dev
-            # - name: Initialize Git user
-            #   run: |
-            #       git config --global user.name "@dhis2-bot"
-            #       git config --global user.email "apps@dhis2.org"
+            - name: Setup NodeJS
+              uses: actions/setup-node@v4
+              with:
+                  node-version: lts/*
+                  cache: 'npm'
+            - name: Install dependencies
+              run: npm ci --include=dev
+            - name: Initialize Git user
+              run: |
+                  git config --global user.name "@dhis2-bot"
+                  git config --global user.email "apps@dhis2.org"
             - name: Compute pre release flag
               id: extract_pre_release_flag
               run: |
@@ -71,67 +71,65 @@ jobs:
                   else
                     echo "command=npx -y release-it --ci ${{ steps.extract_pre_release_flag.outputs.pre_release_flag }}" >> $GITHUB_OUTPUT
                   fi
-            - name: Show full command
-              run: echo ${{ steps.compute_command.outputs.command }}
-            # - name: Release
-            #   id: release_it
-            #   run: npx -y release-it ${{ steps.compute_major_flag.outputs.major_flag }}--ci ${{ steps.extract_pre_release_flag.outputs.pre_release_flag }}
-            #   env:
-            #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Release
+              id: release_it
+              run: ${{steps.compute_command.outputs.command}}
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    # push_to_docker_hub:
-    #     # Will not run if check_if_allowed fails
-    #     needs: [check_if_allowed, create_github_release]
-    #     runs-on: ubuntu-latest
-    #     name: Create new image and push to Docker Hub
-    #     steps:
-    #         - name: Checkout
-    #           uses: actions/checkout@v4
+    push_to_docker_hub:
+        # Will not run if check_if_allowed fails
+        needs: [check_if_allowed, create_github_release]
+        runs-on: ubuntu-latest
+        name: Create new image and push to Docker Hub
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
 
-    #         # Note that "most recent" is different than "latest" in the context
-    #         # of semantic versioning, because "latest" does not include pre-releases.
-    #         # What we need here is the tag of the release that was triggered in the
-    #         # preceeding `create_github_release` job, so the release with the most
-    #         # recent date
-    #         - name: Get most recent release tag
-    #           id: get_most_recent_release_tag
-    #           run: |
-    #               gh api \
-    #               -H "Accept: application/vnd.github+json" \
-    #               -H "X-GitHub-Api-Version: 2022-11-28" \
-    #               /repos/dhis2/push-analytics/releases | \
-    #               jq -r 'max_by(.created_at) | .tag_name' | \
-    #               { read tag; echo "tag=$tag" >> $GITHUB_OUTPUT; }
-    #           env:
-    #               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            # Note that "most recent" is different than "latest" in the context
+            # of semantic versioning, because "latest" does not include pre-releases.
+            # What we need here is the tag of the release that was triggered in the
+            # preceeding `create_github_release` job, so the release with the most
+            # recent date
+            - name: Get most recent release tag
+              id: get_most_recent_release_tag
+              run: |
+                  gh api \
+                  -H "Accept: application/vnd.github+json" \
+                  -H "X-GitHub-Api-Version: 2022-11-28" \
+                  /repos/dhis2/push-analytics/releases | \
+                  jq -r 'max_by(.created_at) | .tag_name' | \
+                  { read tag; echo "tag=$tag" >> $GITHUB_OUTPUT; }
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    #         - name: Log in to Docker Hub
-    #           uses: docker/login-action@v3
-    #           with:
-    #               username: ${{ secrets.DHIS2_BOT_DOCKER_HUB_USERNAME }}
-    #               password: ${{ secrets.DHIS2_BOT_DOCKER_HUB_PASSWORD }}
+            - name: Log in to Docker Hub
+              uses: docker/login-action@v3
+              with:
+                  username: ${{ secrets.DHIS2_BOT_DOCKER_HUB_USERNAME }}
+                  password: ${{ secrets.DHIS2_BOT_DOCKER_HUB_PASSWORD }}
 
-    #         - name: Extract metadata (tags, labels) for Docker
-    #           id: meta
-    #           uses: docker/metadata-action@v5
-    #           with:
-    #               images: dhis2/push-analytics
-    #               tags: |
-    #                   type=semver,pattern={{raw}},value=${{steps.get_most_recent_release_tag.outputs.tag}}
+            - name: Extract metadata (tags, labels) for Docker
+              id: meta
+              uses: docker/metadata-action@v5
+              with:
+                  images: dhis2/push-analytics
+                  tags: |
+                      type=semver,pattern={{raw}},value=${{steps.get_most_recent_release_tag.outputs.tag}}
 
-    #         - uses: docker/setup-qemu-action@v3
-    #         - uses: docker/setup-buildx-action@v3
-    #         - name: Build and push Docker image
-    #           uses: docker/build-push-action@v5
-    #           with:
-    #               context: .
-    #               file: ./Dockerfile
-    #               push: true
-    #               tags: ${{ steps.meta.outputs.tags }}
-    #               labels: ${{ steps.meta.outputs.labels }}
-    #               platforms: linux/amd64,linux/arm64
-    #               cache-from: type=gha
-    #               cache-to: type=gha,mode=max
+            - uses: docker/setup-qemu-action@v3
+            - uses: docker/setup-buildx-action@v3
+            - name: Build and push Docker image
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  file: ./Dockerfile
+                  push: true
+                  tags: ${{ steps.meta.outputs.tags }}
+                  labels: ${{ steps.meta.outputs.labels }}
+                  platforms: linux/amd64,linux/arm64
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
 
     # - name: Update repo description
     #   uses: peter-evans/dockerhub-description@v3
