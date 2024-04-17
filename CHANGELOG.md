@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.6-alpha.9 (2024-04-17)
+
+
+### Features
+
+* build container for ARM64 too ([db82b70](https://github.com/dhis2/push-analytics/commit/db82b70c5e80fc4321f42265d4b79b7115abb313))
+
 ## [0.1.6-alpha.8](https://github.com/dhis2/push-analytics/compare/0.1.6-alpha.7...0.1.6-alpha.8) (2024-04-16)
 
 ## 0.1.6-alpha.7 (2024-04-16)
