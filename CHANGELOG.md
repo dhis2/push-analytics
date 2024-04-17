@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.7-alpha.4 (2024-04-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* This is the end of the V0 era
+
+### chore
+
+* release v1.0.0 alpha ([f2c3779](https://github.com/dhis2/push-analytics/commit/f2c3779d49642b6ff632546068ad911da5e0c958))
+
 ## 0.1.7-alpha.3 (2024-04-17)
 
 ## 0.1.7-alpha.2 (2024-04-17)
