@@ -1,6 +1,6 @@
 {
     "name": "push-analytics",
-    "version": "0.1.6-alpha.13",
+    "version": "0.1.6-alpha.14",
     "description": "A NodeJS service using Puppeteer to generate images and HTML to insert into an email",
     "main": "dist/index.js",
     "author": "Hendrik de Graaf",
