@@ -8,62 +8,62 @@ env:
 
 jobs:
     # Only allow releases from the release branches branch
-    # check_if_allowed:
-    #     name: Check if on a release branch
-    #     runs-on: ubuntu-latest
-    #     steps:
-    #         - name: Exit if branch is not a release branch
-    #           run: |
-    #               if [ "${{ github.ref }}" = "refs/heads/master" ] || \
-    #                  [ "${{ github.ref }}" = "refs/heads/alpha" ] || \
-    #                  [ "${{ github.ref }}" = "refs/heads/beta" ] || \
-    #                  [ "${{ github.ref }}" = "refs/heads/next" ]; then
-    #                   echo "On a release branch, proceeding to release."
-    #                   exit 0
-    #               else
-    #                   echo "This is not a release branch, cancelling release."
-    #                   exit 1
-    #               fi
+    check_if_allowed:
+        name: Check if on a release branch
+        runs-on: ubuntu-latest
+        steps:
+            - name: Exit if branch is not a release branch
+              run: |
+                  if [ "${{ github.ref }}" = "refs/heads/master" ] || \
+                     [ "${{ github.ref }}" = "refs/heads/alpha" ] || \
+                     [ "${{ github.ref }}" = "refs/heads/beta" ] || \
+                     [ "${{ github.ref }}" = "refs/heads/next" ]; then
+                      echo "On a release branch, proceeding to release."
+                      exit 0
+                  else
+                      echo "This is not a release branch, cancelling release."
+                      exit 1
+                  fi
 
-    # create_github_release:
-    #     # Will not run if check_if_allowed fails
-    #     needs: check_if_allowed
-    #     runs-on: ubuntu-latest
-    #     name: Create a GitHub Release with release artefact
-    #     steps:
-    #         - name: Checkout repo
-    #           uses: actions/checkout@v4
-    #         - name: Setup NodeJS
-    #           uses: actions/setup-node@v4
-    #           with:
-    #               node-version: lts/*
-    #               cache: 'npm'
-    #         - name: Install dependencies
-    #           run: npm ci --include=dev
-    #         - name: Initialize Git user
-    #           run: |
-    #               git config --global user.name "@dhis2-bot"
-    #               git config --global user.email "apps@dhis2.org"
-    #         - name: Compute pre release tag
-    #           id: extract_pre_release_flag
-    #           run: |
-    #               if [ "${{ github.ref }}" = "refs/heads/alpha" ]; then
-    #                 echo "pre_release_flag=--preRelease=alpha" >> $GITHUB_OUTPUT
-    #               elif [ "${{ github.ref }}" = "refs/heads/beta" ]; then
-    #                   echo "pre_release_flag=--preRelease=beta" >> $GITHUB_OUTPUT
-    #               elif [ "${{ github.ref }}" = "refs/heads/next" ]; then
-    #                   echo "pre_release_flag=--preRelease=rc" >> $GITHUB_OUTPUT
-    #               else
-    #                 echo "pre_release_flag=''" >> $GITHUB_OUTPUT
-    #               fi
-    #         - name: Release
-    #           id: release_it
-    #           run: npx -y release-it --ci ${{ steps.extract_pre_release_flag.outputs.pre_release_flag }}
-    #           env:
-    #               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    create_github_release:
+        # Will not run if check_if_allowed fails
+        needs: check_if_allowed
+        runs-on: ubuntu-latest
+        name: Create a GitHub Release with release artefact
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v4
+            - name: Setup NodeJS
+              uses: actions/setup-node@v4
+              with:
+                  node-version: lts/*
+                  cache: 'npm'
+            - name: Install dependencies
+              run: npm ci --include=dev
+            - name: Initialize Git user
+              run: |
+                  git config --global user.name "@dhis2-bot"
+                  git config --global user.email "apps@dhis2.org"
+            - name: Compute pre release tag
+              id: extract_pre_release_flag
+              run: |
+                  if [ "${{ github.ref }}" = "refs/heads/alpha" ]; then
+                    echo "pre_release_flag=--preRelease=alpha" >> $GITHUB_OUTPUT
+                  elif [ "${{ github.ref }}" = "refs/heads/beta" ]; then
+                      echo "pre_release_flag=--preRelease=beta" >> $GITHUB_OUTPUT
+                  elif [ "${{ github.ref }}" = "refs/heads/next" ]; then
+                      echo "pre_release_flag=--preRelease=rc" >> $GITHUB_OUTPUT
+                  else
+                    echo "pre_release_flag=''" >> $GITHUB_OUTPUT
+                  fi
+            - name: Release
+              id: release_it
+              run: npx -y release-it --ci ${{ steps.extract_pre_release_flag.outputs.pre_release_flag }}
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     push_to_docker_hub:
-        # needs: [check_if_allowed, create_github_release]
+        needs: [check_if_allowed, create_github_release]
         runs-on: ubuntu-latest
         name: Create new image and push to Docker Hub
         steps:
