@@ -1,6 +1,13 @@
 name: Release to GitHub and Docker Hub
 
-on: workflow_dispatch
+on:
+    workflow_dispatch:
+        inputs:
+            major_version_bump:
+                description: 'Major version bump'
+                type: boolean
+                required: false
+                default: false
 
 jobs:
     create_github_release:
