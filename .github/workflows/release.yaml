@@ -40,17 +40,17 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v4
-            - name: Setup NodeJS
-              uses: actions/setup-node@v4
-              with:
-                  node-version: lts/*
-                  cache: 'npm'
-            - name: Install dependencies
-              run: npm ci --include=dev
-            - name: Initialize Git user
-              run: |
-                  git config --global user.name "@dhis2-bot"
-                  git config --global user.email "apps@dhis2.org"
+            # - name: Setup NodeJS
+            #   uses: actions/setup-node@v4
+            #   with:
+            #       node-version: lts/*
+            #       cache: 'npm'
+            # - name: Install dependencies
+            #   run: npm ci --include=dev
+            # - name: Initialize Git user
+            #   run: |
+            #       git config --global user.name "@dhis2-bot"
+            #       git config --global user.email "apps@dhis2.org"
             - name: Compute pre release flag
               id: extract_pre_release_flag
               run: |
@@ -63,16 +63,16 @@ jobs:
                   else
                     echo "pre_release_flag=''" >> $GITHUB_OUTPUT
                   fi
-            - name: Compute major flag
-              id: compute_major_flag
+            - name: Combine full release-it command
+              id: compute_command
               run: |
                   if [[-z "${{ github.event.inputs.major_version_bump }}"]]; then
-                    echo "major_flag=''" >> $GITHUB_OUTPUT
+                    echo "command=npx -y release-it major --ci ${{ steps.extract_pre_release_flag.outputs.pre_release_flag }}" >> $GITHUB_OUTPUT
                   else
-                    echo "major_flag='major '" >> $GITHUB_OUTPUT
+                    echo "command=npx -y release-it --ci ${{ steps.extract_pre_release_flag.outputs.pre_release_flag }}" >> $GITHUB_OUTPUT
                   fi
             - name: Show full command
-              run: echo "npx -y release-it ${{ steps.compute_major_flag.outputs.major_flag }}--ci ${{ steps.extract_pre_release_flag.outputs.pre_release_flag }}"
+              run: echo ${{ steps.compute_command.outputs.command }}
             # - name: Release
             #   id: release_it
             #   run: npx -y release-it ${{ steps.compute_major_flag.outputs.major_flag }}--ci ${{ steps.extract_pre_release_flag.outputs.pre_release_flag }}
