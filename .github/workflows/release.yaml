@@ -85,33 +85,33 @@ jobs:
             - name: Show most recent tag
               run: echo ${{steps.get_most_recent_release_tag.outputs.tag}}
 
-            # - name: Log in to Docker Hub
-            #   uses: docker/login-action@v3
-            #   with:
-            #       username: ${{ secrets.DHIS2_BOT_DOCKER_HUB_USERNAME }}
-            #       password: ${{ secrets.DHIS2_BOT_DOCKER_HUB_PASSWORD }}
+            - name: Log in to Docker Hub
+              uses: docker/login-action@v3
+              with:
+                  username: ${{ secrets.DHIS2_BOT_DOCKER_HUB_USERNAME }}
+                  password: ${{ secrets.DHIS2_BOT_DOCKER_HUB_PASSWORD }}
 
-            # - name: Extract metadata (tags, labels) for Docker
-            #   id: meta
-            #   uses: docker/metadata-action@v5
-            #   with:
-            #       images: dhis2/push-analytics
-            #       tags: |
-            #           type=semver,pattern={{raw}}
+            - name: Extract metadata (tags, labels) for Docker
+              id: meta
+              uses: docker/metadata-action@v5
+              with:
+                  images: dhis2/push-analytics
+                  tags: |
+                      type=semver,pattern={{raw}},value=${{steps.get_most_recent_release_tag.outputs.tag}}
 
-            # To debug
-            # - name: Output the tags
-            #   run: echo "tags ${{ steps.meta.outputs.tags }}"
+            - name: Output the tags
+              run: echo ${{ steps.meta.outputs.tags }}
+
             # - uses: docker/setup-qemu-action@v3
             # - uses: docker/setup-buildx-action@v3
-            # - name: Build and push Docker image
-            #   uses: docker/build-push-action@v5
-            #   with:
-            #       context: .
-            #       file: ./Dockerfile
-            #       push: true
-            #       tags: ${{ steps.meta.outputs.tags }}
-            #       labels: ${{ steps.meta.outputs.labels }}
-            # platforms: linux/amd64,linux/arm64
-            # cache-from: type=gha
-            # cache-to: type=gha,mode=max
+            - name: Build and push Docker image
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  file: ./Dockerfile
+                  push: true
+                  tags: ${{ steps.meta.outputs.tags }}
+                  labels: ${{ steps.meta.outputs.labels }}
+                  # platforms: linux/amd64,linux/arm64
+                  # cache-from: type=gha
+                  # cache-to: type=gha,mode=max
