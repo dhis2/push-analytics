@@ -81,7 +81,7 @@ jobs:
 
             # To debug
             - name: Output the tags
-              run: echo "tags ${{ steps.meta.outputs.tags }}""
+              run: echo "tags ${{ steps.meta.outputs.tags }}"
             - uses: docker/setup-qemu-action@v3
             - uses: docker/setup-buildx-action@v3
             - name: Build and push Docker image
