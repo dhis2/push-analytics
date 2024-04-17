@@ -33,6 +33,10 @@ jobs:
         steps:
             - name: Checkout repo
               uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  # The Checkout actions at v2 and beyond prevent pushes as another user due to persist-credentials being set to true by default
+                  persist-credentials: false
             - name: Setup NodeJS
               uses: actions/setup-node@v4
               with:
@@ -40,29 +44,29 @@ jobs:
                   cache: 'npm'
             - name: Install dependencies
               run: npm ci --include=dev
-            - name: Initialize Git user
-              run: |
-                  git config --global user.name "@dhis2-bot"
-                  git config --global user.email "apps@dhis2.org"
-            - name: Compute pre release tag
-              id: extract_pre_release_flag
+            - name: Compute JSON options
+              id: compute_json_options
               run: |
                   if [ "${{ github.ref }}" = "refs/heads/alpha" ]; then
-                    echo "pre_release_flag=--preRelease=alpha" >> $GITHUB_OUTPUT
+                      echo 'options={"preRelease": "alpha" }' >> $GITHUB_OUTPUT
                   elif [ "${{ github.ref }}" = "refs/heads/beta" ]; then
-                      echo "pre_release_flag=--preRelease=beta" >> $GITHUB_OUTPUT
+                      echo 'options={"preRelease": "beta" }' >> $GITHUB_OUTPUT
                   elif [ "${{ github.ref }}" = "refs/heads/next" ]; then
-                      echo "pre_release_flag=--preRelease=rc" >> $GITHUB_OUTPUT
+                      echo 'options={"preRelease": "rc" }' >> $GITHUB_OUTPUT
                   else
-                    echo "pre_release_flag=''" >> $GITHUB_OUTPUT
+                    echo "{}" >> $GITHUB_OUTPUT
                   fi
-            - name: Release
+            - name: release-it
               id: release_it
-              run: npx -y release-it --ci ${{ steps.extract_pre_release_flag.outputs.pre_release_flag }}  >> $GITHUB_OUTPUT
+              uses: TheRealWaldo/release-it@v0.7.2
+              with:
+                  json-opts: ${{ steps.compute_json_options.outputs.options }}
+                  git-user-name: '@dhis2-bot'
+                  git-user-email: 'apps@dhis2.org'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            - name: Log release it output
-              run: echo ${{ steps.release_it.outputs }}
+            - name: Log version
+              run: echo ${{ steps.release_it.outputs.version}}
 
     push_to_docker_hub:
         needs: [check_if_allowed, create_github_release]
