@@ -25,84 +25,87 @@ jobs:
                       exit 1
                   fi
 
-    create_github_release:
-        # Will not run if check_if_allowed fails
-        needs: check_if_allowed
-        runs-on: ubuntu-latest
-        name: Create a GitHub Release with release artefact
-        steps:
-            - name: Checkout repo
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-                  # The Checkout actions at v2 and beyond prevent pushes as another user due to persist-credentials being set to true by default
-                  persist-credentials: false
-            - name: Setup NodeJS
-              uses: actions/setup-node@v4
-              with:
-                  node-version: lts/*
-                  cache: 'npm'
-            - name: Install dependencies
-              run: npm ci --include=dev
-            - name: Compute JSON options
-              id: compute_json_options
-              run: |
-                  if [ "${{ github.ref }}" = "refs/heads/alpha" ]; then
-                      echo 'options={"preRelease": "alpha" }' >> $GITHUB_OUTPUT
-                  elif [ "${{ github.ref }}" = "refs/heads/beta" ]; then
-                      echo 'options={"preRelease": "beta" }' >> $GITHUB_OUTPUT
-                  elif [ "${{ github.ref }}" = "refs/heads/next" ]; then
-                      echo 'options={"preRelease": "rc" }' >> $GITHUB_OUTPUT
-                  else
-                    echo "{}" >> $GITHUB_OUTPUT
-                  fi
-            - name: release-it
-              id: release_it
-              uses: TheRealWaldo/release-it@v0.7.2
-              with:
-                  json-opts: ${{ steps.compute_json_options.outputs.options }}
-                  git-user-name: '@dhis2-bot'
-                  git-user-email: 'apps@dhis2.org'
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            - name: Log version
-              run: echo ${{ steps.release_it.outputs.version}}
+    # create_github_release:
+    #     # Will not run if check_if_allowed fails
+    #     needs: check_if_allowed
+    #     runs-on: ubuntu-latest
+    #     name: Create a GitHub Release with release artefact
+    #     steps:
+    #         - name: Checkout repo
+    #           uses: actions/checkout@v4
+    #         - name: Setup NodeJS
+    #           uses: actions/setup-node@v4
+    #           with:
+    #               node-version: lts/*
+    #               cache: 'npm'
+    #         - name: Install dependencies
+    #           run: npm ci --include=dev
+    #         - name: Initialize Git user
+    #           run: |
+    #               git config --global user.name "@dhis2-bot"
+    #               git config --global user.email "apps@dhis2.org"
+    #         - name: Compute pre release tag
+    #           id: extract_pre_release_flag
+    #           run: |
+    #               if [ "${{ github.ref }}" = "refs/heads/alpha" ]; then
+    #                 echo "pre_release_flag=--preRelease=alpha" >> $GITHUB_OUTPUT
+    #               elif [ "${{ github.ref }}" = "refs/heads/beta" ]; then
+    #                   echo "pre_release_flag=--preRelease=beta" >> $GITHUB_OUTPUT
+    #               elif [ "${{ github.ref }}" = "refs/heads/next" ]; then
+    #                   echo "pre_release_flag=--preRelease=rc" >> $GITHUB_OUTPUT
+    #               else
+    #                 echo "pre_release_flag=''" >> $GITHUB_OUTPUT
+    #               fi
+    #         - name: Release
+    #           id: release_it
+    #           run: npx -y release-it --ci ${{ steps.extract_pre_release_flag.outputs.pre_release_flag }}
+    #           env:
+    #               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     push_to_docker_hub:
-        needs: [check_if_allowed, create_github_release]
+        # needs: [check_if_allowed, create_github_release]
         runs-on: ubuntu-latest
         name: Create new image and push to Docker Hub
         steps:
             - name: Check out the repo
               uses: actions/checkout@v4
 
-            - name: Log in to Docker Hub
-              uses: docker/login-action@v3
+            - name: Get latest published tag
+              uses: actions-ecosystem/action-get-latest-tag@v1
               with:
-                  username: ${{ secrets.DHIS2_BOT_DOCKER_HUB_USERNAME }}
-                  password: ${{ secrets.DHIS2_BOT_DOCKER_HUB_PASSWORD }}
+                  semver_only: true
+              id: get_latest_tag
 
-            - name: Extract metadata (tags, labels) for Docker
-              id: meta
-              uses: docker/metadata-action@v5
-              with:
-                  images: dhis2/push-analytics
-                  tags: |
-                      type=semver,pattern={{raw}}
+            - name: Show latest tag
+              run: echo ${{steps.get_latest_tag.outputs.tag}}
+
+            # - name: Log in to Docker Hub
+            #   uses: docker/login-action@v3
+            #   with:
+            #       username: ${{ secrets.DHIS2_BOT_DOCKER_HUB_USERNAME }}
+            #       password: ${{ secrets.DHIS2_BOT_DOCKER_HUB_PASSWORD }}
+
+            # - name: Extract metadata (tags, labels) for Docker
+            #   id: meta
+            #   uses: docker/metadata-action@v5
+            #   with:
+            #       images: dhis2/push-analytics
+            #       tags: |
+            #           type=semver,pattern={{raw}}
 
             # To debug
             # - name: Output the tags
             #   run: echo "tags ${{ steps.meta.outputs.tags }}"
             # - uses: docker/setup-qemu-action@v3
             # - uses: docker/setup-buildx-action@v3
-            - name: Build and push Docker image
-              uses: docker/build-push-action@v5
-              with:
-                  context: .
-                  file: ./Dockerfile
-                  push: true
-                  tags: ${{ steps.meta.outputs.tags }}
-                  labels: ${{ steps.meta.outputs.labels }}
-                  # platforms: linux/amd64,linux/arm64
-                  # cache-from: type=gha
-                  # cache-to: type=gha,mode=max
+            # - name: Build and push Docker image
+            #   uses: docker/build-push-action@v5
+            #   with:
+            #       context: .
+            #       file: ./Dockerfile
+            #       push: true
+            #       tags: ${{ steps.meta.outputs.tags }}
+            #       labels: ${{ steps.meta.outputs.labels }}
+            # platforms: linux/amd64,linux/arm64
+            # cache-from: type=gha
+            # cache-to: type=gha,mode=max
