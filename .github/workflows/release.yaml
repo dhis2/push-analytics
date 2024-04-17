@@ -8,22 +8,22 @@ env:
 
 jobs:
     # Only allow releases from the release branches branch
-    check_if_allowed:
-        name: Check if on a release branch
-        runs-on: ubuntu-latest
-        steps:
-            - name: Exit if branch is not a release branch
-              run: |
-                  if [ "${{ github.ref }}" = "refs/heads/master" ] || \
-                     [ "${{ github.ref }}" = "refs/heads/alpha" ] || \
-                     [ "${{ github.ref }}" = "refs/heads/beta" ] || \
-                     [ "${{ github.ref }}" = "refs/heads/next" ]; then
-                      echo "On a release branch, proceeding to release."
-                      exit 0
-                  else
-                      echo "This is not a release branch, cancelling release."
-                      exit 1
-                  fi
+    # check_if_allowed:
+    #     name: Check if on a release branch
+    #     runs-on: ubuntu-latest
+    #     steps:
+    #         - name: Exit if branch is not a release branch
+    #           run: |
+    #               if [ "${{ github.ref }}" = "refs/heads/master" ] || \
+    #                  [ "${{ github.ref }}" = "refs/heads/alpha" ] || \
+    #                  [ "${{ github.ref }}" = "refs/heads/beta" ] || \
+    #                  [ "${{ github.ref }}" = "refs/heads/next" ]; then
+    #                   echo "On a release branch, proceeding to release."
+    #                   exit 0
+    #               else
+    #                   echo "This is not a release branch, cancelling release."
+    #                   exit 1
+    #               fi
 
     # create_github_release:
     #     # Will not run if check_if_allowed fails
@@ -70,14 +70,18 @@ jobs:
             - name: Check out the repo
               uses: actions/checkout@v4
 
-            - name: Get latest published tag
-              uses: actions-ecosystem/action-get-latest-tag@v1
-              with:
-                  semver_only: true
-              id: get_latest_tag
+            - name: Get most recent release tag
+              id: get_most_recent_release_tag
+              run: |
+                  gh api \
+                  -H "Accept: application/vnd.github+json" \
+                  -H "X-GitHub-Api-Version: 2022-11-28" \
+                  /repos/dhis2/push-analytics/releases | \
+                  jq -r 'max_by(.created_at) | .tag_name' | \
+                  read tag >> $GITHUB_OUTPUT
 
-            - name: Show latest tag
-              run: echo ${{steps.get_latest_tag.outputs.tag}}
+            - name: Show most recent tag
+              run: echo ${{steps.get_most_recent_release_tag.outputs.tag}}
 
             # - name: Log in to Docker Hub
             #   uses: docker/login-action@v3
