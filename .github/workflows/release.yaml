@@ -66,7 +66,7 @@ jobs:
             - name: Combine full release-it command
               id: compute_command
               run: |
-                  if [[-z "${{ github.event.inputs.major_version_bump }}"]]; then
+                  if [[ "${{ github.event.inputs.major_version_bump }}" == "true" ]]; then
                     echo "command=npx -y release-it major --ci ${{ steps.extract_pre_release_flag.outputs.pre_release_flag }}" >> $GITHUB_OUTPUT
                   else
                     echo "command=npx -y release-it --ci ${{ steps.extract_pre_release_flag.outputs.pre_release_flag }}" >> $GITHUB_OUTPUT
