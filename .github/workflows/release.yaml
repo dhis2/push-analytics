@@ -57,9 +57,12 @@ jobs:
                     echo "pre_release_flag=''" >> $GITHUB_OUTPUT
                   fi
             - name: Release
-              run: npx -y release-it --ci ${{ steps.extract_pre_release_flag.outputs.pre_release_flag }}
+              id: release_it
+              run: npx -y release-it --ci ${{ steps.extract_pre_release_flag.outputs.pre_release_flag }}  >> $GITHUB_OUTPUT
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Log release it output
+              run: echo ${{ steps.release_it.outputs }}
 
     push_to_docker_hub:
         needs: [check_if_allowed, create_github_release]
