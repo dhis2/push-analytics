@@ -1,3 +1,0 @@
-# Docker Description for Push Analytics
-
-## Content will follow....
