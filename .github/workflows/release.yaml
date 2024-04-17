@@ -59,6 +59,7 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     push_to_docker_hub:
+        needs: [check_if_allowed, create_github_release]
         runs-on: ubuntu-latest
         name: Create new image and push to Docker Hub
         steps:
