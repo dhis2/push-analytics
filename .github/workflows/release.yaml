@@ -3,6 +3,9 @@ name: Create GitHub Release
 # We trigger releases manually
 on: workflow_dispatch
 
+env:
+    ACTIONS_RUNNER_DEBUG: true
+
 jobs:
     # Only allow releases from the release branches branch
     check_if_allowed:
@@ -83,8 +86,8 @@ jobs:
             # To debug
             - name: Output the tags
               run: echo "tags ${{ steps.meta.outputs.tags }}"
-            - uses: docker/setup-qemu-action@v3
-            - uses: docker/setup-buildx-action@v3
+            # - uses: docker/setup-qemu-action@v3
+            # - uses: docker/setup-buildx-action@v3
             - name: Build and push Docker image
               uses: docker/build-push-action@v5
               with:
@@ -93,6 +96,6 @@ jobs:
                   push: true
                   tags: ${{ steps.meta.outputs.tags }}
                   labels: ${{ steps.meta.outputs.labels }}
-                  platforms: linux/amd64,linux/arm64
-                  cache-from: type=gha
-                  cache-to: type=gha,mode=max
+                  # platforms: linux/amd64,linux/arm64
+                  # cache-from: type=gha
+                  # cache-to: type=gha,mode=max
