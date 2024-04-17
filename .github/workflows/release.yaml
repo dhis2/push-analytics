@@ -79,6 +79,8 @@ jobs:
                   /repos/dhis2/push-analytics/releases | \
                   jq -r 'max_by(.created_at) | .tag_name' | \
                   read tag >> $GITHUB_OUTPUT
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Show most recent tag
               run: echo ${{steps.get_most_recent_release_tag.outputs.tag}}
