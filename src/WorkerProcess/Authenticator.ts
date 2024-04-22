@@ -144,12 +144,11 @@ export class Authenticator implements IAuthenticator {
 
     async #loginViaForm() {
         await this.#page.bringToFront()
-        await this.#page.goto(
-            `${this.#env.baseUrl}/dhis-web-commons/security/login.action`
-        )
-        await this.#page.type('#j_username', this.#env.adminUsername)
-        await this.#page.type('#j_password', this.#env.adminPassword)
-        await this.#page.click('#submit')
+        await this.#page.goto(`${this.#env.baseUrl}/dhis-web-login`)
+        await this.#page.waitForSelector('#username')
+        await this.#page.type('#username', this.#env.adminUsername)
+        await this.#page.type('#password', this.#env.adminPassword)
+        await this.#page.click('button[type="submit"]')
     }
 
     async #preventSessionExpiry() {
