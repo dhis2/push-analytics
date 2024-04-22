@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0-alpha.2 (2024-04-22)
+
+
+### Bug Fixes
+
+* adjust login mechanism to new login app ([8affbe5](https://github.com/dhis2/push-analytics/commit/8affbe521ab88cc1c259dac02c4dda0a8a90787e))
+
 ## 1.0.0-alpha.1 (2024-04-17)
 
 ## 1.0.0-alpha.0 (2024-04-17)
