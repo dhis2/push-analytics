@@ -1,6 +1,10 @@
 node_modules
 dist
+# `.env` files may contain sensitive information
 .env
+# This specific .env file does not
+!e2e/docker/.env
 images
 error-screenshots
 docker/db-dump
+e2e/docker/db-dump

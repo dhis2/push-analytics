@@ -1,19 +1,22 @@
-version: '3.8'
+name: push-analytics-e2e
 
 services:
     web:
-        image: dhis2/core-dev:latest
+        # TODO: switch this to the 41 stable release once available
+        # image: "${DHIS2_IMAGE:-dhis2/core:41}"
+        image: ${DHIS2_IMAGE:-dhis2/core:2.41.0.0-rc}
         ports:
-            - 8080:8080 # DHIS2
-            - 8081:8081 # Debugger: connect using commandline flag -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8081
-            - 9010:9010 # JMX port (for example for VisualVM)
+            - '127.0.0.1:8080:8080' # DHIS2
+            - '127.0.0.1:8081:8081' # Debugger: connect using commandline flag -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8081
+            - '127.0.0.1:9010:9010' # JMX port (for example for VisualVM)
         networks:
             mynetwork:
                 ipv4_address: 172.26.0.6
         volumes:
-            - ./docker/dhis.conf:/opt/dhis2/dhis.conf:ro
-            - ./docker/log4j2.xml:/opt/dhis2/log4j2.xml:ro
+            - ./dhis.conf:/opt/dhis2/dhis.conf:ro
+            - ./log4j2.xml:/opt/dhis2/log4j2.xml:ro
         environment:
+            DHIS2_IMAGE: ${DHIS2_IMAGE}
             JAVA_OPTS:
                 "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8081 \
                 -Dlog4j2.configurationFile=/opt/dhis2/log4j2.xml
@@ -25,6 +28,12 @@ services:
         depends_on:
             db:
                 condition: service_healthy
+        healthcheck:
+            test: ['CMD', 'curl', '-f', '127.0.0.1:8080/dhis-web-login']
+            start_period: 600s
+            interval: 5s
+            timeout: 600s
+            retries: 120
 
     db:
         image: ghcr.io/baosystems/postgis:12-3.3
@@ -34,7 +43,7 @@ services:
             mynetwork:
                 ipv4_address: 172.26.0.7
         volumes:
-            - ./docker/db-dump:/docker-entrypoint-initdb.d/
+            - ./db-dump:/docker-entrypoint-initdb.d/
         environment:
             POSTGRES_USER: dhis
             POSTGRES_DB: dhis
@@ -48,7 +57,7 @@ services:
                 ]
             start_period: 300s
             interval: 1s
-            timeout: 60s
+            timeout: 300s
             retries: 300
         depends_on:
             db-dump:
@@ -58,10 +67,10 @@ services:
         image: busybox # busybox wget version does not have --no-clobber, so we need to do the [ -f ] test
         command: sh -c '[ -f dump.sql.gz ] && echo "dump.sql.gz exists" || wget --output-document dump.sql.gz $$DHIS2_DB_DUMP_URL' # only download file if it does not exist
         environment:
-            DHIS2_DB_DUMP_URL: 'https://databases.dhis2.org/sierra-leone/2.38/dhis2-db-sierra-leone.sql.gz'
+            - DHIS2_DB_DUMP_URL=${DHIS2_DB_DUMP_URL}
         working_dir: /opt/dump
         volumes:
-            - ./docker/db-dump:/opt/dump
+            - ./db-dump:/opt/dump
         networks:
             mynetwork:
                 ipv4_address: 172.26.0.8
@@ -71,33 +80,44 @@ services:
         hostname: 'fake-smtp-server'
         restart: always
         environment:
-            - FAKESMTP_AUTHENTICATION_USERNAME=myuser
-            - FAKESMTP_AUTHENTICATION_PASSWORD=mysecretpassword
-            - FAKESMTP_PORT=8030
-            - SERVER_PORT=8031
-            - MANAGEMENT_SERVER_PORT=8032
+            - FAKESMTP_AUTHENTICATION_USERNAME=${FAKESMTP_AUTHENTICATION_USERNAME}
+            - FAKESMTP_AUTHENTICATION_PASSWORD=${FAKESMTP_AUTHENTICATION_PASSWORD}
+            - FAKESMTP_PORT=${FAKESMTP_PORT}
+            - SERVER_PORT=${FAKESMTP_SERVER_PORT}
+            - MANAGEMENT_SERVER_PORT=${FAKESMTP_MANAGEMENT_SERVER_PORT}
         ports:
-            - 8030:8030 #expose smtp port
-            - 8031:8031 #expose web ui
-            - 8032:8032 #expose management api
+            - '${FAKESMTP_PORT}:${FAKESMTP_PORT}' #expose smtp port
+            - '${FAKESMTP_SERVER_PORT}:${FAKESMTP_SERVER_PORT}' #expose web ui
+            - '${FAKESMTP_MANAGEMENT_SERVER_PORT}:${FAKESMTP_MANAGEMENT_SERVER_PORT}' #expose management api
         networks:
             mynetwork:
                 ipv4_address: 172.26.0.9
 
     push-analytics:
         hostname: 'push-analytics'
-        image: 'dhis2/core-dev:alpha'
-        volumes:
-            - ./:/usr/src/app
-            - /usr/src/app/node_modules
+        image: 'dhis2/push-analytics:1.0.0-alpha.1'
         ports:
             - '${PORT}:${PORT}'
         networks:
             mynetwork:
+                # This IP needs to be present to `switch_user_allow_listed_ips` in `dhis.conf`
                 ipv4_address: 172.26.0.10
+        environment:
+            - HOST=${HOST}
+            - PORT=${PORT}
+            - DHIS2_CORE_URL=${DHIS2_CORE_URL}
+            - DHIS2_CORE_MAJOR_VERSION=${DHIS2_CORE_MAJOR_VERSION}
+            - DHIS2_CORE_ADMIN_USERNAME=${DHIS2_CORE_ADMIN_USERNAME}
+            - DHIS2_CORE_ADMIN_PASSWORD=${DHIS2_CORE_ADMIN_PASSWORD}
+            - DHIS2_CORE_SESSION_TIMEOUT=${DHIS2_CORE_SESSION_TIMEOUT}
+            - MAX_THREADS=${MAX_THREADS}
+            - NODE_ENV=${NODE_ENV}
+        depends_on:
+            web:
+                condition: service_healthy
 
-# volumes:
-#   db-dump:
+volumes:
+    db-dump:
 
 networks:
     mynetwork:
