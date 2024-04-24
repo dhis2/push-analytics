@@ -93,9 +93,42 @@ services:
             mynetwork:
                 ipv4_address: 172.26.0.9
 
+    post-install-scripts:
+        image: badouralix/curl-jq
+        environment:
+            - DHIS2_CORE_URL=${DHIS2_CORE_URL}
+            - DHIS2_CORE_ADMIN_USERNAME=${DHIS2_CORE_ADMIN_USERNAME}
+            - DHIS2_CORE_ADMIN_PASSWORD=${DHIS2_CORE_ADMIN_PASSWORD}
+
+        volumes:
+            - ./scripts:/opt/scripts
+        working_dir: /opt/scripts
+        command:
+            - sh
+            - -c
+            - |
+                ./install_line_listing_app.sh
+                ./generate_analytics_tables.sh
+        # command: |
+        #     ['sh', '-c' './install_line_listing_app.sh']
+        #     ['/bin/sh', './generate_analytics_tables.sh']
+        # command: |
+        #     ./install_line_listing_app.sh
+        #     ./generate_analytics_tables.sh
+        networks:
+            mynetwork:
+                ipv4_address: 172.26.0.11
+        depends_on:
+            web:
+                condition: service_healthy
+
     push-analytics:
         hostname: 'push-analytics'
+        # For e2e and demos use a published image
         image: 'dhis2/push-analytics:1.0.0-alpha.1'
+        # For debugging docker specific issues a local image can be used
+        # To build this image, run `npm run create-local-docker-image`
+        # image: 'dhis2/push-analytics:local'
         ports:
             - '${PORT}:${PORT}'
         networks:
@@ -112,9 +145,10 @@ services:
             - DHIS2_CORE_SESSION_TIMEOUT=${DHIS2_CORE_SESSION_TIMEOUT}
             - MAX_THREADS=${MAX_THREADS}
             - NODE_ENV=${NODE_ENV}
+        # ensure line-listing is installend all analytics tables have been generated
         depends_on:
-            web:
-                condition: service_healthy
+            post-install-scripts:
+                condition: service_completed_successfully
 
 volumes:
     db-dump:

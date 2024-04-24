@@ -33,7 +33,7 @@ Prior to creating the dump, the following configuration was done to the database
         `systemSettings/keyEmailPort` because the UI only allows a few fixed options
 -   The push-analytics URL was created by issuing a POST to `/systemSettings/keyHtmlPushAnalyticsUrl`.
     Note that this URL needs to be a "template" like this:
-    http://push-analytics:1337?username={username}&dashboardId={id}
+    http://host.docker.internal:1337?username={username}&dashboardId={id}
 -   A push-analytics jobs was created in the job-scheduler for both the `RECEIVER` and
     the `EXECUTOR` mode. This was done by issuing a POST to `/jobConfigurations` with a
     payload like this:
