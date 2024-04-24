@@ -116,6 +116,8 @@ services:
 
     push-analytics:
         hostname: 'push-analytics'
+        cap_add:
+            - NET_ADMIN
         # For e2e and demos use a published image
         image: 'dhis2/push-analytics:1.0.0-alpha.1'
         # For debugging docker specific issues a local image can be used
