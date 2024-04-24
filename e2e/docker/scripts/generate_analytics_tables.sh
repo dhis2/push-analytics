@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 set -euxo pipefail
 
-CREDENTIALS="$DHIS2_CORE_ADMIN_USERNAME:$DHIS2_CORE_ADMIN_PASSWORD"
-RELATIVE_POLL_ENDPOINT=$(curl --user $CREDENTIALS -X POST $DHIS2_CORE_URL/api/resourceTables/analytics?skipTrackedEntities=true | jq -r '.response.relativeNotifierEndpoint')
-POLL_URL="$DHIS2_CORE_URL$RELATIVE_POLL_ENDPOINT"
+CREDENTIALS="$USERNAME:$PASSWORD"
+RELATIVE_POLL_ENDPOINT=$(curl --user $CREDENTIALS -X POST $BASE_URL/api/resourceTables/analytics?skipTrackedEntities=true | jq -r '.response.relativeNotifierEndpoint')
+POLL_URL="$BASE_URL$RELATIVE_POLL_ENDPOINT"
 TRIES=0
 
 while true; do
