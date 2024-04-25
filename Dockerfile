@@ -7,6 +7,8 @@
 # TypeScript files that can be used in production
 FROM node:lts AS builder
 WORKDIR /usr/src/app
+# Older versions of NPM would take ages and sometimes time out
+RUN npm install npm@latest -g
 COPY . .
 RUN --mount=type=cache,target=/root/.npm npm ci --yes --verbose --ignore-scripts --include=dev
 RUN ./scripts/build.sh
@@ -16,6 +18,8 @@ RUN ./scripts/build.sh
 FROM node:lts AS prod
 WORKDIR /usr/src/app
 EXPOSE ${PORT:-1337}
+# Older versions of NPM would take ages and sometimes time out
+RUN npm install npm@latest -g
 ENV NODE_ENV production
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium

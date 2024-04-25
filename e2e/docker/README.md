@@ -26,7 +26,7 @@ Prior to creating the dump, the following configuration was done to the database
     -   `test_user_national_nb`: a user with the NB locale, assigned to the top org-unit
     -   `test_user_bo`: a user with the default locale, assigned to the Bo org-unit
     -   `test_user_bonthe`: a user with the default locale, assigned to the Bonthe org-unit
--   A usergroup `Test users` was created with all the test users in it
+-   A user group `Test users` was created with all the test users in it
 -   The system was configured to send email using the fake SMTP server:
     -   Most fields can simply be set using the email section of the system settings app
     -   One exception is the port, which needs to be set via a POST to
