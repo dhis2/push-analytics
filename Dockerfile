@@ -8,7 +8,7 @@
 FROM node:lts AS builder
 WORKDIR /usr/src/app
 COPY . .
-RUN --mount=type=cache,target=/root/.npm npm ci --include=dev
+RUN --mount=type=cache,target=/root/.npm npm ci --yes --verbose --ignore-scripts --include=dev
 RUN ./scripts/build.sh
 
 # The prod stage only installs dev dependencies and then gets the
@@ -45,7 +45,7 @@ RUN apt update -qq \
 COPY --from=builder ./usr/src/app/dist ./dist
 COPY ./package.json .
 COPY ./package-lock.json .
-# Install production dependencies only, husky hooks skipped by --only=production --ignore-scripts
-RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev --only=production --ignore-scripts
+# Install production dependencies only, husky hooks skipped by --ignore-scripts
+RUN --mount=type=cache,target=/root/.npm npm ci --yes --verbose --omit=dev --ignore-scripts
 USER node
 CMD node ./dist/index.js

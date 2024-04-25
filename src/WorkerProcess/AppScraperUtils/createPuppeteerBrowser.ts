@@ -17,7 +17,7 @@ export async function createPuppeteerBrowser(debug: boolean) {
               headless: 'new',
               defaultViewport,
               //   Required argument for dockerized puppeteer
-              //   args: ['--no-sandbox'],
+              args: ['--no-sandbox'],
           }
     const browser = await puppeteer.launch(browserOptions)
     return browser
