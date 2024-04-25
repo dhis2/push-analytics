@@ -29,6 +29,7 @@ export class WorkerProcess {
     #converter: IDashboardItemConverter
     #authenticator: IAuthenticator
     #configCache: IScrapeConfigCache
+    #hasPendingItemRequest: boolean
 
     protected constructor(
         converter: IDashboardItemConverter,
@@ -40,10 +41,11 @@ export class WorkerProcess {
         this.#configCache = configCache
         this.#messageHandler = new WorkerProcessMessageHandler({
             onItemsAddedToQueue: this.#handleItemsAddedToQueue.bind(this),
-            onItemTakenFromQueue: this.#handleItemTakenFromQueue.bind(this),
+            onResponseToItemRequest: this.#handleResponseToItemRequest.bind(this),
         })
+        this.#hasPendingItemRequest = false
         // See if there is work to do
-        this.#messageHandler.requestDashboardItemFromQueue()
+        this.#requestDashboardItemFromQueue()
     }
 
     static async create(env: PushAnalyticsEnvVariables, debug: boolean) {
@@ -55,15 +57,30 @@ export class WorkerProcess {
         return new WorkerProcess(converter, authenticator, configCache)
     }
 
+    #requestDashboardItemFromQueue() {
+        this.#hasPendingItemRequest = true
+        this.#messageHandler.requestDashboardItemFromQueue()
+    }
+
+    #isBusy() {
+        return this.#converter.isConverting() || this.#hasPendingItemRequest
+    }
+
     #handleItemsAddedToQueue() {
-        // Ignore this event if still converting
-        if (!this.#converter.isConverting()) {
-            this.#messageHandler.requestDashboardItemFromQueue()
+        // Ignore this event if working/waiting
+        if (!this.#isBusy()) {
+            this.#requestDashboardItemFromQueue()
         }
     }
 
-    async #handleItemTakenFromQueue(queueItem: QueueItem) {
-        if (this.#converter.isConverting()) {
+    async #handleResponseToItemRequest(queueItem: QueueItem | undefined) {
+        this.#hasPendingItemRequest = false
+
+        if (!queueItem) {
+            return
+        }
+
+        if (this.#isBusy()) {
             throw new WorkerProcessError(
                 'Received a queueItem while converting, this should not happen'
             )
@@ -108,7 +125,7 @@ export class WorkerProcess {
             this.#messageHandler.sendItemConversionErrorToPrimaryProcess(conversionError)
         } finally {
             // See if there is more work to do
-            this.#messageHandler.requestDashboardItemFromQueue()
+            this.#requestDashboardItemFromQueue()
         }
     }
 }
