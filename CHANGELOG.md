@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.0-alpha.3](https://github.com/dhis2/push-analytics/compare/1.0.0-alpha.2...1.0.0-alpha.3) (2024-04-25)
+
+
+### Bug Fixes
+
+* ensure image can run in linux ([7d6ba07](https://github.com/dhis2/push-analytics/commit/7d6ba076dc3bf3cdb55c647f1e48645b22341320))
+* prevent worker from requesting a new item while still awaiting a previous item ([309f420](https://github.com/dhis2/push-analytics/commit/309f420a9405eaf8562c756f9436835c9164c127))
+
 ## 1.0.0-alpha.2 (2024-04-22)
 
 
