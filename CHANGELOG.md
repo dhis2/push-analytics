@@ -1,5 +1,7 @@
 # Changelog
 
+## [1.0.0-alpha.4](https://github.com/dhis2/push-analytics/compare/1.0.0-alpha.3...1.0.0-alpha.4) (2024-04-25)
+
 ## [1.0.0-alpha.3](https://github.com/dhis2/push-analytics/compare/1.0.0-alpha.2...1.0.0-alpha.3) (2024-04-25)
 
 
