@@ -36,6 +36,9 @@ export class RequestHandler {
 
         try {
             dashboardDetails = await this.#getDashboardDetails(request)
+            console.log(
+                `Received conversion request for dasboardId "${dashboardDetails.dashboardId}" and username "${dashboardDetails.username}"`
+            )
         } catch (error) {
             /* Note that this is failing before the dashboard (items)
              * are queued, so we can just send an error from here */
@@ -53,9 +56,7 @@ export class RequestHandler {
         }
     }
 
-    async #getDashboardDetails(
-        request: IncomingMessage
-    ): Promise<DashboardDetails | undefined> {
+    async #getDashboardDetails(request: IncomingMessage): Promise<DashboardDetails> {
         validateRequest(request, this.#env.baseUrl)
 
         const { dashboardId, username } = parseQueryString(request.url, this.#env.baseUrl)

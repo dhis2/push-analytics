@@ -74,7 +74,7 @@ export class PrimaryProcessMessageHandler {
         }
     }
 
-    sendQueueItemToWorker(workerId: number, queueItem: QueueItem) {
+    sendQueueItemToWorker(workerId: number, queueItem?: QueueItem) {
         const worker = this.clusterWorkers[workerId]
 
         if (!worker) {

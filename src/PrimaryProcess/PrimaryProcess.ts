@@ -93,11 +93,12 @@ export class PrimaryProcess {
     }
 
     #handleWorkerItemRequest(workerId: number) {
-        // Ignore the request if queue is empty
-        if (this.#dashboardItemsQueue.hasQueuedItems()) {
-            const queueItem: QueueItem = this.#dashboardItemsQueue.takeItemFromQueue()
-            this.#messageHandler.sendQueueItemToWorker(workerId, queueItem)
-        }
+        // Awlways reply to the worker, it won't request more work until a reply comes in
+        const queueItem: QueueItem | undefined =
+            this.#dashboardItemsQueue.hasQueuedItems()
+                ? this.#dashboardItemsQueue.takeItemFromQueue()
+                : undefined
+        this.#messageHandler.sendQueueItemToWorker(workerId, queueItem)
     }
 
     #handleWorkerConversionSuccess(convertedItem: ConvertedItemPayload) {

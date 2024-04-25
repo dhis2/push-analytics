@@ -7,9 +7,12 @@ import {
     initializeMockCluster,
     getDashboardFixturesArray,
     getHttpServer,
-    awaitAnyMessageUntilExpiry,
+    awaitMessageCount,
 } from './utils'
-import type { WorkerProcessEmittedMessage } from '../../types'
+import type {
+    PrimaryProcessEmittedMessage,
+    WorkerProcessEmittedMessage,
+} from '../../types'
 import { tearDownCluster } from './utils/tearDownCluster'
 
 describe('An error on the dashboard request', { concurrency: 1 }, async () => {
@@ -60,9 +63,14 @@ describe('An error on the dashboard request', { concurrency: 1 }, async () => {
         })
     } else {
         test('the worker process does not receive any messages', async () => {
-            // If no messages received in the first 100ms, assume they will never arrive
-            const message = await awaitAnyMessageUntilExpiry(100)
-            assert.strictEqual(message, null)
+            /* The main worker always replies when a worker requests a dashboard
+             * item. If the queue is empty, so is the payload. */
+            const expectedMessage = { type: 'ITEM_TAKEN_FROM_QUEUE' }
+            const messagesFromPrimaryProcess: PrimaryProcessEmittedMessage[] =
+                await awaitMessageCount(1)
+
+            assert.strictEqual(messagesFromPrimaryProcess.length, 1)
+            assert.deepEqual(messagesFromPrimaryProcess[0], expectedMessage)
         })
     }
 })
