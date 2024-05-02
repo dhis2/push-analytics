@@ -4,10 +4,10 @@ import { after, before, describe, test } from 'node:test'
 import request from 'supertest'
 import type { DashboardFixture } from './utils'
 import {
-    initializeMockCluster,
     getDashboardFixturesArray,
     getHttpServer,
     getOutputFixture,
+    initializeMockCluster,
     waitMs,
 } from './utils'
 import { tearDownCluster } from './utils/tearDownCluster'

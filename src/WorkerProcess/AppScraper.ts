@@ -1,4 +1,5 @@
 import fs from 'fs'
+import { minimatch } from 'minimatch'
 import path from 'path'
 import type { Browser, CDPSession, HTTPResponse, Page } from 'puppeteer'
 import type {
@@ -23,7 +24,6 @@ import {
     insertIntoImageTemplate,
     parseResponseDataToTable,
 } from './htmlTemplates'
-import { minimatch } from 'minimatch'
 
 const DONWLOAD_PAGE_URL_PATTERN =
     /api\/analytics\/enrollments|events\/query\/[a-zA-Z0-9]{11}\.html\+css/

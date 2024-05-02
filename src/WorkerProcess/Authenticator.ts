@@ -1,8 +1,8 @@
 import type { Browser, Page, Protocol } from 'puppeteer'
 import { PushAnalyticsError } from '../Error'
+import { debugLog } from '../debugLog'
 import type { PushAnalyticsEnvVariables } from '../types'
 import type { DashboardItemConverter } from './DashboardItemConverter'
-import { debugLog } from '../debugLog'
 
 class AuthenticationError extends PushAnalyticsError {
     constructor(

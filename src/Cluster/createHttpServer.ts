@@ -1,7 +1,7 @@
 import http from 'node:http'
 import type { PrimaryProcess } from '../PrimaryProcess'
-import type { PushAnalyticsEnvVariables } from '../types'
 import { debugLog } from '../debugLog'
+import type { PushAnalyticsEnvVariables } from '../types'
 
 export function createHttpServer(
     primaryProcess: PrimaryProcess,

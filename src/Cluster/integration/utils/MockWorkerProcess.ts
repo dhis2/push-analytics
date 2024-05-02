@@ -1,13 +1,13 @@
 import { WorkerProcess } from '../../../WorkerProcess'
-import scrapeInstructions from '../fixtures/scrapeInstructions.json'
+import type { IAuthenticator } from '../../../WorkerProcess/Authenticator'
+import type { IDashboardItemConverter } from '../../../WorkerProcess/DashboardItemConverter'
+import type { IScrapeConfigCache } from '../../../WorkerProcess/ScrapeConfigCache'
 import type {
     ConvertedItemPayload,
     ParsedScrapeInstructions,
     QueueItem,
 } from '../../../types'
-import type { IAuthenticator } from '../../../WorkerProcess/Authenticator'
-import type { IDashboardItemConverter } from '../../../WorkerProcess/DashboardItemConverter'
-import type { IScrapeConfigCache } from '../../../WorkerProcess/ScrapeConfigCache'
+import scrapeInstructions from '../fixtures/scrapeInstructions.json'
 
 export async function convertSuccessFn(
     queueItem: QueueItem

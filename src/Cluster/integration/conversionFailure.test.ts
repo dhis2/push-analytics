@@ -1,25 +1,25 @@
 import assert from 'node:assert'
 import cluster from 'node:cluster'
-import { after, before, describe, test, mock } from 'node:test'
+import { after, before, describe, mock, test } from 'node:test'
 import request from 'supertest'
-import type { DashboardFixture } from './utils'
-import {
-    awaitMessageCount,
-    initializeMockCluster,
-    getDashboardFixturesArray,
-    getHttpServer,
-    getOutputFixture,
-    getDashboardFixture,
-    MockDashboardItemConverter,
-    convertSuccessFn,
-} from './utils'
+import { AppScraperError } from '../../WorkerProcess/AppScraperUtils/AppScraperError'
 import type {
     PrimaryProcessEmittedMessage,
     QueueItem,
     WorkerProcessEmittedMessage,
 } from '../../types'
+import type { DashboardFixture } from './utils'
+import {
+    MockDashboardItemConverter,
+    awaitMessageCount,
+    convertSuccessFn,
+    getDashboardFixture,
+    getDashboardFixturesArray,
+    getHttpServer,
+    getOutputFixture,
+    initializeMockCluster,
+} from './utils'
 import { tearDownCluster } from './utils/tearDownCluster'
-import { AppScraperError } from '../../WorkerProcess/AppScraperUtils/AppScraperError'
 
 describe('Conversion error', { concurrency: 1 }, async () => {
     const dashboardFixtures: DashboardFixture[] = getDashboardFixturesArray()

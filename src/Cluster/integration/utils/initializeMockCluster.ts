@@ -1,10 +1,10 @@
 import cluster from 'node:cluster'
 import type { Server as HttpServer } from 'node:http'
-import type { PushAnalyticsEnvVariables } from '../../../types'
 import { PrimaryProcess } from '../../../PrimaryProcess'
+import type { PushAnalyticsEnvVariables } from '../../../types'
 import { createHttpServer } from '../../createHttpServer'
-import { DashboardFixture } from './getDashboardFixture'
 import { MockWorkerProcess } from './MockWorkerProcess'
+import { DashboardFixture } from './getDashboardFixture'
 import { nockDashboardsResponses } from './nockDashboardsResponses'
 
 const { getHttpServer, setHttpServer } = (() => {
@@ -51,4 +51,4 @@ const initializeMockCluster = async (
     }
 }
 
-export { initializeMockCluster, DashboardFixture, getHttpServer }
+export { DashboardFixture, getHttpServer, initializeMockCluster }

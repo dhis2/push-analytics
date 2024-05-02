@@ -1,7 +1,7 @@
+import assert from 'node:assert'
+import { describe, it } from 'node:test'
 import { RequestHandlerError } from './RequestHandlerError'
 import { parseQueryString } from './parseQueryString'
-import { describe, it } from 'node:test'
-import assert from 'node:assert'
 
 describe('parseQueryString', () => {
     const baseUrl = 'http://www.example.com'
