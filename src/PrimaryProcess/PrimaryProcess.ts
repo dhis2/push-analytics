@@ -15,6 +15,7 @@ import { DashboardItemsQueue } from './DashboardItemQueue'
 import { PrimaryProcessMessageHandler } from './PrimaryProcessMessageHandler'
 import { RequestHandler } from './RequestHandler'
 import { ResponseManager } from './ResponseManager'
+import { debugLog } from '../debugLog'
 
 class PrimaryProcessError extends PushAnalyticsError {
     constructor(
@@ -98,6 +99,7 @@ export class PrimaryProcess {
             this.#dashboardItemsQueue.hasQueuedItems()
                 ? this.#dashboardItemsQueue.takeItemFromQueue()
                 : undefined
+        debugLog('Sending queue item to worker', queueItem)
         this.#messageHandler.sendQueueItemToWorker(workerId, queueItem)
     }
 
@@ -109,7 +111,9 @@ export class PrimaryProcess {
             dashboardItemId,
             converterResult
         )
+        debugLog('Queue item converted', convertedItem)
         if (this.#responseManager.isConversionComplete(requestId)) {
+            debugLog('Dashboard conversion complete', convertedItem)
             this.#responseManager.sendSuccessResponse(requestId)
         }
     }
@@ -124,6 +128,7 @@ export class PrimaryProcess {
             httpResponseStatusCode,
             errorName
         )
+        debugLog('Queue item conversion failed', conversionErrorPayload)
         this.#dashboardItemsQueue.removeItemsByRequestId(requestId)
         this.#responseManager.sendErrorResponse(requestId, error)
     }
@@ -132,6 +137,7 @@ export class PrimaryProcess {
         const onConversionTimeout = () => {
             this.#handleConversionTimeout(details.requestId)
         }
+        debugLog('Received dashboard details', details)
         this.#responseManager.addDashboard(details, onConversionTimeout)
         this.#dashboardItemsQueue.addItemsToQueue(details)
         this.#messageHandler.notifyWorkersAboutAddedDashboardItems()

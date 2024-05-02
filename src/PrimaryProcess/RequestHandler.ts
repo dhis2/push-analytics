@@ -39,6 +39,10 @@ export class RequestHandler {
             console.log(
                 `Received conversion request for dasboardId "${dashboardDetails.dashboardId}" and username "${dashboardDetails.username}"`
             )
+            if (dashboardDetails.username === 'system') {
+                response.writeHead(200)
+                response.end('<h1>SYSTEM USER</h1>')
+            }
         } catch (error) {
             /* Note that this is failing before the dashboard (items)
              * are queued, so we can just send an error from here */
@@ -47,7 +51,7 @@ export class RequestHandler {
             response.end(message)
         }
 
-        if (dashboardDetails) {
+        if (dashboardDetails && dashboardDetails.username !== 'system') {
             this.#onDashboardDetailsReceived({
                 requestId,
                 response,

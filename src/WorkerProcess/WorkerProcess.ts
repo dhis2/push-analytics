@@ -1,4 +1,5 @@
 import { PushAnalyticsError } from '../Error'
+import { debugLog } from '../debugLog'
 import type {
     ConversionErrorPayload,
     ConvertedItemPayload,
@@ -74,6 +75,7 @@ export class WorkerProcess {
     }
 
     async #handleResponseToItemRequest(queueItem: QueueItem | undefined) {
+        debugLog('[WORKER] Received queue item', queueItem)
         this.#hasPendingItemRequest = false
 
         if (!queueItem) {
@@ -87,6 +89,7 @@ export class WorkerProcess {
         }
 
         try {
+            debugLog('[WORKER] Conversion starting', queueItem)
             let config = undefined
             if (this.#converter.isAppScraperConversion(queueItem)) {
                 config = await this.#configCache.getScrapeConfig(queueItem.dashboardItem)
@@ -96,8 +99,10 @@ export class WorkerProcess {
                 queueItem,
                 config
             )
+            debugLog('[WORKER] Conversion success', convertedItem)
             this.#messageHandler.sendConvertedItemToPrimaryProcess(convertedItem)
         } catch (error) {
+            debugLog('[WORKER] Conversion error', error)
             let errorMessage = 'Internal error'
             let errorName = 'UnknownConversionError'
             let errorCode = 'E2000'
