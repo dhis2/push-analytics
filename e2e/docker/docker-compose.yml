@@ -137,6 +137,7 @@ services:
             - DHIS2_CORE_SESSION_TIMEOUT=${DHIS2_CORE_SESSION_TIMEOUT}
             - MAX_THREADS=${MAX_THREADS}
             - NODE_ENV=${NODE_ENV}
+            - LOG_LEVEL=${LOG_LEVEL}
         # ensure line-listing is installend all analytics tables have been generated
         depends_on:
             post-install-scripts:
