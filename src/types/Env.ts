@@ -8,8 +8,10 @@ export type EnvVariableName =
     | 'DHIS2_CORE_SESSION_TIMEOUT'
     | 'MAX_THREADS'
     | 'NODE_ENV'
+    | 'LOG_LEVEL'
 
 export type NodeEnvContext = 'development' | 'production' | 'ci' | 'testing'
+export type LogLevel = 'off' | 'on' | 'verbose'
 
 export type PushAnalyticsEnvVariables = {
     host: string
@@ -21,4 +23,5 @@ export type PushAnalyticsEnvVariables = {
     maxThreads: string
     sessionTimeout: string
     nodeEnv: NodeEnvContext
+    logLevel: LogLevel
 }

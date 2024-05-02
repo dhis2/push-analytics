@@ -1,9 +1,9 @@
 import cluster from 'node:cluster'
-import process from 'node:process'
 import { PrimaryProcess } from '../PrimaryProcess'
 import { WorkerProcess } from '../WorkerProcess'
 import { readEnv } from './readEnv'
 import { createHttpServer } from './createHttpServer'
+import { debugLog } from '../debugLog'
 
 export const initializeCluster = async () => {
     const env = readEnv()
@@ -12,7 +12,7 @@ export const initializeCluster = async () => {
         const primaryProcess = new PrimaryProcess(env)
         createHttpServer(primaryProcess, env)
     } else {
-        console.log(`Starting dashboard-item conversion worker on PID ${process.pid}`)
+        debugLog(`Starting dashboard-item conversion worker`)
         await WorkerProcess.create(env, false)
     }
 }

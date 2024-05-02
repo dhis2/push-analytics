@@ -59,6 +59,7 @@ export class WorkerProcess {
     }
 
     #requestDashboardItemFromQueue() {
+        debugLog('Going to request queue item')
         this.#hasPendingItemRequest = true
         this.#messageHandler.requestDashboardItemFromQueue()
     }
@@ -75,10 +76,10 @@ export class WorkerProcess {
     }
 
     async #handleResponseToItemRequest(queueItem: QueueItem | undefined) {
-        debugLog('[WORKER] Received queue item', queueItem)
         this.#hasPendingItemRequest = false
 
         if (!queueItem) {
+            debugLog('Received reply to item request - queue is empty')
             return
         }
 
@@ -89,7 +90,10 @@ export class WorkerProcess {
         }
 
         try {
-            debugLog('[WORKER] Conversion starting', queueItem)
+            debugLog(
+                'Received reply to item request - conversion starting for queue item: ',
+                queueItem
+            )
             let config = undefined
             if (this.#converter.isAppScraperConversion(queueItem)) {
                 config = await this.#configCache.getScrapeConfig(queueItem.dashboardItem)
@@ -99,10 +103,10 @@ export class WorkerProcess {
                 queueItem,
                 config
             )
-            debugLog('[WORKER] Conversion success', convertedItem)
+            debugLog('Conversion success', convertedItem)
             this.#messageHandler.sendConvertedItemToPrimaryProcess(convertedItem)
         } catch (error) {
-            debugLog('[WORKER] Conversion error', error)
+            debugLog('Conversion error', error)
             let errorMessage = 'Internal error'
             let errorName = 'UnknownConversionError'
             let errorCode = 'E2000'

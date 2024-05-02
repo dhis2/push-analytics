@@ -37,6 +37,7 @@ const initializeMockCluster = async (
         maxThreads: maxThreads,
         sessionTimeout: '3600',
         nodeEnv: 'testing',
+        logLevel: 'off',
     }
 
     if (cluster.isPrimary) {

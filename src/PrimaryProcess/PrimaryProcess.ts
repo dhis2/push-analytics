@@ -99,7 +99,16 @@ export class PrimaryProcess {
             this.#dashboardItemsQueue.hasQueuedItems()
                 ? this.#dashboardItemsQueue.takeItemFromQueue()
                 : undefined
-        debugLog('Sending queue item to worker', queueItem)
+
+        if (queueItem) {
+            debugLog(
+                'Received item request and queue is populated, sending queueItem: ',
+                queueItem
+            )
+        } else {
+            debugLog('Received item request but queue is empty, sending empty message')
+        }
+
         this.#messageHandler.sendQueueItemToWorker(workerId, queueItem)
     }
 

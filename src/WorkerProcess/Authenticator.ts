@@ -2,6 +2,7 @@ import type { Browser, Page, Protocol } from 'puppeteer'
 import { PushAnalyticsError } from '../Error'
 import type { PushAnalyticsEnvVariables } from '../types'
 import type { DashboardItemConverter } from './DashboardItemConverter'
+import { debugLog } from '../debugLog'
 
 class AuthenticationError extends PushAnalyticsError {
     constructor(
@@ -51,6 +52,11 @@ export class Authenticator implements IAuthenticator {
             await this.#loginViaForm()
             await this.#setSessionCookie()
             this.#preventSessionExpiry()
+            debugLog(
+                `Successfully logged in as push-analytics admin-user "${
+                    this.#env.adminUsername
+                }"`
+            )
         } catch (error) {
             throw new AuthenticationError(
                 'Admin user could not login to the DHIS2 Core instance'
@@ -75,6 +81,7 @@ export class Authenticator implements IAuthenticator {
                     `Could not exit impersonation mode. Received response status code ${exitImpersonateStatusCode}`
                 )
             }
+            debugLog(`Exited impersonation mode for user "${this.#impersonatedUser}"`)
         }
 
         // Skip impersonation for admin user only
@@ -88,6 +95,8 @@ export class Authenticator implements IAuthenticator {
                     `Could not impersonate user. Received response status code ${impersonateStatusCode}`
                 )
             }
+
+            debugLog(`Entered impersonation mode for user "${username}"`)
 
             this.#impersonatedUser = username
         }

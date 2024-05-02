@@ -7,6 +7,7 @@ import {
     parseQueryString,
     validateRequest,
 } from './RequestHandlerUtils'
+import { debugLog } from '../debugLog'
 
 type DashboardDetails = Omit<AddDashboardOptions, 'requestId' | 'response'>
 
@@ -36,7 +37,7 @@ export class RequestHandler {
 
         try {
             dashboardDetails = await this.#getDashboardDetails(request)
-            console.log(
+            debugLog(
                 `Received conversion request for dasboardId "${dashboardDetails.dashboardId}" and username "${dashboardDetails.username}"`
             )
             if (dashboardDetails.username === 'system') {

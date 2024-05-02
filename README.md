@@ -117,6 +117,14 @@ The push-analytics-service codebase contains various error classes which all ext
 | `E2601`    | `500`             | `ScrapeConfigCacheError`            | Generic error in `ScrapeConfigCache` class            |
 | `E2701`    | `500`             | `WorkerProcessMessageHandlerError`  | Generic error in `WorkerProcessMessageHandler` class  |
 
+## Logging
+
+Push Analytics comes with a very basic logging utility. It prefixes each log message with a color code string to indicate the type of process (primary VS worker) and process PID. The amount of output is controlled by the `LOG_LEVEL` environment variable:
+
+-   `LOG_LEVEL=off` (or omitting the `LOG_LEVEL` variable completely) disables log output completely
+-   `LOG_LEVEL=on` enables all log statements, but functions and objects will not be printed to the console
+-   `LOG_LEVEL=verbose` enables all log statements, and functions and objects will also be printed to the console
+
 ## Architecture
 
 ### Guiding principles
