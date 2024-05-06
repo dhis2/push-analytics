@@ -19,9 +19,7 @@ const envVariableDefaults: Record<EnvVariableName, string> = {
     LOG_LEVEL: 'off',
 }
 
-export function readEnvVariable(
-    name: EnvVariableName
-): string | NodeEnvContext | LogLevel {
+function readEnvVariable(name: EnvVariableName): string | NodeEnvContext | LogLevel {
     if (process.env[name]) {
         return process.env[name] ?? ''
     } else {

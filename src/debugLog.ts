@@ -1,9 +1,8 @@
 import cluster from 'node:cluster'
-import { readEnvVariable } from './Cluster/readEnv'
 import type { LogLevel } from './types'
 
 export function debugLog(...args: unknown[]) {
-    const logLevel = readEnvVariable('LOG_LEVEL') as LogLevel
+    const logLevel = (process.env['LOG_LEVEL'] ?? 'off') as LogLevel
 
     if (logLevel === 'on' || logLevel === 'verbose') {
         // Do not log full objects and functions unless log level is verbose
