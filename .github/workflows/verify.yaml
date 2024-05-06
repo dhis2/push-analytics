@@ -33,12 +33,6 @@ jobs:
         runs-on: ubuntu-latest
         if: contains(github.event.pull_request.labels.*.name, 'e2e')
         steps:
-            - name: Maximize build space
-              uses: easimon/maximize-build-space@master
-              with:
-                  root-reserve-mb: 4096
-                  temp-reserve-mb: 4096
-                  swap-size-mb: 8192
             - name: Checkout repo
               uses: actions/checkout@v4
             - name: Setup Docker BuildX
