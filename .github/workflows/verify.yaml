@@ -3,7 +3,7 @@ name: Verify Push Analytics Service
 on:
     pull_request:
         types: ['opened', 'edited', 'reopened', 'synchronize', 'labeled']
-        branches: ['master']
+        branches: ['master', 'beta', 'next', 'alpha']
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
