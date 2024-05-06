@@ -34,7 +34,14 @@ jobs:
         if: contains(github.event.pull_request.labels.*.name, 'e2e')
         steps:
             - name: Build local Docker image
-              run: docker build -t dhis2/push-analytics:local .
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  file: ./Dockerfile
+                  push: false
+                  tags: dhis2/push-analytics:local
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
             - name: Spin up the E2E environment
               # Fake SMTP is not needed for the e2e tests
               run: cd ./e2e/docker && docker compose up -d web db db-dump post-install-scripts push-analytics
