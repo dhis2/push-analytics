@@ -36,8 +36,8 @@ jobs:
             - name: Maximize build space
               uses: easimon/maximize-build-space@master
               with:
-                  root-reserve-mb: 2048
-                  temp-reserve-mb: 2048
+                  root-reserve-mb: 4096
+                  temp-reserve-mb: 4096
                   swap-size-mb: 8192
             - name: Checkout repo
               uses: actions/checkout@v4
