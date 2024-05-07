@@ -20,20 +20,18 @@ describe('producing user specific dashboard content', () => {
     const htmlPerUser = new Map()
 
     for (const username of usernames) {
-        test(`produces the expected HTML for username ${username}"`, (_, done) => {
+        test(`produces the expected HTML for username ${username}"`, async () => {
             const filePath = path.resolve(fixturesPath, `${dashboardId}_${username}.txt`)
             const expectedHtml = fs.readFileSync(filePath).toString()
+            const response = await req.get('/').query({ dashboardId, username })
 
-            req.get('/')
-                .query({ dashboardId, username })
-                .expect(200, (_, response) => {
-                    const actualHtml = response.text.replace(/\s+/g, '')
-                    // Enable line below to generate new fixtures
-                    // fs.writeFileSync(filePath, actualHtml)
-                    htmlPerUser.set(username, actualHtml)
-                    assert.strictEqual(actualHtml, expectedHtml)
-                    done()
-                })
+            assert.strictEqual(response.status, 200)
+
+            const actualHtml = response.text.replace(/\s+/g, '')
+            // Enable line below to generate new fixtures
+            // fs.writeFileSync(filePath, actualHtml)
+            htmlPerUser.set(username, actualHtml)
+            assert.strictEqual(actualHtml, expectedHtml)
         })
     }
 
