@@ -26,7 +26,7 @@
         "db-dump:with-analytics": "pg_dump 'postgresql://dhis:dhis@localhost:5432/dhis' | gzip >dump_with_analytics.sql.gz",
         "db-dump:default": "pg_dump postgresql://dhis:dhis@localhost:5432/dhis -T 'analytics*' -T '_*' -T 'rs_*' | gzip >dump.sql.gz",
         "e2e:prepare": "npm install && npm run docker:build:local && npm run docker:compose:e2e",
-        "e2e:test": "npx tsc --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --require ts-node/register $(find ./e2e -name '*.e2e.ts')"
+        "e2e:test": "npx tsc -p ./tsconfig.e2e.json --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --require ts-node/register $(find ./e2e -name '*.e2e.ts')"
     },
     "devDependencies": {
         "@commitlint/cli": "^19.2.1",

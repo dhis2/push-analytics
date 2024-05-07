@@ -138,7 +138,7 @@ services:
             - MAX_THREADS=${MAX_THREADS}
             - NODE_ENV=${NODE_ENV}
             - LOG_LEVEL=${LOG_LEVEL}
-        # ensure line-listing is installend all analytics tables have been generated
+        # ensure line-listing is installed and analytics tables have been generated
         depends_on:
             post-install-scripts:
                 condition: service_completed_successfully
@@ -149,15 +149,21 @@ services:
         networks:
             mynetwork:
                 ipv4_address: 172.26.0.12
-        command: npm ci --yes --ignore-scripts --include=dev && npm run e2e:test
+        command: >
+            sh -c "npm install npm@latest -g &&
+                   npm ci --yes --ignore-scripts --include=dev &&
+                   npx tsc -p ./tsconfig.e2e.json --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --require ts-node/register $(find ./e2e -name '*.e2e.ts')"
         working_dir: /opt/app
         volumes:
             - ../../package.json:/opt/app/package.json
             - ../../package-lock.json:/opt/app/package-lock.json
+            - ../../tsconfig.json:/opt/app/tsconfig.json
+            - ../../tsconfig.e2e.json:/opt/app/tsconfig.e2e.json
             - ../:/opt/app/e2e
         depends_on:
             push-analytics:
                 condition: service_started
+
 volumes:
     db-dump:
 

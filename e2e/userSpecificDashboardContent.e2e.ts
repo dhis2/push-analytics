@@ -14,7 +14,7 @@ import request from 'supertest'
 const fixturesPath = path.resolve('./e2e/__fixtures__')
 
 describe('producing user specific dashboard content', () => {
-    const req = request('http://localhost:1337')
+    const req = request('http://push-analytics:1337')
     const dashboardId = 'KQVXh5tlzW2'
     const usernames = ['test_user_national', 'test_user_bo', 'test_user_bonthe']
     const htmlPerUser = new Map()
