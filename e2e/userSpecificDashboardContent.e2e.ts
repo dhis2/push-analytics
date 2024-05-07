@@ -28,6 +28,8 @@ describe('producing user specific dashboard content', () => {
                 .query({ dashboardId, username })
                 .expect(200, (_, response) => {
                     const actualHtml = response.text.replace(/\s+/g, '')
+                    // Enable line below to generate new fixtures
+                    // fs.writeFileSync(filePath, actualHtml)
                     htmlPerUser.set(username, actualHtml)
                     assert.strictEqual(actualHtml, expectedHtml)
                     done()

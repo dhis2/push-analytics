@@ -2,6 +2,8 @@
 set -euxo pipefail
 
 CREDENTIALS="$USERNAME:$PASSWORD"
+# Only skip tracked entities because we need outlier tables and the rest
+# Only request analytics table generation for the last year to make things quicker and prevent out-of-disk-space issues on GHA
 RELATIVE_POLL_ENDPOINT=$(curl --user $CREDENTIALS -X POST $BASE_URL/api/resourceTables/analytics?skipTrackedEntities=true\&lastYears=1 | jq -r '.response.relativeNotifierEndpoint')
 POLL_URL="$BASE_URL$RELATIVE_POLL_ENDPOINT"
 TRIES=0
