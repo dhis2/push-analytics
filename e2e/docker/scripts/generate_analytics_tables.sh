@@ -2,7 +2,7 @@
 set -euxo pipefail
 
 CREDENTIALS="$USERNAME:$PASSWORD"
-RELATIVE_POLL_ENDPOINT=$(curl --user $CREDENTIALS -X POST $BASE_URL/api/resourceTables/analytics?skipTrackedEntities=true | jq -r '.response.relativeNotifierEndpoint')
+RELATIVE_POLL_ENDPOINT=$(curl --user $CREDENTIALS -X POST $BASE_URL/api/resourceTables/analytics?skipTrackedEntities=true\&lastYears=1 | jq -r '.response.relativeNotifierEndpoint')
 POLL_URL="$BASE_URL$RELATIVE_POLL_ENDPOINT"
 TRIES=0
 
