@@ -160,9 +160,6 @@ services:
             - ../../tsconfig.json:/opt/app/tsconfig.json
             - ../../tsconfig.e2e.json:/opt/app/tsconfig.e2e.json
             - ../:/opt/app/e2e
-        depends_on:
-            push-analytics:
-                condition: service_started
 
 volumes:
     db-dump:
