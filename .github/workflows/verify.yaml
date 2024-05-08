@@ -29,7 +29,7 @@ jobs:
             - name: Run tests
               run: npm run test
 
-    prepare-e2e:
+    e2e:
         runs-on: ubuntu-latest
         if: contains(github.event.pull_request.labels.*.name, 'e2e')
         steps:
@@ -50,20 +50,5 @@ jobs:
             - name: Spin up the E2E environment
               # Fake SMTP is not needed for the e2e tests
               run: cd ./e2e/docker && docker compose up -d web db db-dump post-install-scripts push-analytics
-
-    run-e2e:
-        runs-on: ubuntu-latest
-        if: contains(github.event.pull_request.labels.*.name, 'e2e')
-        needs: [verify, prepare-e2e]
-        steps:
-            - name: Checkout repo
-              uses: actions/checkout@v4
-            - name: Setup Node JS
-              uses: actions/setup-node@v4
-              with:
-                  node-version: lts/*
-                  cache: 'npm'
-            - name: Install dependencies (incl. devDependencies)
-              run: npm ci --include=dev
-            - name: Run the test suite
-              run: npm run e2e:test
+            - name: Run the e2e service
+              run: cd ./e2e/docker && docker compose up --abort-on-container-exit --exit-code-from e2e e2e
