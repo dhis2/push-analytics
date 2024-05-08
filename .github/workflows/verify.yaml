@@ -50,5 +50,5 @@ jobs:
             - name: Spin up the E2E environment
               # Fake SMTP is not needed for the e2e tests
               run: cd ./e2e/docker && docker compose up -d web db db-dump post-install-scripts push-analytics
-            - name: Run the e2e service
+            - name: Run the e2e test suite
               run: cd ./e2e/docker && docker compose up --abort-on-container-exit --exit-code-from e2e e2e
