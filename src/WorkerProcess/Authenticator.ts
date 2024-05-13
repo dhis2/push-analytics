@@ -73,7 +73,7 @@ export class Authenticator implements IAuthenticator {
         // Only exit impersonation mode if already in it
         if (this.#impersonatedUser) {
             const exitImpersonateStatusCode = await this.doAuthenticatedRequestFromPage(
-                '/impersonateExit',
+                '/api/auth/impersonateExit',
                 'POST'
             )
             if (exitImpersonateStatusCode !== 200) {
@@ -87,7 +87,7 @@ export class Authenticator implements IAuthenticator {
         // Skip impersonation for admin user only
         if (username !== this.#env.adminUsername) {
             const impersonateStatusCode = await this.doAuthenticatedRequestFromPage(
-                `/impersonate?username=${username}`,
+                `/api/auth/impersonate?username=${username}`,
                 'POST'
             )
             if (impersonateStatusCode !== 200) {
@@ -153,7 +153,7 @@ export class Authenticator implements IAuthenticator {
 
     async #loginViaForm() {
         await this.#page.bringToFront()
-        await this.#page.goto(`${this.#env.baseUrl}/dhis-web-login`)
+        await this.#page.goto(`${this.#env.baseUrl}/dhis-web-login/`)
         await this.#page.waitForSelector('#username')
         await this.#page.type('#username', this.#env.adminUsername)
         await this.#page.type('#password', this.#env.adminPassword)

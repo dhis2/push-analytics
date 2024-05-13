@@ -120,7 +120,7 @@ services:
         # image: 'dhis2/push-analytics:1.0.0-alpha.4'
         # For the e2e suite or debugging docker specific issues use a local image with the most recent changes
         # To build this image, run `npm run create-local-docker-image`
-        image: 'dhis2/push-analytics:local'
+        image: ${PUSH_ANALYTICS_IMAGE:-dhis2/push-analytics:local}
         ports:
             - '${PORT}:${PORT}'
         networks:
@@ -138,6 +138,7 @@ services:
             - MAX_THREADS=${MAX_THREADS}
             - NODE_ENV=${NODE_ENV}
             - LOG_LEVEL=${LOG_LEVEL}
+            - PUSH_ANALYTICS_IMAGE=${PUSH_ANALYTICS_IMAGE}
         # ensure line-listing is installed and analytics tables have been generated
         depends_on:
             post-install-scripts:
