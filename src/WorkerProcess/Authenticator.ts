@@ -72,23 +72,15 @@ export class Authenticator implements IAuthenticator {
 
         // Only exit impersonation mode if already in it
         if (this.#impersonatedUser) {
-            const userSnapShot = this.#impersonatedUser
             debugLog(`Exiting impersonation mode for user "${this.#impersonatedUser}"`)
 
             const exitImpersonateStatusCode = await this.doAuthenticatedRequestFromPage(
                 '/api/auth/impersonateExit',
                 'POST'
             )
-            if (exitImpersonateStatusCode !== 200 && exitImpersonateStatusCode !== 400) {
+            if (exitImpersonateStatusCode !== 200) {
                 throw new AuthenticationError(
                     `Could not exit impersonation mode. Received response status code ${exitImpersonateStatusCode}`
-                )
-            }
-            if (exitImpersonateStatusCode === 400) {
-                debugLog(
-                    `Could not exit impersonation mode for user "${
-                        this.#impersonatedUser
-                    }" | "${userSnapShot}". User not impersonating anyone.`
                 )
             }
 
