@@ -31,6 +31,7 @@ export class WorkerProcess {
     #authenticator: IAuthenticator
     #configCache: IScrapeConfigCache
     #hasPendingItemRequest: boolean
+    #hasInProgressConversion: boolean
 
     protected constructor(
         converter: IDashboardItemConverter,
@@ -45,6 +46,7 @@ export class WorkerProcess {
             onResponseToItemRequest: this.#handleResponseToItemRequest.bind(this),
         })
         this.#hasPendingItemRequest = false
+        this.#hasInProgressConversion = false
         // See if there is work to do
         this.#requestDashboardItemFromQueue('INIT')
     }
@@ -67,11 +69,20 @@ export class WorkerProcess {
     }
 
     #isBusy() {
-        return this.#converter.isConverting() || this.#hasPendingItemRequest
+        return (
+            this.#converter.isConverting() ||
+            this.#hasPendingItemRequest ||
+            this.#hasInProgressConversion
+        )
     }
 
     #handleItemsAddedToQueue() {
         // Ignore this event if working/waiting
+        debugLog(
+            `Item added to queue, busy: ${this.#isBusy()} (${this.#converter.isConverting()} || ${
+                this.#hasPendingItemRequest
+            } || ${this.#hasInProgressConversion})`
+        )
         if (!this.#isBusy()) {
             this.#requestDashboardItemFromQueue('ITEMS_ADDED_TO_QUEUE')
         }
@@ -79,13 +90,14 @@ export class WorkerProcess {
 
     async #handleResponseToItemRequest(queueItem: QueueItem | undefined) {
         this.#hasPendingItemRequest = false
+        this.#hasInProgressConversion = !!queueItem
 
         if (!queueItem) {
             debugLog('Received reply to item request - queue is empty')
             return
         }
 
-        if (this.#isBusy()) {
+        if (this.#converter.isConverting()) {
             throw new WorkerProcessError(
                 `Received a queueItem while converting, this should not happen (PID ${process.pid})`
             )
@@ -135,6 +147,7 @@ export class WorkerProcess {
             }
             this.#messageHandler.sendItemConversionErrorToPrimaryProcess(conversionError)
         } finally {
+            this.#hasInProgressConversion = false
             // See if there is more work to do
             if (this.#isBusy()) {
                 debugLog(
