@@ -134,7 +134,13 @@ export class WorkerProcess {
             this.#messageHandler.sendItemConversionErrorToPrimaryProcess(conversionError)
         } finally {
             // See if there is more work to do
-            this.#requestDashboardItemFromQueue()
+            if (this.#isBusy()) {
+                debugLog(
+                    'Not requesting a new item after conversion because a pending item request is present'
+                )
+            } else {
+                this.#requestDashboardItemFromQueue('AFTER CONVERSION')
+            }
         }
     }
 }
