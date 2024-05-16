@@ -46,7 +46,7 @@ export class WorkerProcess {
         })
         this.#hasPendingItemRequest = false
         // See if there is work to do
-        this.#requestDashboardItemFromQueue()
+        this.#requestDashboardItemFromQueue('INIT')
     }
 
     static async create(env: PushAnalyticsEnvVariables, debug: boolean) {
@@ -58,8 +58,10 @@ export class WorkerProcess {
         return new WorkerProcess(converter, authenticator, configCache)
     }
 
-    #requestDashboardItemFromQueue() {
-        debugLog('Going to request queue item')
+    #requestDashboardItemFromQueue(reason: string) {
+        debugLog(
+            `Going to request queue item because: ${reason} | busy: ${this.#isBusy()}`
+        )
         this.#hasPendingItemRequest = true
         this.#messageHandler.requestDashboardItemFromQueue()
     }
@@ -71,7 +73,7 @@ export class WorkerProcess {
     #handleItemsAddedToQueue() {
         // Ignore this event if working/waiting
         if (!this.#isBusy()) {
-            this.#requestDashboardItemFromQueue()
+            this.#requestDashboardItemFromQueue('ITEMS_ADDED_TO_QUEUE')
         }
     }
 
@@ -85,7 +87,7 @@ export class WorkerProcess {
 
         if (this.#isBusy()) {
             throw new WorkerProcessError(
-                'Received a queueItem while converting, this should not happen'
+                `Received a queueItem while converting, this should not happen (PID ${process.pid})`
             )
         }
 
