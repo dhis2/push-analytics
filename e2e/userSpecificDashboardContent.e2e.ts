@@ -13,17 +13,30 @@ import request from 'supertest'
 
 const fixturesPath = path.resolve('./e2e/__fixtures__')
 
-describe('producing user specific dashboard content', () => {
-    const req = request('http://push-analytics:1337')
+describe('producing user specific dashboard content ()', () => {
+    if (!process.env.HOST || !process.env.PORT) {
+        throw new Error('HOST and PORT env variables missing, aborting test run')
+    }
+    const url = `${process.env.HOST}:${process.env.PORT}`
+    const req = request(url)
     const dashboardId = 'KQVXh5tlzW2'
-    const usernames = ['test_user_national', 'test_user_bo', 'test_user_bonthe']
-    const htmlPerUser = new Map()
+    const usernameWithNorwegianLocale = 'test_user_national_nb'
+    const usernames = [
+        'test_user_national',
+        // org unit data
+        'test_user_bo',
+        'test_user_bonthe',
+        // locale
+        usernameWithNorwegianLocale,
+    ]
+    const htmlPerUser: Map<string, string> = new Map()
 
     for (const username of usernames) {
         test(`produces the expected HTML for username ${username}"`, async () => {
+            const locale = username === usernameWithNorwegianLocale ? 'no' : 'en'
             const filePath = path.resolve(fixturesPath, `${dashboardId}_${username}.txt`)
             const expectedHtml = fs.readFileSync(filePath).toString()
-            const response = await req.get('/').query({ dashboardId, username })
+            const response = await req.get('/').query({ dashboardId, username, locale })
 
             assert.strictEqual(response.status, 200)
 
@@ -39,5 +52,14 @@ describe('producing user specific dashboard content', () => {
         assert.notEqual(htmlPerUser.get(usernames[0]), htmlPerUser.get(usernames[1]))
         assert.notEqual(htmlPerUser.get(usernames[0]), htmlPerUser.get(usernames[2]))
         assert.notEqual(htmlPerUser.get(usernames[1]), htmlPerUser.get(usernames[2]))
+    })
+
+    test('expected localised strings are found', () => {
+        const localisedHtml = htmlPerUser.get(usernameWithNorwegianLocale)
+        const trimmedDashboardName = 'Norwegian dashboard name'.replace(/ /g, '')
+        const trimmedDashboardItemName = 'Norwegian viz name'.replace(/ /g, '')
+
+        assert.strictEqual(localisedHtml?.includes(trimmedDashboardName), true)
+        assert.strictEqual(localisedHtml?.includes(trimmedDashboardItemName), true)
     })
 })

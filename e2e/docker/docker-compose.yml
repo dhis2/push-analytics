@@ -150,6 +150,9 @@ services:
         networks:
             mynetwork:
                 ipv4_address: 172.26.0.12
+        environment:
+            - HOST=${HOST}
+            - PORT=${PORT}
         command: >
             sh -c "npm install npm@latest -g &&
                    npm ci --yes --ignore-scripts --include=dev &&
