@@ -55,7 +55,7 @@ export class PrimaryProcess {
         this.#initializeWorkers()
     }
 
-    #handleWorkerExit(worker: Worker) {
+    #handleWorkerExit(worker: Worker, code: number, signal: string) {
         /* Technically it would be possible to handle this
          * in a much more sophisticated way. We could find out if the worker
          * was busy doing a conversion and then we could either retry that
@@ -67,6 +67,9 @@ export class PrimaryProcess {
          * for a long time. So we just go with this simple but quite drastic
          * approach of sending error responses to all pending requests and
          * and clearing the dashboard item queue. */
+        debugLog(
+            `Worker with PID "${worker.process.pid}" died with code "${code}" and signal "${signal}"). Clearing the queue`
+        )
         this.#workerExitLog.push(Date.now())
         const hasFrequentExits = this.#hasFrequentExits()
         this.#dashboardItemsQueue.clearQueue()
@@ -89,7 +92,10 @@ export class PrimaryProcess {
             process.exit(0)
         } else {
             // Start another worker to replace the dead one
-            cluster.fork()
+            const newWorker = cluster.fork()
+            debugLog(
+                `New worker with PID "${newWorker.process.pid}" will replace old worker with PID ${worker.process.pid}`
+            )
         }
     }
 
@@ -99,15 +105,6 @@ export class PrimaryProcess {
             this.#dashboardItemsQueue.hasQueuedItems()
                 ? this.#dashboardItemsQueue.takeItemFromQueue()
                 : undefined
-
-        if (queueItem) {
-            debugLog(
-                'Received item request and queue is populated, sending queueItem: ',
-                queueItem
-            )
-        } else {
-            debugLog('Received item request but queue is empty, sending empty message')
-        }
 
         this.#messageHandler.sendQueueItemToWorker(workerId, queueItem)
     }
