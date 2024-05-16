@@ -72,20 +72,33 @@ export class Authenticator implements IAuthenticator {
 
         // Only exit impersonation mode if already in it
         if (this.#impersonatedUser) {
+            const userSnapShot = this.#impersonatedUser
+            debugLog(`Exiting impersonation mode for user "${this.#impersonatedUser}"`)
+
             const exitImpersonateStatusCode = await this.doAuthenticatedRequestFromPage(
                 '/api/auth/impersonateExit',
                 'POST'
             )
-            if (exitImpersonateStatusCode !== 200) {
+            if (exitImpersonateStatusCode !== 200 && exitImpersonateStatusCode !== 400) {
                 throw new AuthenticationError(
                     `Could not exit impersonation mode. Received response status code ${exitImpersonateStatusCode}`
                 )
             }
-            debugLog(`Exited impersonation mode for user "${this.#impersonatedUser}"`)
+            if (exitImpersonateStatusCode === 400) {
+                debugLog(
+                    `Could not exit impersonation mode for user "${
+                        this.#impersonatedUser
+                    }" | "${userSnapShot}". User not impersonating anyone.`
+                )
+            }
+
+            this.#impersonatedUser = null
         }
 
         // Skip impersonation for admin user only
         if (username !== this.#env.adminUsername) {
+            debugLog(`Entering impersonation mode for user "${username}"`)
+
             const impersonateStatusCode = await this.doAuthenticatedRequestFromPage(
                 `/api/auth/impersonate?username=${username}`,
                 'POST'
@@ -95,8 +108,6 @@ export class Authenticator implements IAuthenticator {
                     `Could not impersonate user. Received response status code ${impersonateStatusCode}`
                 )
             }
-
-            debugLog(`Entered impersonation mode for user "${username}"`)
 
             this.#impersonatedUser = username
         }
