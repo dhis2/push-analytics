@@ -15,7 +15,7 @@ import {
 } from './utils'
 import { tearDownCluster } from './utils/tearDownCluster'
 
-describe('An error on the dashboard request', { concurrency: 1 }, async () => {
+describe('An error on the dashboard request', { concurrency: 1 }, () => {
     const dashboardFixtures: DashboardFixture[] = getDashboardFixturesArray()
 
     before(async () => {

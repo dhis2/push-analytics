@@ -32,21 +32,22 @@ export async function convertSuccessFn(
         (reports && 'REPORTS ITEM') ??
         (resources && 'RESOURCES ITEM')
 
-    const convertedItemPayload: ConvertedItemPayload = {
+    const convertedItemPayload: ConvertedItemPayload = await Promise.resolve({
         requestId: queueItem.requestId,
         dashboardId: queueItem.dashboardId,
         username: queueItem.username,
         dashboardItemId: queueItem.dashboardItem.id,
         html: `<h6>${name}</h6>`,
         css: '',
-    }
+    })
 
     return convertedItemPayload
 }
 
 export class MockDashboardItemConverter implements IDashboardItemConverter {
     static async create() {
-        return new MockDashboardItemConverter()
+        const converter = await Promise.resolve(new MockDashboardItemConverter())
+        return converter
     }
     public isConverting() {
         return false
@@ -61,19 +62,23 @@ export class MockDashboardItemConverter implements IDashboardItemConverter {
 
 class MockAuthenticator implements IAuthenticator {
     static async create() {
-        return new MockAuthenticator()
+        const authenticator = await Promise.resolve(new MockAuthenticator())
+        return authenticator
     }
-    public async establishNonExpiringAdminSession(): Promise<void> {
-        return Promise.resolve()
+    public establishNonExpiringAdminSession(): void {
+        return undefined
     }
     public async impersonateUser() {
-        return Promise.resolve()
+        return await Promise.resolve()
     }
 }
 
 class MockScrapeConfigCache implements IScrapeConfigCache {
     public async getScrapeConfig(): Promise<ParsedScrapeInstructions> {
-        return Promise.resolve(scrapeInstructions as ParsedScrapeInstructions)
+        const instructuctions = await Promise.resolve(
+            scrapeInstructions as ParsedScrapeInstructions
+        )
+        return instructuctions
     }
 }
 

@@ -15,7 +15,7 @@ class AuthenticationError extends PushAnalyticsError {
 }
 
 export interface IAuthenticator {
-    establishNonExpiringAdminSession: () => Promise<void>
+    establishNonExpiringAdminSession: () => void
     impersonateUser: (username: string) => Promise<void>
 }
 
@@ -160,7 +160,7 @@ export class Authenticator implements IAuthenticator {
         await this.#page.click('button[type="submit"]')
     }
 
-    async #preventSessionExpiry() {
+    #preventSessionExpiry() {
         // Do a ping request 30 seconds before the session is due to expire
         const intervalInMs = (parseInt(this.#env.sessionTimeout) - 30) * 1000
         const intervalId = setInterval(async () => {
@@ -179,7 +179,7 @@ export class Authenticator implements IAuthenticator {
 
             if (httpStatusCode !== 200) {
                 clearInterval(intervalId)
-                this.establishNonExpiringAdminSession()
+                await this.establishNonExpiringAdminSession()
             }
         }, intervalInMs)
     }

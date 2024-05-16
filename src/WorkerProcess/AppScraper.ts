@@ -96,7 +96,7 @@ export class AppScraper implements Converter {
                 return Promise.resolve({ html: '', css: '' })
             }
             await this.page.bringToFront()
-            await this.#updateRequestUrlGlob(config)
+            this.#updateRequestUrlGlob(config)
             await this.#clearVisualization(config)
             /* Make sure we download the exported file to `./images/${PID}_${dashboardItemId}`,
              * which allows us to track the download process in a relatively sane way */
@@ -331,7 +331,7 @@ export class AppScraper implements Converter {
         })
     }
 
-    async #updateRequestUrlGlob(config: ParsedScrapeInstructions) {
+    #updateRequestUrlGlob(config: ParsedScrapeInstructions) {
         if (config.obtainDownloadArtifact.strategy === 'interceptResponse') {
             this.#currentRequestUrlGlob = config.obtainDownloadArtifact.urlGlob ?? ''
         } else {

@@ -63,7 +63,7 @@ export class ItemParser implements Converter {
                 ? '<hr class="spacer"/>'
                 : insertIntoTextTemplate(parser.render(text))
 
-        return Promise.resolve({ html, css: '' })
+        return await Promise.resolve({ html, css: '' })
     }
 
     // See https://github.com/dhis2/dashboard-app/blob/master/src/modules/itemTypes.js
@@ -85,7 +85,7 @@ export class ItemParser implements Converter {
             }))
         )
 
-        return Promise.resolve({ html, css: '' })
+        return await Promise.resolve({ html, css: '' })
     }
 
     async #convertReports(queueItem: QueueItem) {
@@ -106,7 +106,7 @@ export class ItemParser implements Converter {
             }))
         )
 
-        return Promise.resolve({ html, css: '' })
+        return await Promise.resolve({ html, css: '' })
     }
 
     #getReportPath(id: string, type: ReportType) {

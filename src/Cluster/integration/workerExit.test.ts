@@ -12,7 +12,7 @@ import {
 } from './utils'
 import { tearDownCluster } from './utils/tearDownCluster'
 
-describe('Handling a worker exit', async () => {
+describe('Handling a worker exit', () => {
     const dashboardFixtures: DashboardFixture[] = getDashboardFixturesArray()
 
     before(async () => {

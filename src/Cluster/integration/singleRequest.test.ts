@@ -20,7 +20,7 @@ import { tearDownCluster } from './utils/tearDownCluster'
 describe(
     'A successfull request response cycle for a single request',
     { concurrency: 1 },
-    async () => {
+    () => {
         const dashboardFixtures: DashboardFixture[] = getDashboardFixturesArray()
 
         before(async () => {

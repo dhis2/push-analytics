@@ -17,7 +17,7 @@ import {
 } from './utils'
 import { tearDownCluster } from './utils/tearDownCluster'
 
-describe('Handling parallel requests', { concurrency: 1 }, async () => {
+describe('Handling parallel requests', { concurrency: 1 }, () => {
     const dashboardFixtures: DashboardFixture[] = getDashboardFixturesArray()
 
     before(async () => {

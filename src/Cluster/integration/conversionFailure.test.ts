@@ -21,7 +21,7 @@ import {
 } from './utils'
 import { tearDownCluster } from './utils/tearDownCluster'
 
-describe('Conversion error', { concurrency: 1 }, async () => {
+describe('Conversion error', { concurrency: 1 }, () => {
     const dashboardFixtures: DashboardFixture[] = getDashboardFixturesArray()
 
     before(async () => {
