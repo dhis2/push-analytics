@@ -9,14 +9,19 @@ describe('parseQueryString', () => {
     it('should return the dashboardId and username if the URL is valid', () => {
         const dashboardId = 'gkhrgyD3Rd4'
         const username = 'test'
-        const url = `/?dashboardId=${dashboardId}&username=${username}`
+        const locale = 'no'
+        const url = `/?dashboardId=${dashboardId}&username=${username}&locale=${locale}`
 
-        assert.deepEqual(parseQueryString(url, baseUrl), { dashboardId, username })
+        assert.deepEqual(parseQueryString(url, baseUrl), {
+            dashboardId,
+            username,
+            locale,
+        })
     })
     it('should throw an error if the username is invalid or missing', () => {
         // Query param was omitted
         assert.throws(
-            () => parseQueryString('/?dashboardId=gkhrgyD3Rd4', baseUrl),
+            () => parseQueryString('/?dashboardId=gkhrgyD3Rd4&locale=no', baseUrl),
             (error: unknown) => {
                 assert(error instanceof RequestHandlerError)
                 assert.strictEqual(error?.message, 'Invalid username "undefined"')
@@ -26,7 +31,11 @@ describe('parseQueryString', () => {
 
         // Query param empty
         assert.throws(
-            () => parseQueryString('/?dashboardId=gkhrgyD3Rd4&username=', baseUrl),
+            () =>
+                parseQueryString(
+                    '/?dashboardId=gkhrgyD3Rd4&username=&locale=no',
+                    baseUrl
+                ),
             (error: unknown) => {
                 assert(error instanceof RequestHandlerError)
                 assert.strictEqual(error?.message, 'Invalid username ""')
@@ -37,7 +46,7 @@ describe('parseQueryString', () => {
     it('should throw an error if the dashboardId is invalid or missing', () => {
         // Query param was omitted
         assert.throws(
-            () => parseQueryString('/?username=test', baseUrl),
+            () => parseQueryString('/?username=test&locale=no', baseUrl),
             (error: unknown) => {
                 assert(error instanceof RequestHandlerError)
                 assert.strictEqual(error?.message, 'Invalid dashhboard UID "undefined"')
@@ -48,13 +57,42 @@ describe('parseQueryString', () => {
         // Query param invalid
         const invalidId = 'INVALID_ID'
         assert.throws(
-            () => parseQueryString(`/?dashboardId=${invalidId}&username=test`, baseUrl),
+            () =>
+                parseQueryString(
+                    `/?dashboardId=${invalidId}&username=test&locale=no`,
+                    baseUrl
+                ),
             (error: unknown) => {
                 assert(error instanceof RequestHandlerError)
                 assert.strictEqual(
                     error?.message,
                     `Invalid dashhboard UID "${invalidId}"`
                 )
+                return true
+            }
+        )
+    })
+    it('should throw an error if the locale is invalid or missing', () => {
+        // Query param was omitted
+        assert.throws(
+            () => parseQueryString('/?dashboardId=gkhrgyD3Rd4&username=admin', baseUrl),
+            (error: unknown) => {
+                assert(error instanceof RequestHandlerError)
+                assert.strictEqual(error?.message, 'Invalid locale "undefined"')
+                return true
+            }
+        )
+
+        // Query param empty
+        assert.throws(
+            () =>
+                parseQueryString(
+                    '/?dashboardId=gkhrgyD3Rd4&username=admin&locale=',
+                    baseUrl
+                ),
+            (error: unknown) => {
+                assert(error instanceof RequestHandlerError)
+                assert.strictEqual(error?.message, 'Invalid locale ""')
                 return true
             }
         )

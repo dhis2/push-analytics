@@ -64,8 +64,14 @@ export class RequestHandler {
     async #getDashboardDetails(request: IncomingMessage): Promise<DashboardDetails> {
         validateRequest(request, this.#env.baseUrl)
 
-        const { dashboardId, username } = parseQueryString(request.url, this.#env.baseUrl)
-        const { displayName, dashboardItems } = await this.#getDashboard(dashboardId)
+        const { dashboardId, username, locale } = parseQueryString(
+            request.url,
+            this.#env.baseUrl
+        )
+        const { displayName, dashboardItems } = await this.#getDashboard(
+            dashboardId,
+            locale
+        )
         return {
             dashboardId,
             username,
@@ -74,12 +80,13 @@ export class RequestHandler {
         }
     }
 
-    async #getDashboard(dashboardId: string) {
+    async #getDashboard(dashboardId: string, locale: string) {
         const { apiVersion, baseUrl, adminPassword, adminUsername } = this.#env
         const url = `${baseUrl}/api/${apiVersion}/dashboards/${dashboardId}`
         const options = {
             params: {
                 fields: getDashboardFieldsParam(),
+                locale,
             },
             auth: { username: adminUsername, password: adminPassword },
         }

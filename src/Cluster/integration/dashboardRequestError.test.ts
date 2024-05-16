@@ -50,7 +50,7 @@ describe('An error on the dashboard request', { concurrency: 1 }, () => {
                 messagesFromWorkers.push(message)
             })
             const response = await request(getHttpServer()).get(
-                `/?dashboardId=${dashboardId}&username=admin`
+                `/?dashboardId=${dashboardId}&username=admin&locale=en`
             )
 
             assert.strictEqual(messagesFromWorkers.length, 0)

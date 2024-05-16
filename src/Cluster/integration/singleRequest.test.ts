@@ -41,7 +41,7 @@ describe(
                     messagesFromWorkers.push(message)
                 })
                 const response = await request(getHttpServer()).get(
-                    `/?dashboardId=${dashboardId}&username=admin`
+                    `/?dashboardId=${dashboardId}&username=admin&locale=en`
                 )
                 const itemRequestedMessages = messagesFromWorkers.filter(
                     ({ type }) => type === 'ITEM_REQUESTED_FROM_QUEUE'

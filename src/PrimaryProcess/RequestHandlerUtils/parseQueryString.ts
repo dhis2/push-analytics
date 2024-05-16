@@ -7,7 +7,7 @@ const isNonEmptyString = (str: string) => typeof str === 'string' && str.length 
 
 export function parseQueryString(url = '', baseUrl: string) {
     const { searchParams } = new URL(url, baseUrl)
-    const { dashboardId, username } = Object.fromEntries(searchParams)
+    const { dashboardId, username, locale } = Object.fromEntries(searchParams)
 
     if (!isValidUid(dashboardId)) {
         throw new RequestHandlerError(
@@ -21,5 +21,9 @@ export function parseQueryString(url = '', baseUrl: string) {
         throw new RequestHandlerError(`Invalid username "${username}"`, 'E1502', 400)
     }
 
-    return { dashboardId, username }
+    if (!isNonEmptyString(locale)) {
+        throw new RequestHandlerError(`Invalid locale "${locale}"`, 'E1502', 400)
+    }
+
+    return { dashboardId, username, locale }
 }

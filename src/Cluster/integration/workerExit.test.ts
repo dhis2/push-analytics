@@ -43,10 +43,10 @@ describe('Handling a worker exit', () => {
             // Note the `Promise.all`, the requests are issued in parallel
             const [response1, response2] = await Promise.all([
                 request(getHttpServer()).get(
-                    `/?dashboardId=${dashboardId1}&username=admin`
+                    `/?dashboardId=${dashboardId1}&username=admin&locale=en`
                 ),
                 request(getHttpServer()).get(
-                    `/?dashboardId=${dashboardId2}&username=admin`
+                    `/?dashboardId=${dashboardId2}&username=admin&locale=en`
                 ),
             ])
 
@@ -74,7 +74,7 @@ describe('Handling a worker exit', () => {
             )
             // Try a new request, which should pass
             const response3 = await request(getHttpServer()).get(
-                `/?dashboardId=${dashboardId3}&username=admin`
+                `/?dashboardId=${dashboardId3}&username=admin&locale=en`
             )
             assert.strictEqual(response3.status, 200)
             assert.strictEqual(response3.text, outputHtml3)

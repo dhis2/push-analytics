@@ -48,13 +48,13 @@ describe('Handling parallel requests', { concurrency: 1 }, () => {
             // Note the `Promise.all`, the requests are issued in parallel
             const [response1, response2, response3] = await Promise.all([
                 request(getHttpServer()).get(
-                    `/?dashboardId=${dashboardId1}&username=admin`
+                    `/?dashboardId=${dashboardId1}&username=admin&locale=en`
                 ),
                 request(getHttpServer()).get(
-                    `/?dashboardId=${dashboardId2}&username=admin`
+                    `/?dashboardId=${dashboardId2}&username=admin&locale=en`
                 ),
                 request(getHttpServer()).get(
-                    `/?dashboardId=${dashboardId3}&username=admin`
+                    `/?dashboardId=${dashboardId3}&username=admin&locale=en`
                 ),
             ])
             const itemRequestedMessages = messagesFromWorkers.filter(
