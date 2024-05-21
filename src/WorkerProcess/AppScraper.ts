@@ -111,10 +111,20 @@ export class AppScraper implements Converter {
 
             return { html, css }
         } catch (error) {
-            const message =
+            let visualizationType = ''
+            try {
+                const visualization = getDashboardItemVisualization(
+                    queueItem.dashboardItem
+                )
+                visualizationType = visualization.type as string
+            } catch {
+                visualizationType = 'UNKNOWN_VIZ_TYPE'
+            }
+            const errorMessage =
                 error instanceof Error
                     ? error.message
                     : 'An unknown conversion error occurred'
+            const message = `[${queueItem.dashboardItem.type} | ${visualizationType}] ${errorMessage}`
             throw new AppScraperError(message)
         }
     }

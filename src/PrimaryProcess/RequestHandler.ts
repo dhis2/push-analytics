@@ -8,6 +8,7 @@ import {
     parseQueryString,
     validateRequest,
 } from './RequestHandlerUtils'
+import { RequestHandlerError } from './RequestHandlerUtils/RequestHandlerError'
 
 type DashboardDetails = Omit<AddDashboardOptions, 'requestId' | 'response'> & {
     locale: string
@@ -81,16 +82,23 @@ export class RequestHandler {
     }
 
     async #getDashboard(dashboardId: string, locale: string) {
-        const { apiVersion, baseUrl, adminPassword, adminUsername } = this.#env
-        const url = `${baseUrl}/api/${apiVersion}/dashboards/${dashboardId}`
-        const options = {
-            params: {
-                fields: getDashboardFieldsParam(),
-                locale,
-            },
-            auth: { username: adminUsername, password: adminPassword },
+        try {
+            const { apiVersion, baseUrl, adminPassword, adminUsername } = this.#env
+            const url = `${baseUrl}/api/${apiVersion}/dashboards/${dashboardId}`
+            const options = {
+                params: {
+                    fields: getDashboardFieldsParam(),
+                    locale,
+                },
+                auth: { username: adminUsername, password: adminPassword },
+            }
+            const result = await axios.get<Dashboard>(url, options)
+            return result.data
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'unknow error'
+            const message = `Could not fetch dashboard details for ID "${dashboardId}", error: ${errorMessage}`
+            debugLog(message)
+            throw new RequestHandlerError(message)
         }
-        const result = await axios.get<Dashboard>(url, options)
-        return result.data
     }
 }
