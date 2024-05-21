@@ -9,7 +9,9 @@ import {
     validateRequest,
 } from './RequestHandlerUtils'
 
-type DashboardDetails = Omit<AddDashboardOptions, 'requestId' | 'response'>
+type DashboardDetails = Omit<AddDashboardOptions, 'requestId' | 'response'> & {
+    locale: string
+}
 
 type RequestHandlerOptions = {
     env: PushAnalyticsEnvVariables
@@ -37,13 +39,10 @@ export class RequestHandler {
 
         try {
             dashboardDetails = await this.#getDashboardDetails(request)
+            const { dashboardId, username, locale } = dashboardDetails
             debugLog(
-                `Received conversion request for dasboardId "${dashboardDetails.dashboardId}" and username "${dashboardDetails.username}"`
+                `Received conversion request for dasboardId "${dashboardId}", username "${username}", and locale "${locale}"`
             )
-            if (dashboardDetails.username === 'system') {
-                response.writeHead(200)
-                response.end('<h1>SYSTEM USER</h1>')
-            }
         } catch (error) {
             /* Note that this is failing before the dashboard (items)
              * are queued, so we can just send an error from here */
@@ -75,6 +74,7 @@ export class RequestHandler {
         return {
             dashboardId,
             username,
+            locale,
             displayName,
             dashboardItems,
         }
