@@ -61,9 +61,7 @@ export class WorkerProcess {
     }
 
     #requestDashboardItemFromQueue(reason: string) {
-        debugLog(
-            `Going to request queue item because: ${reason} | busy: ${this.#isBusy()}`
-        )
+        debugLog(`Going to request queue item because: ${reason}`)
         this.#hasPendingItemRequest = true
         this.#messageHandler.requestDashboardItemFromQueue()
     }
@@ -78,11 +76,6 @@ export class WorkerProcess {
 
     #handleItemsAddedToQueue() {
         // Ignore this event if working/waiting
-        debugLog(
-            `Item added to queue, busy: ${this.#isBusy()} (${this.#converter.isConverting()} || ${
-                this.#hasPendingItemRequest
-            } || ${this.#hasInProgressConversion})`
-        )
         if (!this.#isBusy()) {
             this.#requestDashboardItemFromQueue('ITEMS_ADDED_TO_QUEUE')
         }
