@@ -25,7 +25,7 @@
         "db-dump:default": "pg_dump postgresql://dhis:dhis@localhost:5432/dhis -T 'analytics*' -T '_*' -T 'rs_*' | gzip >dump.sql.gz",
         "db-dump:with-analytics": "pg_dump 'postgresql://dhis:dhis@localhost:5432/dhis' | gzip >dump_with_analytics.sql.gz",
         "start:dev": "nodemon --exec ts-node -r dotenv/config src/index.ts",
-        "start:prod": "npm run build && node ./dist/index.js"
+        "start:prod": "npm run build && node -r dotenv/config ./dist/index.js"
     },
     "devDependencies": {
         "@commitlint/cli": "^19.2.1",
