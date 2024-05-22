@@ -103,8 +103,8 @@ export class WorkerProcess {
             )
             let config = undefined
             if (this.#converter.isAppScraperConversion(queueItem)) {
-                config = await this.#configCache.getScrapeConfig(queueItem.dashboardItem)
                 await this.#authenticator.impersonateUser(queueItem.username)
+                config = await this.#configCache.getScrapeConfig(queueItem.dashboardItem)
             }
             const convertedItem: ConvertedItemPayload = await this.#converter.convert(
                 queueItem,
@@ -113,7 +113,6 @@ export class WorkerProcess {
             debugLog('Conversion success', convertedItem)
             this.#messageHandler.sendConvertedItemToPrimaryProcess(convertedItem)
         } catch (error) {
-            debugLog('Conversion error', error)
             let errorMessage = 'Internal error'
             let errorName = 'UnknownConversionError'
             let errorCode = 'E2000'
@@ -127,6 +126,8 @@ export class WorkerProcess {
             } else if (error instanceof Error) {
                 errorMessage = error.message
             }
+
+            debugLog(`Conversion error [${errorCode} | ${errorName}]: "${errorMessage}"`)
 
             const conversionError: ConversionErrorPayload = {
                 requestId: queueItem.requestId,

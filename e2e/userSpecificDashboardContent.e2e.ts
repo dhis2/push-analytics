@@ -38,7 +38,7 @@ describe('producing user specific dashboard content', () => {
             // Strip whitespace and newlines to avoid
             const actualHtml = response.text
             // Enable line below to generate new fixtures
-            fs.writeFileSync(filePath, actualHtml)
+            // fs.writeFileSync(filePath, actualHtml)
             htmlPerUser.set(username, actualHtml)
 
             /* The e2e dashboard used to assert content customisation looks slightly different
@@ -54,6 +54,7 @@ describe('producing user specific dashboard content', () => {
                 actualHtml,
                 expectedHtml
             )
+            console.log(`Actual and expected string are ${similarity * 100}% similar`)
             assert.strictEqual(similarity > 0.75, true)
         })
     }

@@ -27,8 +27,8 @@ describe('converting all types of dashboard items', () => {
         assert.strictEqual(response.status, 200)
 
         const actualHtml = response.text
-        // Enable line below to generate new fixtures
-        fs.writeFileSync(filePath, actualHtml)
+        // Enable line below to generate new fixture
+        // fs.writeFileSync(filePath, actualHtml)
 
         /* The e2e dashboard used to assert content customisation looks slightly different
          * depending on when it is viewed. As a result the HTML strings are not constant.
@@ -40,6 +40,7 @@ describe('converting all types of dashboard items', () => {
          * generated HTML to JS DOM, to assert the tables have expected content and the images
          * are showing.*/
         const similarity = stringSimilarity.compareTwoStrings(actualHtml, expectedHtml)
+        console.log(`Actual and expected string are ${similarity * 100}% similar`)
         assert.strictEqual(similarity > 0.75, true)
     })
 })
