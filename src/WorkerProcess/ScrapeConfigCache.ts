@@ -106,7 +106,6 @@ export class ScrapeConfigCache implements IScrapeConfigCache {
                     `Could not fetch scrape instructions from "${appUrl}", httpStatusCode: "${instructions.httpStatusCode}" message "${instructions.message}"`
                 )
             } else {
-                console.log('setting instructions', appPath, instructions)
                 this.#cachedConfigs.set(appPath, instructions)
                 return instructions
             }
