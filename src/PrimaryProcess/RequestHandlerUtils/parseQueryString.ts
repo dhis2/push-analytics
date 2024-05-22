@@ -5,7 +5,6 @@ const UID_REGEX = /^[a-zA-Z][a-zA-Z0-9]{10}$/
 
 export function parseQueryString(url = '', baseUrl: string) {
     const { searchParams } = new URL(url, baseUrl)
-    console.log(searchParams)
     const { dashboardId, username, locale } = Object.fromEntries(searchParams)
 
     if (!UID_REGEX.test(dashboardId)) {
