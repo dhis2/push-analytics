@@ -5,16 +5,9 @@ import { describe, test } from 'node:test'
 import stringSimilarity from 'string-similarity'
 import request from 'supertest'
 
-/* Before writing the HTML strings to the fixtures files
- * `.replace(/\s+/g, '')` was applied to the string to remove
- * all newlines and whitespaces. The same is done again before
- * comparing the produced HTML string with the fixture. This
- * is done to avoid mismatches on newlines etc, but
- * why this is needed is beyond me. */
-
 const fixturesPath = path.resolve('./e2e/__fixtures__')
 
-describe('producing user specific dashboard content ()', () => {
+describe('producing user specific dashboard content', () => {
     if (!process.env.HOST || !process.env.PORT) {
         throw new Error('HOST and PORT env variables missing, aborting test run')
     }
@@ -42,9 +35,10 @@ describe('producing user specific dashboard content ()', () => {
 
             assert.strictEqual(response.status, 200)
 
-            const actualHtml = response.text.replace(/\s+/g, '')
+            // Strip whitespace and newlines to avoid
+            const actualHtml = response.text
             // Enable line below to generate new fixtures
-            // fs.writeFileSync(filePath, actualHtml)
+            fs.writeFileSync(filePath, actualHtml)
             htmlPerUser.set(username, actualHtml)
 
             /* The e2e dashboard used to assert content customisation looks slightly different
@@ -72,10 +66,8 @@ describe('producing user specific dashboard content ()', () => {
 
     test('expected localised strings are found', () => {
         const localisedHtml = htmlPerUser.get(usernameWithNorwegianLocale)
-        const trimmedDashboardName = 'Norwegian dashboard name'.replace(/ /g, '')
-        const trimmedDashboardItemName = 'Norwegian viz name'.replace(/ /g, '')
 
-        assert.strictEqual(localisedHtml?.includes(trimmedDashboardName), true)
-        assert.strictEqual(localisedHtml?.includes(trimmedDashboardItemName), true)
+        assert.strictEqual(localisedHtml?.includes('Norwegian dashboard name'), true)
+        assert.strictEqual(localisedHtml?.includes('Norwegian viz name'), true)
     })
 })
