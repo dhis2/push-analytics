@@ -18,7 +18,7 @@ describe('parseQueryString', () => {
             locale,
         })
     })
-    it('should throw an error if the username is invalid or missing', () => {
+    it('should throw an error if the username parameter is invalid or omitted', () => {
         // Query param was omitted
         assert.throws(
             () => parseQueryString('/?dashboardId=gkhrgyD3Rd4&locale=no', baseUrl),
@@ -43,7 +43,7 @@ describe('parseQueryString', () => {
             }
         )
     })
-    it('should throw an error if the dashboardId is invalid or missing', () => {
+    it('should throw an error if the dashboardId parameter is invalid or omitted', () => {
         // Query param was omitted
         assert.throws(
             () => parseQueryString('/?username=test&locale=no', baseUrl),
@@ -72,29 +72,25 @@ describe('parseQueryString', () => {
             }
         )
     })
-    it('should throw an error if the locale is invalid or missing', () => {
-        // Query param was omitted
+    it('should throw an error if the locale parameter is omitted', () => {
         assert.throws(
             () => parseQueryString('/?dashboardId=gkhrgyD3Rd4&username=admin', baseUrl),
             (error: unknown) => {
                 assert(error instanceof RequestHandlerError)
-                assert.strictEqual(error?.message, 'Invalid locale "undefined"')
+                assert.strictEqual(error?.message, 'Locale is missing')
                 return true
             }
         )
+    })
+    it('should return the default locale if the locale parameter is empty', () => {
+        const dashboardId = 'gkhrgyD3Rd4'
+        const username = 'test'
+        const url = `/?dashboardId=${dashboardId}&username=${username}&locale=`
 
-        // Query param empty
-        assert.throws(
-            () =>
-                parseQueryString(
-                    '/?dashboardId=gkhrgyD3Rd4&username=admin&locale=',
-                    baseUrl
-                ),
-            (error: unknown) => {
-                assert(error instanceof RequestHandlerError)
-                assert.strictEqual(error?.message, 'Invalid locale ""')
-                return true
-            }
-        )
+        assert.deepEqual(parseQueryString(url, baseUrl), {
+            dashboardId,
+            username,
+            locale: 'en',
+        })
     })
 })
