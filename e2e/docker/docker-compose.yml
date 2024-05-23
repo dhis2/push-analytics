@@ -155,7 +155,7 @@ services:
         command: >
             sh -c "npm install npm@latest -g &&
                    npm ci --yes --ignore-scripts --include=dev &&
-                   npx tsc -p ./tsconfig.e2e.json --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --require ts-node/register $(find ./e2e -name '*.e2e.ts')"
+                   npx tsc -p ./tsconfig.e2e.json --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --test-reporter spec --require ts-node/register $(find ./e2e -name '*.e2e.ts')"
         working_dir: /opt/app
         volumes:
             - ../../package.json:/opt/app/package.json
