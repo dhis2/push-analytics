@@ -51,5 +51,7 @@ COPY ./package.json .
 COPY ./package-lock.json .
 # Install production dependencies only, husky hooks skipped by --ignore-scripts
 RUN --mount=type=cache,target=/root/.npm npm ci --yes --verbose --omit=dev --ignore-scripts
-USER node
+# This is problematic: when setting the user we run into issues when awaiting downloaded files
+# But when not setting the user we may introduce a security risk
+# USER node
 CMD node ./dist/index.js
