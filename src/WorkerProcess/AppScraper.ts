@@ -16,6 +16,7 @@ import {
     clearDir,
     downloadPath,
     getDashboardItemVisualization,
+    sanitizeSearchReplaceValue,
     waitForFileToDownload,
 } from './AppScraperUtils'
 import { AppScraperError } from './AppScraperUtils/AppScraperError'
@@ -145,11 +146,13 @@ export class AppScraper implements Converter {
     async #modifyDownloadUrl(config: ParsedScrapeInstructions) {
         const shouldModify =
             config.obtainDownloadArtifact.strategy === 'scrapeDownloadPage' &&
-            config.obtainDownloadArtifact.modifyDownloadUrl
-        const searchValue =
-            config.obtainDownloadArtifact.modifyDownloadUrl?.searchValue ?? ''
-        const replaceValue =
-            config.obtainDownloadArtifact.modifyDownloadUrl?.replaceValue ?? ''
+            !!config.obtainDownloadArtifact.modifyDownloadUrl
+        const searchValue = sanitizeSearchReplaceValue(
+            config.obtainDownloadArtifact.modifyDownloadUrl?.searchValue
+        )
+        const replaceValue = sanitizeSearchReplaceValue(
+            config.obtainDownloadArtifact.modifyDownloadUrl?.replaceValue
+        )
         const stringifiedRegexObj = JSON.stringify({
             flags: DONWLOAD_PAGE_URL_PATTERN.flags,
             source: DONWLOAD_PAGE_URL_PATTERN.source,
