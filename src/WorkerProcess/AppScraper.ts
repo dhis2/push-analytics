@@ -25,6 +25,7 @@ import {
     insertIntoImageTemplate,
     parseResponseDataToTable,
 } from './htmlTemplates'
+// import { logPageEvents } from './AppScraperUtils'
 
 const DONWLOAD_PAGE_URL_PATTERN =
     /api\/analytics\/enrollments|events\/query\/[a-zA-Z0-9]{11}\.html\+css/
@@ -50,6 +51,11 @@ export class AppScraper implements Converter {
         this.#currentRequestUrlGlob = ''
         this.#interceptedResponseHtml = null
         page.on('response', this.#interceptResponse.bind(this))
+        /* Enable this for debugging browser events in a headless browser.
+         * For debugging issues that happen in the browser context it is
+         * usually more convenient to switch Puppeteer to headed mode, but
+         * for cases where this is not possible, the function below can help. */
+        // logPageEvents(page)
     }
 
     static async create(baseUrl: string, browser: Browser) {
