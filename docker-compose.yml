@@ -12,8 +12,8 @@ services:
             mynetwork:
                 ipv4_address: 172.26.0.6
         volumes:
-            - ./dhis.conf:/opt/dhis2/dhis.conf:ro
-            - ./log4j2.xml:/opt/dhis2/log4j2.xml:ro
+            - ./docker/dhis.conf:/opt/dhis2/dhis.conf:ro
+            - ./docker/log4j2.xml:/opt/dhis2/log4j2.xml:ro
         environment:
             DHIS2_IMAGE: ${DHIS2_IMAGE}
             JAVA_OPTS:
@@ -42,7 +42,7 @@ services:
             mynetwork:
                 ipv4_address: 172.26.0.7
         volumes:
-            - ./db-dump:/docker-entrypoint-initdb.d/
+            - ./docker/db-dump:/docker-entrypoint-initdb.d/
         environment:
             POSTGRES_USER: dhis
             POSTGRES_DB: dhis
@@ -69,7 +69,7 @@ services:
             - DHIS2_DB_DUMP_URL=${DHIS2_DB_DUMP_URL}
         working_dir: /opt/dump
         volumes:
-            - ./db-dump:/opt/dump
+            - ./docker/db-dump:/opt/dump
         networks:
             mynetwork:
                 ipv4_address: 172.26.0.8
@@ -99,7 +99,7 @@ services:
             - USERNAME=admin
             - PASSWORD=district
         volumes:
-            - ./scripts:/opt/scripts
+            - ./docker/scripts:/opt/scripts
         working_dir: /opt/scripts
         command: >
             sh -c "apk update --no-cache &&
@@ -158,11 +158,11 @@ services:
                    npx tsc -p ./tsconfig.e2e.json --noEmit && TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node --test --test-reporter spec --require ts-node/register $(find ./e2e -name '*.e2e.ts')"
         working_dir: /opt/app
         volumes:
-            - ../../package.json:/opt/app/package.json
-            - ../../package-lock.json:/opt/app/package-lock.json
-            - ../../tsconfig.json:/opt/app/tsconfig.json
-            - ../../tsconfig.e2e.json:/opt/app/tsconfig.e2e.json
-            - ../:/opt/app/e2e
+            - ./package.json:/opt/app/package.json
+            - ./package-lock.json:/opt/app/package-lock.json
+            - ./tsconfig.json:/opt/app/tsconfig.json
+            - ./tsconfig.e2e.json:/opt/app/tsconfig.e2e.json
+            - ./e2e:/opt/app/e2e
 
 volumes:
     db-dump:

@@ -27,7 +27,7 @@ RUN apk upgrade --no-cache --available \
     --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
     font-wqy-zenhei font-ipa font-terminus font-inconsolata font-dejavu font-noto font-noto-cjk font-noto-extra
 
-COPY e2e/docker/browserfonts.conf /etc/fonts/local.conf
+COPY docker/browserfonts.conf /etc/fonts/local.conf
 
 # Add Chrome as a user
 RUN mkdir -p /usr/src/app \

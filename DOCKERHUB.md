@@ -54,7 +54,7 @@ over the DevTools Protocol. Because of this the image consists of the following 
 The easiest way to get familiar with the Push Analytics Service is to start running it locally using [Docker
 Compose](https://docs.docker.com/compose/install/). As mentioned before, the Push Analytics Service
 is meant to be deployed alongside a DHIS2 Core instance, so it makes sense to add both as a service in a
-Docker Compose file. An [example for a fully functioning setup](https://github.com/dhis2/push-analytics/blob/master/e2e/docker-compose.yml)
+Docker Compose file. An [example for a fully functioning setup](https://github.com/dhis2/push-analytics/blob/master/docker-compose.yml)
 can be found in the `e2e` dir of the repo.
 
 It is advisable to create a `.env` file (and add this to `.gitignore`) to populate all the required environment
