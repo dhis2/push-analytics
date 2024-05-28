@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # Clear previous builds
 rm -rf ./dist && mkdir ./dist && mkdir ./dist/images
