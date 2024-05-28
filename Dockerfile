@@ -7,7 +7,7 @@
 # `with-node/Dockerfile` and `with-puppeteer/Dockerfile` found on
 # https://github.com/Zenika/alpine-chrome
 
-FROM alpine:latest as base
+FROM alpine:3.20 as base
 
 # Installs latest Chromium package.
 RUN apk upgrade --no-cache --available \
@@ -22,8 +22,8 @@ RUN apk upgrade --no-cache --available \
     nodejs \
     npm \
     ttf-freefont \
-    font-noto-emoji
-RUN apk add --no-cache \
+    font-noto-emoji \
+    && apk add --no-cache \
     --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
     font-wqy-zenhei font-ipa font-terminus font-inconsolata font-dejavu font-noto font-noto-cjk font-noto-extra
 
@@ -38,11 +38,11 @@ RUN mkdir -p /usr/src/app \
 USER chrome
 WORKDIR /usr/src/app
 
-ENV CHROME_BIN=/usr/bin/chromium-browser
-ENV CHROME_PATH=/usr/lib/chromium/
-ENV CHROMIUM_FLAGS="--disable-software-rasterizer --disable-dev-shm-usage"
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV CHROME_BIN=/usr/bin/chromium-browser \
+    CHROME_PATH=/usr/lib/chromium/ \
+    CHROMIUM_FLAGS="--disable-software-rasterizer --disable-dev-shm-usage" \
+    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1 \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 ENTRYPOINT ["tini", "--"]
 
