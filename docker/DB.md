@@ -1,16 +1,3 @@
-# General info
-
-The services below provide a fully functioning environment which can be used for e2e tests
-and demo purposes. There are some noteworthy differences between this file and the default
-DHIS2 Core [docker compose file](https://github.com/dhis2/dhis2-core/blob/master/docker-compose.yml):
-
--   The `dhis.conf` file contains some variables to enable "user impersonation"
--   To ensure the `switch_user_allow_listed_ips` var in `dhis.conf` has an effect a
-    static ipv4 network is used
--   A custom DB dump is used that has some things available needed by push-analytics
--   A fake SMTP server service is added
--   Last but not lease we have the addition of the push-analytics service
-
 # DHIS2 Core DB dump contents
 
 Prior to creating the dump, the following configuration was done to the database:
