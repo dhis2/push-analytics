@@ -43,8 +43,8 @@ The Push Analytics Service uses [Puppeteer](https://pptr.dev/) to convert client
 into static HTML. Puppeteer is a Node.js library which provides a high-level API to control Chrome/Chromium
 over the DevTools Protocol. Because of this the image consists of the following parts:
 
--   We use the Debian based [Node.js LTS image](https://hub.docker.com/layers/library/node/lts/images/sha256-468ce1d592311c66820e29954d878ba9ce4aa03f9e621a18dca17215c00c5f26) as a starting point
--   Then we install number of libs which are required by Chromium/Puppeteer
+-   We use the Alpine Linux base image (`alpine:3.20`)
+-   Then we install NodeJS, Chromium and a number of libs which are required by Chromium/Puppeteer
 -   And finally we add the compiled app and production dependencies
 
 # How to use this image
@@ -54,11 +54,9 @@ over the DevTools Protocol. Because of this the image consists of the following 
 The easiest way to get familiar with the Push Analytics Service is to start running it locally using [Docker
 Compose](https://docs.docker.com/compose/install/). As mentioned before, the Push Analytics Service
 is meant to be deployed alongside a DHIS2 Core instance, so it makes sense to add both as a service in a
-Docker Compose file. An [example for a fully functioning setup](https://github.com/dhis2/push-analytics/blob/master/docker-compose.yml)
-can be found in the `e2e` dir of the repo.
+Docker Compose file. An [example for a fully functioning setup](https://github.com/dhis2/push-analytics/blob/master/docker-compose.yml) can be found in the root dir of the repo.
 
-It is advisable to create a `.env` file (and add this to `.gitignore`) to populate all the required environment
-variables.
+It is advisable to create a `.env` file (and add this to `.gitignore`) to populate all the required environment variables.
 
 # License
 
