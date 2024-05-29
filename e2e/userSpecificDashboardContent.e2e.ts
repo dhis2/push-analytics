@@ -55,7 +55,7 @@ describe('producing user specific dashboard content', () => {
                 expectedHtml
             )
             console.log(`Actual and expected string are ${similarity * 100}% similar`)
-            assert.strictEqual(similarity > 0.75, true)
+            assert.strictEqual(similarity > 0.8, true)
         })
     }
 
