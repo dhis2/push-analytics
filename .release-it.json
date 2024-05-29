@@ -2,7 +2,7 @@
     "git": {
         "commitMessage": "chore: release v${version}",
         "commitArgs": ["--no-verify"],
-        "requireBranch": ["master", "beta", "alpha", "next"]
+        "requireBranch": ["master", "beta", "alpha"]
     },
     "github": {
         "release": true,
