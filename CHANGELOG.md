@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.0-alpha.5](https://github.com/dhis2/push-analytics/compare/1.0.0-alpha.4...1.0.0-alpha.5) (2024-05-29)
+
+
+### Features
+
+* e2e tests ([#18](https://github.com/dhis2/push-analytics/issues/18)) ([4176289](https://github.com/dhis2/push-analytics/commit/4176289d7c468f797b3e19539c7ac84be7012194))
+
 ## [1.0.0-alpha.4](https://github.com/dhis2/push-analytics/compare/1.0.0-alpha.3...1.0.0-alpha.4) (2024-04-25)
 
 ## [1.0.0-alpha.3](https://github.com/dhis2/push-analytics/compare/1.0.0-alpha.2...1.0.0-alpha.3) (2024-04-25)
