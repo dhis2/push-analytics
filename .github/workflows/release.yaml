@@ -40,6 +40,13 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  token: ${{secrets.DHIS2_BOT_GITHUB_TOKEN}}
+            - name: Initialize Git user
+              run: |
+                  git config --global user.name "@dhis2-bot"
+                  git config --global user.email "apps@dhis2.org"
             - name: Setup NodeJS
               uses: actions/setup-node@v4
               with:
@@ -47,10 +54,7 @@ jobs:
                   cache: 'npm'
             - name: Install dependencies
               run: npm ci --include=dev
-            - name: Initialize Git user
-              run: |
-                  git config --global user.name "@dhis2-bot"
-                  git config --global user.email "apps@dhis2.org"
+
             - name: Compute pre release flag
               id: extract_pre_release_flag
               run: |
