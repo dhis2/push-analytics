@@ -2,20 +2,20 @@ import assert from 'node:assert'
 import cluster from 'node:cluster'
 import { after, before, describe, test } from 'node:test'
 import request from 'supertest'
-import type { DashboardFixture } from './utils'
-import {
-    initializeMockCluster,
-    getDashboardFixturesArray,
-    getHttpServer,
-    awaitMessageCount,
-} from './utils'
 import type {
     PrimaryProcessEmittedMessage,
     WorkerProcessEmittedMessage,
 } from '../../types'
+import type { DashboardFixture } from './utils'
+import {
+    awaitMessageCount,
+    getDashboardFixturesArray,
+    getHttpServer,
+    initializeMockCluster,
+} from './utils'
 import { tearDownCluster } from './utils/tearDownCluster'
 
-describe('An error on the dashboard request', { concurrency: 1 }, async () => {
+describe('An error on the dashboard request', { concurrency: 1 }, () => {
     const dashboardFixtures: DashboardFixture[] = getDashboardFixturesArray()
 
     before(async () => {
@@ -50,7 +50,7 @@ describe('An error on the dashboard request', { concurrency: 1 }, async () => {
                 messagesFromWorkers.push(message)
             })
             const response = await request(getHttpServer()).get(
-                `/?dashboardId=${dashboardId}&username=admin`
+                `/?dashboardId=${dashboardId}&username=admin&locale=en`
             )
 
             assert.strictEqual(messagesFromWorkers.length, 0)

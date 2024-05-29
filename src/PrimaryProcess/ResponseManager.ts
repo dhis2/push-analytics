@@ -10,6 +10,7 @@ import type {
     PushAnalyticsEnvVariables,
 } from '../types'
 import { HtmlCollector } from './HtmlCollector'
+import { debugLog } from '../debugLog'
 
 class ResponseManagerError extends PushAnalyticsError {
     constructor(
@@ -97,6 +98,10 @@ export class ResponseManager {
         itemsHtmlCollection.clearConversionTimeout()
         this.#responseQueue.delete(requestId)
 
+        debugLog(
+            `Dashboard converted successfully for request ID "${requestId}" - sending converted dashboard HTML`
+        )
+
         response.writeHead(200)
         response.end(fullHtml)
     }
@@ -109,6 +114,10 @@ export class ResponseManager {
          * being processed simultanuiously. */
         if (queueItem) {
             const { httpStatusCode, message } = parseError(error)
+
+            debugLog(
+                `Dashboard failed to convert for request ID "${requestId}" - sending error message "${message}"`
+            )
 
             this.#responseQueue.delete(requestId)
             queueItem.response.writeHead(httpStatusCode)

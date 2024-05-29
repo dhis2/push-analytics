@@ -3,6 +3,7 @@ import type { Worker } from 'node:cluster'
 import cluster from 'node:cluster'
 import { availableParallelism } from 'node:os'
 import { PushAnalyticsError } from '../Error'
+import { debugLog } from '../debugLog'
 import type {
     AddDashboardOptions,
     ConversionErrorPayload,
@@ -54,7 +55,7 @@ export class PrimaryProcess {
         this.#initializeWorkers()
     }
 
-    #handleWorkerExit(worker: Worker) {
+    #handleWorkerExit(worker: Worker, code: number, signal: string) {
         /* Technically it would be possible to handle this
          * in a much more sophisticated way. We could find out if the worker
          * was busy doing a conversion and then we could either retry that
@@ -66,6 +67,9 @@ export class PrimaryProcess {
          * for a long time. So we just go with this simple but quite drastic
          * approach of sending error responses to all pending requests and
          * and clearing the dashboard item queue. */
+        debugLog(
+            `Worker with PID "${worker.process.pid}" died with code "${code}" and signal "${signal}"). Clearing the queue`
+        )
         this.#workerExitLog.push(Date.now())
         const hasFrequentExits = this.#hasFrequentExits()
         this.#dashboardItemsQueue.clearQueue()
@@ -88,7 +92,10 @@ export class PrimaryProcess {
             process.exit(0)
         } else {
             // Start another worker to replace the dead one
-            cluster.fork()
+            const newWorker = cluster.fork()
+            debugLog(
+                `New worker with PID "${newWorker.process.pid}" will replace old worker with PID ${worker.process.pid}`
+            )
         }
     }
 
@@ -98,6 +105,7 @@ export class PrimaryProcess {
             this.#dashboardItemsQueue.hasQueuedItems()
                 ? this.#dashboardItemsQueue.takeItemFromQueue()
                 : undefined
+
         this.#messageHandler.sendQueueItemToWorker(workerId, queueItem)
     }
 
@@ -109,7 +117,9 @@ export class PrimaryProcess {
             dashboardItemId,
             converterResult
         )
+        debugLog('Queue item converted', convertedItem)
         if (this.#responseManager.isConversionComplete(requestId)) {
+            debugLog('Dashboard conversion complete', convertedItem)
             this.#responseManager.sendSuccessResponse(requestId)
         }
     }
@@ -124,6 +134,7 @@ export class PrimaryProcess {
             httpResponseStatusCode,
             errorName
         )
+        debugLog('Queue item conversion failed', conversionErrorPayload)
         this.#dashboardItemsQueue.removeItemsByRequestId(requestId)
         this.#responseManager.sendErrorResponse(requestId, error)
     }
@@ -132,6 +143,7 @@ export class PrimaryProcess {
         const onConversionTimeout = () => {
             this.#handleConversionTimeout(details.requestId)
         }
+        debugLog('Received dashboard details', details)
         this.#responseManager.addDashboard(details, onConversionTimeout)
         this.#dashboardItemsQueue.addItemsToQueue(details)
         this.#messageHandler.notifyWorkersAboutAddedDashboardItems()
