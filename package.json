@@ -8,6 +8,7 @@
     "private": true,
     "scripts": {
         "prepare": "husky",
+        "release": "release-it",
         "build:compile": "./scripts/build.sh",
         "build:compress": "./scripts/compress.sh",
         "build": "npm run build:compile && npm run build:compress",
