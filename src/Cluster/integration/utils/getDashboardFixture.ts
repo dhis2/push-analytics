@@ -1,7 +1,7 @@
+import type { Dashboard } from '../../../types'
 import iMnYyBfSxmM from '../fixtures/dashboards/iMnYyBfSxmM.json'
 import nghVC4wtyzi from '../fixtures/dashboards/nghVC4wtyzi.json'
 import rmPiJIPFL4U from '../fixtures/dashboards/rmPiJIPFL4U.json'
-import type { Dashboard } from '../../../types'
 
 export type DashboardFixture = Dashboard & { id: string }
 

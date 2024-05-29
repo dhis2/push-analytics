@@ -22,7 +22,7 @@ function checkFile(dir: string) {
 }
 
 export async function waitForFileToDownload(dir: string): Promise<string> {
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
         let tries = 0
         let fileName = checkFile(dir)
         if (fileName) {

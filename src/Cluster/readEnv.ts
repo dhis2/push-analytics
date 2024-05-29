@@ -1,5 +1,10 @@
 import cluster from 'node:cluster'
-import type { EnvVariableName, NodeEnvContext, PushAnalyticsEnvVariables } from '../types'
+import type {
+    EnvVariableName,
+    LogLevel,
+    NodeEnvContext,
+    PushAnalyticsEnvVariables,
+} from '../types'
 
 const envVariableDefaults: Record<EnvVariableName, string> = {
     HOST: 'localhost',
@@ -11,9 +16,10 @@ const envVariableDefaults: Record<EnvVariableName, string> = {
     MAX_THREADS: '4',
     DHIS2_CORE_SESSION_TIMEOUT: '3600',
     NODE_ENV: 'production',
+    LOG_LEVEL: 'off',
 }
 
-function readEnvVariable(name: EnvVariableName): string | NodeEnvContext {
+function readEnvVariable(name: EnvVariableName): string | NodeEnvContext | LogLevel {
     if (process.env[name]) {
         return process.env[name] ?? ''
     } else {
@@ -37,5 +43,6 @@ export function readEnv(): PushAnalyticsEnvVariables {
         maxThreads: readEnvVariable('MAX_THREADS'),
         sessionTimeout: readEnvVariable('DHIS2_CORE_SESSION_TIMEOUT'),
         nodeEnv: readEnvVariable('NODE_ENV') as NodeEnvContext,
+        logLevel: readEnvVariable('LOG_LEVEL') as LogLevel,
     }
 }

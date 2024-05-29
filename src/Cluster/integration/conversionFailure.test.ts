@@ -1,27 +1,27 @@
 import assert from 'node:assert'
 import cluster from 'node:cluster'
-import { after, before, describe, test, mock } from 'node:test'
+import { after, before, describe, mock, test } from 'node:test'
 import request from 'supertest'
-import type { DashboardFixture } from './utils'
-import {
-    awaitMessageCount,
-    initializeMockCluster,
-    getDashboardFixturesArray,
-    getHttpServer,
-    getOutputFixture,
-    getDashboardFixture,
-    MockDashboardItemConverter,
-    convertSuccessFn,
-} from './utils'
+import { AppScraperError } from '../../WorkerProcess/AppScraperUtils/AppScraperError'
 import type {
     PrimaryProcessEmittedMessage,
     QueueItem,
     WorkerProcessEmittedMessage,
 } from '../../types'
+import type { DashboardFixture } from './utils'
+import {
+    MockDashboardItemConverter,
+    awaitMessageCount,
+    convertSuccessFn,
+    getDashboardFixture,
+    getDashboardFixturesArray,
+    getHttpServer,
+    getOutputFixture,
+    initializeMockCluster,
+} from './utils'
 import { tearDownCluster } from './utils/tearDownCluster'
-import { AppScraperError } from '../../WorkerProcess/AppScraperUtils/AppScraperError'
 
-describe('Conversion error', { concurrency: 1 }, async () => {
+describe('Conversion error', { concurrency: 1 }, () => {
     const dashboardFixtures: DashboardFixture[] = getDashboardFixturesArray()
 
     before(async () => {
@@ -65,13 +65,13 @@ describe('Conversion error', { concurrency: 1 }, async () => {
             // Note the `Promise.all`, the requests are issued in parallel
             const [response1, response2, response3] = await Promise.all([
                 request(getHttpServer()).get(
-                    `/?dashboardId=${dashboardId1}&username=admin`
+                    `/?dashboardId=${dashboardId1}&username=admin&locale=en`
                 ),
                 request(getHttpServer()).get(
-                    `/?dashboardId=${dashboardId2}&username=admin`
+                    `/?dashboardId=${dashboardId2}&username=admin&locale=en`
                 ),
                 request(getHttpServer()).get(
-                    `/?dashboardId=${dashboardId3}&username=admin`
+                    `/?dashboardId=${dashboardId3}&username=admin&locale=en`
                 ),
             ])
             const itemConvertedMessages = messagesFromWorkers.filter(

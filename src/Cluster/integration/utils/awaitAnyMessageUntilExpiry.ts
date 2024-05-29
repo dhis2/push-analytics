@@ -3,7 +3,7 @@ import type { PrimaryProcessEmittedMessage } from '../../../types'
 export async function awaitAnyMessageUntilExpiry(
     expiry: number
 ): Promise<PrimaryProcessEmittedMessage | null> {
-    return new Promise((resolve) => {
+    return await new Promise((resolve) => {
         const timeout = setTimeout(() => {
             resolve(null)
         }, expiry)

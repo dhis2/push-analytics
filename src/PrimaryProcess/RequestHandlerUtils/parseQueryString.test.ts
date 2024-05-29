@@ -1,7 +1,7 @@
+import assert from 'node:assert'
+import { describe, it } from 'node:test'
 import { RequestHandlerError } from './RequestHandlerError'
 import { parseQueryString } from './parseQueryString'
-import { describe, it } from 'node:test'
-import assert from 'node:assert'
 
 describe('parseQueryString', () => {
     const baseUrl = 'http://www.example.com'
@@ -9,14 +9,19 @@ describe('parseQueryString', () => {
     it('should return the dashboardId and username if the URL is valid', () => {
         const dashboardId = 'gkhrgyD3Rd4'
         const username = 'test'
-        const url = `/?dashboardId=${dashboardId}&username=${username}`
+        const locale = 'no'
+        const url = `/?dashboardId=${dashboardId}&username=${username}&locale=${locale}`
 
-        assert.deepEqual(parseQueryString(url, baseUrl), { dashboardId, username })
+        assert.deepEqual(parseQueryString(url, baseUrl), {
+            dashboardId,
+            username,
+            locale,
+        })
     })
-    it('should throw an error if the username is invalid or missing', () => {
+    it('should throw an error if the username parameter is invalid or omitted', () => {
         // Query param was omitted
         assert.throws(
-            () => parseQueryString('/?dashboardId=gkhrgyD3Rd4', baseUrl),
+            () => parseQueryString('/?dashboardId=gkhrgyD3Rd4&locale=no', baseUrl),
             (error: unknown) => {
                 assert(error instanceof RequestHandlerError)
                 assert.strictEqual(error?.message, 'Invalid username "undefined"')
@@ -26,7 +31,11 @@ describe('parseQueryString', () => {
 
         // Query param empty
         assert.throws(
-            () => parseQueryString('/?dashboardId=gkhrgyD3Rd4&username=', baseUrl),
+            () =>
+                parseQueryString(
+                    '/?dashboardId=gkhrgyD3Rd4&username=&locale=no',
+                    baseUrl
+                ),
             (error: unknown) => {
                 assert(error instanceof RequestHandlerError)
                 assert.strictEqual(error?.message, 'Invalid username ""')
@@ -34,10 +43,10 @@ describe('parseQueryString', () => {
             }
         )
     })
-    it('should throw an error if the dashboardId is invalid or missing', () => {
+    it('should throw an error if the dashboardId parameter is invalid or omitted', () => {
         // Query param was omitted
         assert.throws(
-            () => parseQueryString('/?username=test', baseUrl),
+            () => parseQueryString('/?username=test&locale=no', baseUrl),
             (error: unknown) => {
                 assert(error instanceof RequestHandlerError)
                 assert.strictEqual(error?.message, 'Invalid dashhboard UID "undefined"')
@@ -48,7 +57,11 @@ describe('parseQueryString', () => {
         // Query param invalid
         const invalidId = 'INVALID_ID'
         assert.throws(
-            () => parseQueryString(`/?dashboardId=${invalidId}&username=test`, baseUrl),
+            () =>
+                parseQueryString(
+                    `/?dashboardId=${invalidId}&username=test&locale=no`,
+                    baseUrl
+                ),
             (error: unknown) => {
                 assert(error instanceof RequestHandlerError)
                 assert.strictEqual(
@@ -58,5 +71,26 @@ describe('parseQueryString', () => {
                 return true
             }
         )
+    })
+    it('should throw an error if the locale parameter is omitted', () => {
+        assert.throws(
+            () => parseQueryString('/?dashboardId=gkhrgyD3Rd4&username=admin', baseUrl),
+            (error: unknown) => {
+                assert(error instanceof RequestHandlerError)
+                assert.strictEqual(error?.message, 'Locale is missing')
+                return true
+            }
+        )
+    })
+    it('should return the default locale if the locale parameter is empty', () => {
+        const dashboardId = 'gkhrgyD3Rd4'
+        const username = 'test'
+        const url = `/?dashboardId=${dashboardId}&username=${username}&locale=`
+
+        assert.deepEqual(parseQueryString(url, baseUrl), {
+            dashboardId,
+            username,
+            locale: 'en',
+        })
     })
 })

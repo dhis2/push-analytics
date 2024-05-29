@@ -1,5 +1,6 @@
 import http from 'node:http'
 import type { PrimaryProcess } from '../PrimaryProcess'
+import { debugLog } from '../debugLog'
 import type { PushAnalyticsEnvVariables } from '../types'
 
 export function createHttpServer(
@@ -9,10 +10,8 @@ export function createHttpServer(
     return http
         .createServer(primaryProcess.requestListener)
         .listen(env.port, parseInt(env.host), () => {
-            if (env.nodeEnv !== 'testing') {
-                console.log(
-                    `DHIS2 Push Analytics Service is running on http://${env.host}:${env.port}`
-                )
-            }
+            debugLog(
+                `DHIS2 Push Analytics Service is running on http://${env.host}:${env.port}`
+            )
         })
 }

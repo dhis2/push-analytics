@@ -1,11 +1,9 @@
 name: Verify Push Analytics Service
 
 on:
-    push:
-        branches: ['master']
     pull_request:
-        types: ['opened', 'edited', 'reopened', 'synchronize']
-        branches: ['master']
+        types: ['opened', 'edited', 'reopened', 'synchronize', 'labeled']
+        branches: ['master', 'beta', 'next', 'alpha']
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -29,4 +27,28 @@ jobs:
             - name: Lint code
               run: npm run lint
             - name: Run tests
-              run: npm run test
+              run: npm run test:unit
+
+    e2e:
+        runs-on: ubuntu-latest
+        if: contains(github.event.pull_request.labels.*.name, 'e2e')
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v4
+            - name: Setup Docker BuildX
+              uses: docker/setup-buildx-action@v3
+            - name: Build local Docker image
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  file: ./Dockerfile
+                  push: false
+                  load: true
+                  tags: dhis2/push-analytics:local
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
+            - name: Spin up the E2E environment
+              # Fake SMTP is not needed for the e2e tests
+              run: docker compose --env-file ./.env.e2e up -d web db db-dump post-install-scripts push-analytics
+            - name: Run the e2e test suite
+              run: docker compose --env-file ./.env.e2e up --abort-on-container-exit --exit-code-from e2e e2e
