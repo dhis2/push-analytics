@@ -8,7 +8,7 @@ import { waitMs } from './waitMs'
  * anymore. So we keep the 0ms delay mainly for that reason
  * but it is also convenient for the one test that does
  * need a longer delay. */
-export async function tearDownCluster(delay: number = 0) {
+export async function tearDownCluster(delay: number = 150) {
     await waitMs(delay)
 
     if (cluster.isPrimary) {
