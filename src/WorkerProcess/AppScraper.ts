@@ -277,8 +277,11 @@ export class AppScraper implements Converter {
         )
 
         return {
-            html: insertIntoDivTemplate(rawHtml ?? '', name),
-            css: css ?? '',
+            html: insertIntoDivTemplate(
+                (rawHtml ?? '').replace(/ {4}|[\t\n\r]/gm, ''),
+                name
+            ),
+            css: (css ?? '').replace(/ {4}|[\t\n\r]/gm, ''),
         }
     }
 

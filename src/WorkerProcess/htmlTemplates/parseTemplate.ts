@@ -1,13 +1,8 @@
 type Interpolator = Record<string, string>
 
-const containerTemplate = `
-<div class="dashboard-item">
-    <div class="dashboard-item-inner">{{content}}</div>
-</div>
-`
-const headertemplate = `
-<h2 class="dashboard-item-header">{{name}}</h2>
-`
+const containerTemplate =
+    '<div class="dashboard-item"><div class="dashboard-item-inner">{{content}}</div></div>'
+const headertemplate = '<h2 class="dashboard-item-header">{{name}}</h2>'
 
 const trimNewlines = (str: string) => str.replace(/\n^/, '').replace(/\n$/, '')
 
