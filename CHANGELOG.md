@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.0-alpha.7](https://github.com/dhis2/push-analytics/compare/1.0.0-alpha.6...1.0.0-alpha.7) (2024-06-06)
+
+
+### Bug Fixes
+
+* address style issues in outlook email client ([7513bf4](https://github.com/dhis2/push-analytics/commit/7513bf439a122930f3af9a74ba3b795423d1166c))
+
 ## [1.0.0-alpha.6](https://github.com/dhis2/push-analytics/compare/1.0.0-alpha.5...1.0.0-alpha.6) (2024-05-30)
 
 ## [1.0.0-alpha.5](https://github.com/dhis2/push-analytics/compare/1.0.0-alpha.4...1.0.0-alpha.5) (2024-05-29)
