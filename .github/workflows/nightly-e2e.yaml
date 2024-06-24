@@ -1,0 +1,22 @@
+name: Nightly regression e2e test
+
+on:
+    workflow_dispatch:
+    schedule:
+        - cron: '20 5 * * 1-5'
+
+env:
+    DHIS2_IMAGE: 'dhis2/core-dev:latest'
+    PUSH_ANALYTICS_IMAGE: 'dhis2/push-analytics:1.0.0-alpha.7'
+
+jobs:
+    e2e:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v4
+            - name: Spin up the E2E environment
+              # Fake SMTP is not needed for the e2e tests
+              run: docker compose --env-file ./.env.e2e up -d web db db-dump post-install-scripts push-analytics
+            - name: Run the e2e test suite
+              run: docker compose --env-file ./.env.e2e up --abort-on-container-exit --exit-code-from e2e e2e
