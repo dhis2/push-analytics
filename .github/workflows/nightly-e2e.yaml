@@ -4,6 +4,9 @@ on:
     schedule:
         # mon-fri at 5:30 AM
         - cron: '30 5 * * 1-5'
+    pull_request:
+        types: ['opened', 'edited', 'reopened', 'synchronize', 'labeled']
+        branches: ['master', 'beta', 'next', 'alpha']
 
 env:
     DHIS2_IMAGE: 'dhis2/core-dev:2.41'
