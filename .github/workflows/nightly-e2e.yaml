@@ -10,7 +10,7 @@ on:
 
 env:
     DHIS2_IMAGE: 'dhis2/core-dev:2.41'
-    PUSH_ANALYTICS_IMAGE: 'dhis2/push-analytics:local'
+    PUSH_ANALYTICS_IMAGE: 'dhis2/push-analytics:1.0.0-alpha.8'
 
 jobs:
     nightly-e2e:
@@ -18,18 +18,18 @@ jobs:
         steps:
             - name: Checkout repo
               uses: actions/checkout@v4
-            - name: Setup Docker BuildX
-              uses: docker/setup-buildx-action@v3
-            - name: Build local Docker image
-              uses: docker/build-push-action@v5
-              with:
-                  context: .
-                  file: ./Dockerfile
-                  push: false
-                  load: true
-                  tags: dhis2/push-analytics:local
-                  cache-from: type=gha
-                  cache-to: type=gha,mode=max
+            # - name: Setup Docker BuildX
+            #   uses: docker/setup-buildx-action@v3
+            # - name: Build local Docker image
+            #   uses: docker/build-push-action@v5
+            #   with:
+            #       context: .
+            #       file: ./Dockerfile
+            #       push: false
+            #       load: true
+            #       tags: dhis2/push-analytics:local
+            #       cache-from: type=gha
+            #       cache-to: type=gha,mode=max
             - name: Spin up the E2E environment
               # Fake SMTP is not needed for the e2e tests
               run: docker compose --env-file ./.env.e2e up -d web db db-dump post-install-scripts push-analytics
