@@ -1,5 +1,4 @@
-#!/bin/sh
-set -euxo pipefail
+#!/bin/bash
 
 CREDENTIALS="$USERNAME:$PASSWORD"
 # Only skip tracked entities because we need outlier tables and the rest
