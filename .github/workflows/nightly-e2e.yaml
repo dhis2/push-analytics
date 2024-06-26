@@ -1,0 +1,40 @@
+name: Nightly regression e2e test
+
+on:
+    schedule:
+        # mon-fri at 5:30 AM
+        - cron: '30 5 * * 1-5'
+
+env:
+    DHIS2_IMAGE: 'dhis2/core-dev:2.41'
+    # TODO: replace with 'dhis2/push-analytics:latest' once available
+    PUSH_ANALYTICS_IMAGE: 'dhis2/push-analytics:1.0.0-alpha.8'
+    APPS_TO_INSTALL: 'Line Listing, Maps, Data Visualizer, Dashboard'
+
+jobs:
+    nightly-e2e:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v4
+            - name: Spin up the E2E environment
+              # Fake SMTP is not needed for the e2e tests
+              run: docker compose --env-file ./.env.e2e up -d web db db-dump post-install-scripts push-analytics
+            - name: List running Docker images
+              run: docker ps --format '{{.Image}}'
+            - name: Run the e2e test suite
+              run: docker compose --env-file ./.env.e2e up --abort-on-container-exit --exit-code-from e2e e2e
+
+    send-slack-message:
+        runs-on: ubuntu-latest
+        if: |
+            failure() &&
+            !cancelled()
+        needs: [nightly-e2e]
+        steps:
+            - uses: rtCamp/action-slack-notify@v2
+              env:
+                  SLACK_WEBHOOK: ${{ secrets.SLACK_BACKEND_WEBHOOK }}
+                  SLACK_CHANNEL: 'analytics-internal-bot'
+                  SLACK_MESSAGE: 'Push Analytics Nightly E2E run failed and needs investigation ::female-detective:.'
+                  SLACK_COLOR: '#ff0000'

@@ -98,13 +98,14 @@ services:
             - BASE_URL=${DHIS2_CORE_URL}
             - USERNAME=admin
             - PASSWORD=district
+            - APPS_TO_INSTALL='${APPS_TO_INSTALL:-Line Listing}'
         volumes:
             - ./docker/scripts:/opt/scripts
         working_dir: /opt/scripts
         command: >
             sh -c "apk update --no-cache &&
-                   apk add --no-cache curl jq &&
-                   ./install_line_listing_app.sh &&
+                   apk add --no-cache bash curl jq &&
+                   ./install_apps_from_app_hub.sh &&
                    ./generate_analytics_tables.sh"
         networks:
             mynetwork:
