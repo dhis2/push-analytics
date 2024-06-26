@@ -2,8 +2,10 @@
 
 function split_on_commas() {
     local IFS=,
-    # strip leading and trailing " before splitting
+    # strip " before splitting
     local WORD_LIST=(${1//\"/})
+    # strip ' before splitting
+    WORD_LIST=(${WORD_LIST//\'/})
     for word in "${WORD_LIST[@]}"; do
         echo "$word"
     done
