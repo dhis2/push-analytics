@@ -1,4 +1,4 @@
 {
     "extends": "./tsconfig",
-    "include": [".eslintrc.js", "src/**/*", "e2e/**/*.e2e.ts"]
+    "include": ["eslint.config.js", "prettierrc.js", "src/**/*", "e2e/**/*.e2e.ts"]
 }
