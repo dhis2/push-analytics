@@ -6,7 +6,7 @@ on:
         - cron: '30 5 * * 1-5'
 
 env:
-    DHIS2_IMAGE: 'dhis2/core-dev:2.41'
+    DHIS2_IMAGE: 'dhis2/core:2.41'
     # TODO: replace with 'dhis2/push-analytics:latest' once available
     PUSH_ANALYTICS_IMAGE: 'dhis2/push-analytics:1.0.0-alpha.8'
     APPS_TO_INSTALL: 'Line Listing, Maps, Data Visualizer, Dashboard'

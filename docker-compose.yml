@@ -2,7 +2,6 @@ name: push-analytics-e2e
 
 services:
     web:
-        # TODO: switch this to the 41 stable release once available
         image: '${DHIS2_IMAGE:-dhis2/core:41}'
         ports:
             - '127.0.0.1:8080:8080' # DHIS2
