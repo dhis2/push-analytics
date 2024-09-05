@@ -5,3 +5,5 @@ dist
 images
 error-screenshots
 db-dump
+dump.sql.gz
+dump_with_analytics.sql.gz
