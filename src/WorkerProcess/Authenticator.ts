@@ -1,4 +1,4 @@
-import type { Browser, Page, Protocol } from 'puppeteer'
+import type { Browser, Cookie, Page } from 'puppeteer'
 import { PushAnalyticsError } from '../Error'
 import { debugLog } from '../debugLog'
 import type { PushAnalyticsEnvVariables } from '../types'
@@ -23,7 +23,7 @@ export class Authenticator implements IAuthenticator {
     #env: PushAnalyticsEnvVariables
     #page: Page
     #converter: DashboardItemConverter
-    #sessionCookie: Protocol.Network.Cookie | null
+    #sessionCookie: Cookie | null
     #impersonatedUser: string | null
 
     protected constructor(
@@ -57,7 +57,7 @@ export class Authenticator implements IAuthenticator {
                     this.#env.adminUsername
                 }"`
             )
-        } catch (error) {
+        } catch {
             throw new AuthenticationError(
                 'Admin user could not login to the DHIS2 Core instance'
             )
@@ -190,7 +190,7 @@ export class Authenticator implements IAuthenticator {
     async #setSessionCookie() {
         const cookies = await this.#page.cookies()
         const sessionCookie = cookies.find(
-            (cookie: Protocol.Network.Cookie) => cookie.name === 'JSESSIONID'
+            (cookie: Cookie) => cookie.name === 'JSESSIONID'
         )
         if (!sessionCookie) {
             throw new AuthenticationError('Could not find session cookie')

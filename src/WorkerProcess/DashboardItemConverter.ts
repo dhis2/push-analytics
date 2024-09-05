@@ -120,7 +120,7 @@ export class DashboardItemConverter implements IDashboardItemConverter {
             ) {
                 try {
                     await this.#appScraper.takeErrorScreenShot(queueItem)
-                } catch (error) {
+                } catch {
                     /* Note that the error below is swallowed because the service
                      * should not crash when a debug tool fails to work properly */
                     console.log(

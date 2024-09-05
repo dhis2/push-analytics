@@ -109,7 +109,7 @@ export class ScrapeConfigCache implements IScrapeConfigCache {
                 this.#cachedConfigs.set(appPath, instructions)
                 return instructions
             }
-        } catch (error) {
+        } catch {
             throw new ScrapeConfigCacheError(
                 `Could not fetch JSON scrape instructions from ${jsonFileUrl}`
             )

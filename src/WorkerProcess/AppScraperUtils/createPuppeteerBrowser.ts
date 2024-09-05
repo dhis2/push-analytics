@@ -23,7 +23,7 @@ export async function createPuppeteerBrowser(debug: boolean) {
               //   slowMo: 100,
           }
         : {
-              headless: 'new',
+              headless: true,
               defaultViewport,
               args: ['--no-sandbox', '--enable-gpu'],
           }

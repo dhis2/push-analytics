@@ -11,12 +11,12 @@ A service to convert DHIS2 Core Dashboards into static HTML, which can be sent b
 
 ### Prerequisites for the DHIS2 Core Instance
 
--   DHIS2 Core needs to be version 41.1.1 or above to have the Push Analytics job-type available in the job-scheduler. Some analytics-apps also need to be installed and have to be above a certain version, but all apps bundled have with 2.41.1 will have meet this requirement:
-    -   Data Visualizer App `##.##.##` (core app)
-    -   Maps App `##.##.##` (core app)
-    -   Event Charts App `##.##.##` (core app)
-    -   Event Reports App `##.##.##` (core app)
-    -   Line Listing App `##.##.##`. This app can be installed from the app hub and is only required if the instance has line lists on dashboards.
+-   DHIS2 Core needs to be version 41.1 or above to have the Push Analytics job-type available in the job-scheduler. Some analytics-apps also need to be installed and have to be above a certain version, but all apps bundled have with 2.41.1 will have meet this requirement:
+    -   Data Visualizer App `100.6.1` (core app)
+    -   Maps App `100.6.2` (core app)
+    -   Event Visualizer App `33.1.1` (core app)
+    -   Event Reports App `33.2.68` (core app)
+    -   Line Listing App `101.1.0`. This app can be installed from the app hub and is only required if the instance has line lists on dashboards.
 -   The DHIS2 Core Instance needs to have a valid email configuration. Instructions on how to achieve this is out-of-scope for this document.
 -   The instance needs to be configured to allow [user-impersonation](https://docs.dhis2.org/en/manage/performing-system-administration/dhis-core-version-master/debugging-as-another-user.html?h=user+impersonation+master#user_impersonation), which requires some changes to the `dhis.conf` file:
     -   `switch_user_feature.enabled = true`
