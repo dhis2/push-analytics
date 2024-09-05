@@ -1,4 +1,5 @@
 import fs from 'fs'
+import { minimatch } from 'minimatch'
 import path from 'path'
 import type { Browser, CDPSession, HTTPResponse, Page } from 'puppeteer'
 import type {
@@ -15,6 +16,7 @@ import {
     clearDir,
     downloadPath,
     getDashboardItemVisualization,
+    sanitizeSearchReplaceValue,
     waitForFileToDownload,
 } from './AppScraperUtils'
 import { AppScraperError } from './AppScraperUtils/AppScraperError'
@@ -23,7 +25,7 @@ import {
     insertIntoImageTemplate,
     parseResponseDataToTable,
 } from './htmlTemplates'
-import { minimatch } from 'minimatch'
+// import { logPageEvents } from './AppScraperUtils'
 
 const DONWLOAD_PAGE_URL_PATTERN =
     /api\/analytics\/enrollments|events\/query\/[a-zA-Z0-9]{11}\.html\+css/
@@ -49,6 +51,11 @@ export class AppScraper implements Converter {
         this.#currentRequestUrlGlob = ''
         this.#interceptedResponseHtml = null
         page.on('response', this.#interceptResponse.bind(this))
+        /* Enable this for debugging browser events in a headless browser.
+         * For debugging issues that happen in the browser context it is
+         * usually more convenient to switch Puppeteer to headed mode, but
+         * for cases where this is not possible, the function below can help. */
+        // logPageEvents(page)
     }
 
     static async create(baseUrl: string, browser: Browser) {
@@ -96,8 +103,7 @@ export class AppScraper implements Converter {
                 return Promise.resolve({ html: '', css: '' })
             }
             await this.page.bringToFront()
-            await this.#updateRequestUrlGlob(config)
-            await this.#clearVisualization(config)
+            this.#updateRequestUrlGlob(config)
             /* Make sure we download the exported file to `./images/${PID}_${dashboardItemId}`,
              * which allows us to track the download process in a relatively sane way */
             await this.#setDownloadPathToItemId(visualization.id)
@@ -108,13 +114,24 @@ export class AppScraper implements Converter {
                 config,
                 visualization
             )
+            await this.#clearVisualization(config)
 
             return { html, css }
         } catch (error) {
-            const message =
+            let visualizationType = ''
+            try {
+                const visualization = getDashboardItemVisualization(
+                    queueItem.dashboardItem
+                )
+                visualizationType = visualization.type as string
+            } catch {
+                visualizationType = 'UNKNOWN_VIZ_TYPE'
+            }
+            const errorMessage =
                 error instanceof Error
                     ? error.message
                     : 'An unknown conversion error occurred'
+            const message = `[${queueItem.dashboardItem.type} | ${visualizationType}] ${errorMessage}`
             throw new AppScraperError(message)
         }
     }
@@ -135,11 +152,13 @@ export class AppScraper implements Converter {
     async #modifyDownloadUrl(config: ParsedScrapeInstructions) {
         const shouldModify =
             config.obtainDownloadArtifact.strategy === 'scrapeDownloadPage' &&
-            config.obtainDownloadArtifact.modifyDownloadUrl
-        const searchValue =
-            config.obtainDownloadArtifact.modifyDownloadUrl?.searchValue ?? ''
-        const replaceValue =
-            config.obtainDownloadArtifact.modifyDownloadUrl?.replaceValue ?? ''
+            !!config.obtainDownloadArtifact.modifyDownloadUrl
+        const searchValue = sanitizeSearchReplaceValue(
+            config.obtainDownloadArtifact.modifyDownloadUrl?.searchValue
+        )
+        const replaceValue = sanitizeSearchReplaceValue(
+            config.obtainDownloadArtifact.modifyDownloadUrl?.replaceValue
+        )
         const stringifiedRegexObj = JSON.stringify({
             flags: DONWLOAD_PAGE_URL_PATTERN.flags,
             source: DONWLOAD_PAGE_URL_PATTERN.source,
@@ -258,8 +277,11 @@ export class AppScraper implements Converter {
         )
 
         return {
-            html: insertIntoDivTemplate(rawHtml ?? '', name),
-            css: css ?? '',
+            html: insertIntoDivTemplate(
+                (rawHtml ?? '').replace(/ {4}|[\t\n\r]/gm, ''),
+                name
+            ),
+            css: (css ?? '').replace(/ {4}|[\t\n\r]/gm, ''),
         }
     }
 
@@ -331,7 +353,7 @@ export class AppScraper implements Converter {
         })
     }
 
-    async #updateRequestUrlGlob(config: ParsedScrapeInstructions) {
+    #updateRequestUrlGlob(config: ParsedScrapeInstructions) {
         if (config.obtainDownloadArtifact.strategy === 'interceptResponse') {
             this.#currentRequestUrlGlob = config.obtainDownloadArtifact.urlGlob ?? ''
         } else {

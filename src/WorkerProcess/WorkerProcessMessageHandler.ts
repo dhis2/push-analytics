@@ -14,7 +14,7 @@ type OnItemsAddedToQueueFn = () => void
 type OnItemTakenFromQueueFn = (queueItem: QueueItem) => void
 type WorkerProcessMessageHandlerOptions = {
     onItemsAddedToQueue: OnItemsAddedToQueueFn
-    onItemTakenFromQueue: OnItemTakenFromQueueFn
+    onResponseToItemRequest: OnItemTakenFromQueueFn
 }
 
 class WorkerProcessMessageHandlerError extends PushAnalyticsError {
@@ -29,14 +29,14 @@ class WorkerProcessMessageHandlerError extends PushAnalyticsError {
 
 export class WorkerProcessMessageHandler {
     #onItemsAddedToQueue
-    #onItemTakenFromQueue
+    #onResponseToItemRequest
 
     constructor({
         onItemsAddedToQueue,
-        onItemTakenFromQueue,
+        onResponseToItemRequest,
     }: WorkerProcessMessageHandlerOptions) {
         this.#onItemsAddedToQueue = onItemsAddedToQueue
-        this.#onItemTakenFromQueue = onItemTakenFromQueue
+        this.#onResponseToItemRequest = onResponseToItemRequest
         process.on('message', this.#handlePrimaryProcessMessage.bind(this))
     }
 
@@ -84,7 +84,7 @@ export class WorkerProcessMessageHandler {
             case 'ITEMS_ADDED_TO_QUEUE':
                 return this.#onItemsAddedToQueue()
             case 'ITEM_TAKEN_FROM_QUEUE':
-                return this.#onItemTakenFromQueue(message.payload as QueueItem)
+                return this.#onResponseToItemRequest(message.payload as QueueItem)
             default:
                 throw new WorkerProcessMessageHandlerError(
                     'Received unknown message from primary process'

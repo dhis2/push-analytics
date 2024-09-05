@@ -116,11 +116,11 @@ export class DashboardItemConverter implements IDashboardItemConverter {
         } catch (error) {
             if (
                 this.isAppScraperConversion(queueItem) &&
-                this.#env.context === 'development'
+                this.#env.nodeEnv === 'development'
             ) {
                 try {
                     await this.#appScraper.takeErrorScreenShot(queueItem)
-                } catch (error) {
+                } catch {
                     /* Note that the error below is swallowed because the service
                      * should not crash when a debug tool fails to work properly */
                     console.log(

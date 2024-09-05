@@ -1,0 +1,10 @@
+{
+    "extends": "./tsconfig",
+    "include": [
+        "eslint.config.js",
+        ".prettierrc.js",
+        ".commitlintrc.ts",
+        "src/**/*",
+        "e2e/**/*.e2e.ts"
+    ]
+}

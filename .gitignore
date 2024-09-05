@@ -1,6 +1,9 @@
 node_modules
-build
+dist
+# `.env` files may contain sensitive information
 .env
 images
 error-screenshots
-docker/db-dump
+db-dump
+dump.sql.gz
+dump_with_analytics.sql.gz

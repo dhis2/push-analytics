@@ -1,14 +1,18 @@
 import axios from 'axios'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { parseError } from '../Error'
+import { debugLog } from '../debugLog'
 import type { AddDashboardOptions, Dashboard, PushAnalyticsEnvVariables } from '../types'
 import {
     getDashboardFieldsParam,
     parseQueryString,
     validateRequest,
 } from './RequestHandlerUtils'
+import { RequestHandlerError } from './RequestHandlerUtils/RequestHandlerError'
 
-type DashboardDetails = Omit<AddDashboardOptions, 'requestId' | 'response'>
+type DashboardDetails = Omit<AddDashboardOptions, 'requestId' | 'response'> & {
+    locale: string
+}
 
 type RequestHandlerOptions = {
     env: PushAnalyticsEnvVariables
@@ -36,6 +40,10 @@ export class RequestHandler {
 
         try {
             dashboardDetails = await this.#getDashboardDetails(request)
+            const { dashboardId, username, locale } = dashboardDetails
+            debugLog(
+                `Received conversion request for dasboardId "${dashboardId}", username "${username}", and locale "${locale}"`
+            )
         } catch (error) {
             /* Note that this is failing before the dashboard (items)
              * are queued, so we can just send an error from here */
@@ -44,7 +52,7 @@ export class RequestHandler {
             response.end(message)
         }
 
-        if (dashboardDetails) {
+        if (dashboardDetails && dashboardDetails.username !== 'system') {
             this.#onDashboardDetailsReceived({
                 requestId,
                 response,
@@ -53,31 +61,44 @@ export class RequestHandler {
         }
     }
 
-    async #getDashboardDetails(
-        request: IncomingMessage
-    ): Promise<DashboardDetails | undefined> {
+    async #getDashboardDetails(request: IncomingMessage): Promise<DashboardDetails> {
         validateRequest(request, this.#env.baseUrl)
 
-        const { dashboardId, username } = parseQueryString(request.url, this.#env.baseUrl)
-        const { displayName, dashboardItems } = await this.#getDashboard(dashboardId)
+        const { dashboardId, username, locale } = parseQueryString(
+            request.url,
+            this.#env.baseUrl
+        )
+        const { displayName, dashboardItems } = await this.#getDashboard(
+            dashboardId,
+            locale
+        )
         return {
             dashboardId,
             username,
+            locale,
             displayName,
             dashboardItems,
         }
     }
 
-    async #getDashboard(dashboardId: string) {
-        const { apiVersion, baseUrl, adminPassword, adminUsername } = this.#env
-        const url = `${baseUrl}/api/${apiVersion}/dashboards/${dashboardId}`
-        const options = {
-            params: {
-                fields: getDashboardFieldsParam(),
-            },
-            auth: { username: adminUsername, password: adminPassword },
+    async #getDashboard(dashboardId: string, locale: string) {
+        try {
+            const { apiVersion, baseUrl, adminPassword, adminUsername } = this.#env
+            const url = `${baseUrl}/api/${apiVersion}/dashboards/${dashboardId}`
+            const options = {
+                params: {
+                    fields: getDashboardFieldsParam(),
+                    locale,
+                },
+                auth: { username: adminUsername, password: adminPassword },
+            }
+            const result = await axios.get<Dashboard>(url, options)
+            return result.data
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'unknow error'
+            const message = `Could not fetch dashboard details for ID "${dashboardId}", error: ${errorMessage}`
+            debugLog(message)
+            throw new RequestHandlerError(message)
         }
-        const result = await axios.get<Dashboard>(url, options)
-        return result.data
     }
 }

@@ -1,6 +1,8 @@
+import cluster from 'node:cluster'
 import type {
     EnvVariableName,
-    PushAnalyticsContext,
+    LogLevel,
+    NodeEnvContext,
     PushAnalyticsEnvVariables,
 } from '../types'
 
@@ -13,16 +15,19 @@ const envVariableDefaults: Record<EnvVariableName, string> = {
     DHIS2_CORE_ADMIN_PASSWORD: 'district',
     MAX_THREADS: '4',
     DHIS2_CORE_SESSION_TIMEOUT: '3600',
-    CONTEXT: 'production',
+    NODE_ENV: 'production',
+    LOG_LEVEL: 'off',
 }
 
-function readEnvVariable(name: EnvVariableName): string | PushAnalyticsContext {
+function readEnvVariable(name: EnvVariableName): string | NodeEnvContext | LogLevel {
     if (process.env[name]) {
         return process.env[name] ?? ''
     } else {
-        console.log(
-            `Env variable "${name}" not found. Using default value "${envVariableDefaults[name]}" instead`
-        )
+        if (cluster.isPrimary) {
+            console.log(
+                `Env variable "${name}" not found. Using default value "${envVariableDefaults[name]}" instead`
+            )
+        }
         return envVariableDefaults[name]
     }
 }
@@ -37,6 +42,7 @@ export function readEnv(): PushAnalyticsEnvVariables {
         adminPassword: readEnvVariable('DHIS2_CORE_ADMIN_PASSWORD'),
         maxThreads: readEnvVariable('MAX_THREADS'),
         sessionTimeout: readEnvVariable('DHIS2_CORE_SESSION_TIMEOUT'),
-        context: readEnvVariable('CONTEXT') as PushAnalyticsContext,
+        nodeEnv: readEnvVariable('NODE_ENV') as NodeEnvContext,
+        logLevel: readEnvVariable('LOG_LEVEL') as LogLevel,
     }
 }

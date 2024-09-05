@@ -1,8 +1,8 @@
-import { RequestHandlerError } from './RequestHandlerError'
-import { validateRequest } from './validateRequest'
-import { describe, it } from 'node:test'
 import assert from 'node:assert'
 import type { IncomingMessage } from 'node:http'
+import { describe, it } from 'node:test'
+import { RequestHandlerError } from './RequestHandlerError'
+import { validateRequest } from './validateRequest'
 
 describe('validateRequest', () => {
     const baseUrl = 'http://www.example.com'

@@ -3,6 +3,7 @@ import type { Worker } from 'node:cluster'
 import cluster from 'node:cluster'
 import { availableParallelism } from 'node:os'
 import { PushAnalyticsError } from '../Error'
+import { debugLog } from '../debugLog'
 import type {
     AddDashboardOptions,
     ConversionErrorPayload,
@@ -28,6 +29,7 @@ class PrimaryProcessError extends PushAnalyticsError {
 
 export class PrimaryProcess {
     #workerCount: number
+    #workerExitLog: number[]
     #messageHandler: PrimaryProcessMessageHandler
     #dashboardItemsQueue: DashboardItemsQueue
     requestHandler: RequestHandler
@@ -36,6 +38,7 @@ export class PrimaryProcess {
 
     constructor(env: PushAnalyticsEnvVariables) {
         this.#workerCount = this.#computeWorkerCount(env.maxThreads)
+        this.#workerExitLog = []
         this.#messageHandler = new PrimaryProcessMessageHandler({
             onWorkerItemRequest: this.#handleWorkerItemRequest.bind(this),
             onWorkerConversionSuccess: this.#handleWorkerConversionSuccess.bind(this),
@@ -52,7 +55,7 @@ export class PrimaryProcess {
         this.#initializeWorkers()
     }
 
-    #handleWorkerExit(worker: Worker) {
+    #handleWorkerExit(worker: Worker, code: number, signal: string) {
         /* Technically it would be possible to handle this
          * in a much more sophisticated way. We could find out if the worker
          * was busy doing a conversion and then we could either retry that
@@ -64,26 +67,46 @@ export class PrimaryProcess {
          * for a long time. So we just go with this simple but quite drastic
          * approach of sending error responses to all pending requests and
          * and clearing the dashboard item queue. */
+        debugLog(
+            `Worker with PID "${worker.process.pid}" died with code "${code}" and signal "${signal}"). Clearing the queue`
+        )
+        this.#workerExitLog.push(Date.now())
+        const hasFrequentExits = this.#hasFrequentExits()
         this.#dashboardItemsQueue.clearQueue()
+
         for (const requestId of this.#responseManager.getPendingRequestIds()) {
+            const message = hasFrequentExits
+                ? 'Too many workers have crashed, push-analytics-service will terminate'
+                : `Conversion worker with ID "${worker.id}" crashed, need to restart`
             this.#responseManager.sendErrorResponse(
                 requestId,
-                new PrimaryProcessError(
-                    `Conversion worker with ID "${worker.id}" crashed, need to restart`,
-                    'E1102'
-                )
+                new PrimaryProcessError(message, 'E1102')
             )
         }
-        // Start another worker to replace the dead one
-        cluster.fork()
+
+        // Prevent infinite worker-restart loops
+        if (hasFrequentExits) {
+            for (const id in cluster.workers) {
+                cluster.workers[id]?.kill()
+            }
+            process.exit(0)
+        } else {
+            // Start another worker to replace the dead one
+            const newWorker = cluster.fork()
+            debugLog(
+                `New worker with PID "${newWorker.process.pid}" will replace old worker with PID ${worker.process.pid}`
+            )
+        }
     }
 
     #handleWorkerItemRequest(workerId: number) {
-        // Ignore the request if queue is empty
-        if (this.#dashboardItemsQueue.hasQueuedItems()) {
-            const queueItem: QueueItem = this.#dashboardItemsQueue.takeItemFromQueue()
-            this.#messageHandler.sendQueueItemToWorker(workerId, queueItem)
-        }
+        // Awlways reply to the worker, it won't request more work until a reply comes in
+        const queueItem: QueueItem | undefined =
+            this.#dashboardItemsQueue.hasQueuedItems()
+                ? this.#dashboardItemsQueue.takeItemFromQueue()
+                : undefined
+
+        this.#messageHandler.sendQueueItemToWorker(workerId, queueItem)
     }
 
     #handleWorkerConversionSuccess(convertedItem: ConvertedItemPayload) {
@@ -94,7 +117,9 @@ export class PrimaryProcess {
             dashboardItemId,
             converterResult
         )
+        debugLog('Queue item converted', convertedItem)
         if (this.#responseManager.isConversionComplete(requestId)) {
+            debugLog('Dashboard conversion complete', convertedItem)
             this.#responseManager.sendSuccessResponse(requestId)
         }
     }
@@ -109,6 +134,7 @@ export class PrimaryProcess {
             httpResponseStatusCode,
             errorName
         )
+        debugLog('Queue item conversion failed', conversionErrorPayload)
         this.#dashboardItemsQueue.removeItemsByRequestId(requestId)
         this.#responseManager.sendErrorResponse(requestId, error)
     }
@@ -117,6 +143,7 @@ export class PrimaryProcess {
         const onConversionTimeout = () => {
             this.#handleConversionTimeout(details.requestId)
         }
+        debugLog('Received dashboard details', details)
         this.#responseManager.addDashboard(details, onConversionTimeout)
         this.#dashboardItemsQueue.addItemsToQueue(details)
         this.#messageHandler.notifyWorkersAboutAddedDashboardItems()
@@ -151,5 +178,15 @@ export class PrimaryProcess {
         for (let i = 0; i < this.#workerCount; i++) {
             cluster.fork()
         }
+    }
+
+    #hasFrequentExits() {
+        const lasTimestamp = this.#workerExitLog[this.#workerExitLog.length - 1]
+        const tenMinutesAgoTimestamp = lasTimestamp - 10 * 60 * 1000
+        return (
+            this.#workerExitLog.filter(
+                (exitTimestamp) => exitTimestamp >= tenMinutesAgoTimestamp
+            ).length > 10
+        )
     }
 }

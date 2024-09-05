@@ -1,5 +1,6 @@
-import type { Browser, Page, Protocol } from 'puppeteer'
+import type { Browser, Cookie, Page } from 'puppeteer'
 import { PushAnalyticsError } from '../Error'
+import { debugLog } from '../debugLog'
 import type { PushAnalyticsEnvVariables } from '../types'
 import type { DashboardItemConverter } from './DashboardItemConverter'
 
@@ -14,7 +15,7 @@ class AuthenticationError extends PushAnalyticsError {
 }
 
 export interface IAuthenticator {
-    establishNonExpiringAdminSession: () => Promise<void>
+    establishNonExpiringAdminSession: () => void
     impersonateUser: (username: string) => Promise<void>
 }
 
@@ -22,7 +23,7 @@ export class Authenticator implements IAuthenticator {
     #env: PushAnalyticsEnvVariables
     #page: Page
     #converter: DashboardItemConverter
-    #sessionCookie: Protocol.Network.Cookie | null
+    #sessionCookie: Cookie | null
     #impersonatedUser: string | null
 
     protected constructor(
@@ -51,7 +52,12 @@ export class Authenticator implements IAuthenticator {
             await this.#loginViaForm()
             await this.#setSessionCookie()
             this.#preventSessionExpiry()
-        } catch (error) {
+            debugLog(
+                `Successfully logged in as push-analytics admin-user "${
+                    this.#env.adminUsername
+                }"`
+            )
+        } catch {
             throw new AuthenticationError(
                 'Admin user could not login to the DHIS2 Core instance'
             )
@@ -66,8 +72,10 @@ export class Authenticator implements IAuthenticator {
 
         // Only exit impersonation mode if already in it
         if (this.#impersonatedUser) {
+            debugLog(`Exiting impersonation mode for user "${this.#impersonatedUser}"`)
+
             const exitImpersonateStatusCode = await this.doAuthenticatedRequestFromPage(
-                '/impersonateExit',
+                '/api/auth/impersonateExit',
                 'POST'
             )
             if (exitImpersonateStatusCode !== 200) {
@@ -75,12 +83,16 @@ export class Authenticator implements IAuthenticator {
                     `Could not exit impersonation mode. Received response status code ${exitImpersonateStatusCode}`
                 )
             }
+
+            this.#impersonatedUser = null
         }
 
         // Skip impersonation for admin user only
         if (username !== this.#env.adminUsername) {
+            debugLog(`Entering impersonation mode for user "${username}"`)
+
             const impersonateStatusCode = await this.doAuthenticatedRequestFromPage(
-                `/impersonate?username=${username}`,
+                `/api/auth/impersonate?username=${username}`,
                 'POST'
             )
             if (impersonateStatusCode !== 200) {
@@ -144,15 +156,14 @@ export class Authenticator implements IAuthenticator {
 
     async #loginViaForm() {
         await this.#page.bringToFront()
-        await this.#page.goto(
-            `${this.#env.baseUrl}/dhis-web-commons/security/login.action`
-        )
-        await this.#page.type('#j_username', this.#env.adminUsername)
-        await this.#page.type('#j_password', this.#env.adminPassword)
-        await this.#page.click('#submit')
+        await this.#page.goto(`${this.#env.baseUrl}/dhis-web-login/`)
+        await this.#page.waitForSelector('#username')
+        await this.#page.type('#username', this.#env.adminUsername)
+        await this.#page.type('#password', this.#env.adminPassword)
+        await this.#page.click('button[type="submit"]')
     }
 
-    async #preventSessionExpiry() {
+    #preventSessionExpiry() {
         // Do a ping request 30 seconds before the session is due to expire
         const intervalInMs = (parseInt(this.#env.sessionTimeout) - 30) * 1000
         const intervalId = setInterval(async () => {
@@ -171,7 +182,7 @@ export class Authenticator implements IAuthenticator {
 
             if (httpStatusCode !== 200) {
                 clearInterval(intervalId)
-                this.establishNonExpiringAdminSession()
+                await this.establishNonExpiringAdminSession()
             }
         }, intervalInMs)
     }
@@ -179,7 +190,7 @@ export class Authenticator implements IAuthenticator {
     async #setSessionCookie() {
         const cookies = await this.#page.cookies()
         const sessionCookie = cookies.find(
-            (cookie: Protocol.Network.Cookie) => cookie.name === 'JSESSIONID'
+            (cookie: Cookie) => cookie.name === 'JSESSIONID'
         )
         if (!sessionCookie) {
             throw new AuthenticationError('Could not find session cookie')

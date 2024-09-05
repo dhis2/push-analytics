@@ -11,11 +11,12 @@ import type {
     ItemsAddedToQueueMessage,
     QueueItem,
 } from '../types'
+import { debugLog } from '../debugLog'
 
 type OnWorkerItemRequestFn = (workerId: number) => void
 type OnWorkerConversionSuccessFn = (convertedItem: ConvertedItemPayload) => void
 type OnWorkerConversionFailureFn = (conversionError: ConversionErrorPayload) => void
-type OnWorkerExitFn = (worker: Worker) => void
+type OnWorkerExitFn = (worker: Worker, code: number, signal: string) => void
 
 type PrimaryProcessMessageHandlerOptions = {
     onWorkerItemRequest: OnWorkerItemRequestFn
@@ -74,8 +75,19 @@ export class PrimaryProcessMessageHandler {
         }
     }
 
-    sendQueueItemToWorker(workerId: number, queueItem: QueueItem) {
+    sendQueueItemToWorker(workerId: number, queueItem?: QueueItem) {
         const worker = this.clusterWorkers[workerId]
+
+        if (queueItem) {
+            debugLog(
+                `Received item request and queue is populated, sending queueItem to worker with PID "${worker?.process.pid}": `,
+                queueItem
+            )
+        } else {
+            debugLog(
+                `Received item request but queue is empty, sending empty message to worker with PID "${worker?.process.pid}"`
+            )
+        }
 
         if (!worker) {
             throw new PrimaryProcessMessageHandlerError(

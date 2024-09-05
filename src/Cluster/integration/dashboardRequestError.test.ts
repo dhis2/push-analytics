@@ -2,17 +2,20 @@ import assert from 'node:assert'
 import cluster from 'node:cluster'
 import { after, before, describe, test } from 'node:test'
 import request from 'supertest'
+import type {
+    PrimaryProcessEmittedMessage,
+    WorkerProcessEmittedMessage,
+} from '../../types'
 import type { DashboardFixture } from './utils'
 import {
-    initializeMockCluster,
+    awaitMessageCount,
     getDashboardFixturesArray,
     getHttpServer,
-    awaitAnyMessageUntilExpiry,
+    initializeMockCluster,
 } from './utils'
-import type { WorkerProcessEmittedMessage } from '../../types'
 import { tearDownCluster } from './utils/tearDownCluster'
 
-describe('An error on the dashboard request', { concurrency: 1 }, async () => {
+describe('An error on the dashboard request', { concurrency: 1 }, () => {
     const dashboardFixtures: DashboardFixture[] = getDashboardFixturesArray()
 
     before(async () => {
@@ -47,7 +50,7 @@ describe('An error on the dashboard request', { concurrency: 1 }, async () => {
                 messagesFromWorkers.push(message)
             })
             const response = await request(getHttpServer()).get(
-                `/?dashboardId=${dashboardId}&username=admin`
+                `/?dashboardId=${dashboardId}&username=admin&locale=en`
             )
 
             assert.strictEqual(messagesFromWorkers.length, 0)
@@ -60,9 +63,14 @@ describe('An error on the dashboard request', { concurrency: 1 }, async () => {
         })
     } else {
         test('the worker process does not receive any messages', async () => {
-            // If no messages received in the first 100ms, assume they will never arrive
-            const message = await awaitAnyMessageUntilExpiry(100)
-            assert.strictEqual(message, null)
+            /* The main worker always replies when a worker requests a dashboard
+             * item. If the queue is empty, so is the payload. */
+            const expectedMessage = { type: 'ITEM_TAKEN_FROM_QUEUE' }
+            const messagesFromPrimaryProcess: PrimaryProcessEmittedMessage[] =
+                await awaitMessageCount(1)
+
+            assert.strictEqual(messagesFromPrimaryProcess.length, 1)
+            assert.deepEqual(messagesFromPrimaryProcess[0], expectedMessage)
         })
     }
 })

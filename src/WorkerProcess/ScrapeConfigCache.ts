@@ -44,6 +44,14 @@ class ScrapeConfigCacheError extends PushAnalyticsError {
     }
 }
 
+type ErrorResponseBody = {
+    httpStatus: string
+    httpStatusCode: number
+    status: string
+    message: string
+    appUrl: string
+}
+
 export interface IScrapeConfigCache {
     getScrapeConfig: (dashboardItem: DashboardItem) => Promise<ParsedScrapeInstructions>
 }
@@ -88,12 +96,20 @@ export class ScrapeConfigCache implements IScrapeConfigCache {
         const jsonFileUrl = `${appUrl}/push-analytics.json`
 
         try {
-            const instructions: ScrapeInstructions = await this.#authenticator
-                .doAuthenticatedRequestFromPage(jsonFileUrl, 'GET', 'responseBody')
-                .then((response) => ({ ...response, appUrl }))
-            this.#cachedConfigs.set(appPath, instructions)
-            return instructions
-        } catch (error) {
+            const instructions: ScrapeInstructions | ErrorResponseBody =
+                await this.#authenticator
+                    .doAuthenticatedRequestFromPage(jsonFileUrl, 'GET', 'responseBody')
+                    .then((response) => ({ ...response, appUrl }))
+
+            if ('httpStatusCode' in instructions) {
+                throw new ScrapeConfigCacheError(
+                    `Could not fetch scrape instructions from "${appUrl}", httpStatusCode: "${instructions.httpStatusCode}" message "${instructions.message}"`
+                )
+            } else {
+                this.#cachedConfigs.set(appPath, instructions)
+                return instructions
+            }
+        } catch {
             throw new ScrapeConfigCacheError(
                 `Could not fetch JSON scrape instructions from ${jsonFileUrl}`
             )

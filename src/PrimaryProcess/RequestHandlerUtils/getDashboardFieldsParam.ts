@@ -12,13 +12,25 @@ export function getDashboardFieldsParam() {
                 'text',
                 'x',
                 'y',
-                { name: 'eventChart', fields: ['id', 'name', 'type'] },
-                { name: 'eventReport', fields: ['id', 'name', 'type'] },
-                { name: 'eventVisualization', fields: ['id', 'name', 'type'] },
+                {
+                    name: 'eventChart',
+                    fields: ['id', 'displayName~rename(name)', 'type'],
+                },
+                {
+                    name: 'eventReport',
+                    fields: ['id', 'displayName~rename(name)', 'type'],
+                },
+                {
+                    name: 'eventVisualization',
+                    fields: ['id', 'displayName~rename(name)', 'type'],
+                },
                 { name: 'map', fields: ['id', 'name'] },
-                { name: 'reports', fields: ['id', 'name', 'type'] },
+                { name: 'reports', fields: ['id', 'displayName~rename(name)', 'type'] },
                 { name: 'resources', fields: ['id', 'name'] },
-                { name: 'visualization', fields: ['id', 'name', 'type'] },
+                {
+                    name: 'visualization',
+                    fields: ['id', 'displayName~rename(name)', 'type'],
+                },
             ],
         },
     ]

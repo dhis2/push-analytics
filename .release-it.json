@@ -1,0 +1,39 @@
+{
+    "git": {
+        "commitMessage": "chore: release v${version}",
+        "commitArgs": ["--no-verify"],
+        "requireBranch": ["master", "beta", "alpha"]
+    },
+    "github": {
+        "release": true,
+        "assets": ["dist/push-analytics-${version}.tar.gz"]
+    },
+    "plugins": {
+        "@release-it/conventional-changelog": {
+            "infile": "CHANGELOG.md",
+            "header": "# Changelog",
+            "ignoreRecommendedBump": true,
+            "preset": {
+                "name": "conventionalcommits",
+                "types": [
+                    {
+                        "type": "feat",
+                        "section": "Features"
+                    },
+                    {
+                        "type": "fix",
+                        "section": "Bug Fixes"
+                    }
+                ]
+            }
+        }
+    },
+    "npm": {
+        "publish": false
+    },
+    "hooks": {
+        "before:init": ["npm run lint", "npm run test:unit"],
+        "after:bump": "npm run build:compile && npm run build:compress ${version}",
+        "after:release": "echo Successfully released ${name} v${version} to ${repo.repository}."
+    }
+}

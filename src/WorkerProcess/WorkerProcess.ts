@@ -1,4 +1,5 @@
 import { PushAnalyticsError } from '../Error'
+import { debugLog } from '../debugLog'
 import type {
     ConversionErrorPayload,
     ConvertedItemPayload,
@@ -29,6 +30,8 @@ export class WorkerProcess {
     #converter: IDashboardItemConverter
     #authenticator: IAuthenticator
     #configCache: IScrapeConfigCache
+    #hasPendingItemRequest: boolean
+    #hasInProgressConversion: boolean
 
     protected constructor(
         converter: IDashboardItemConverter,
@@ -40,10 +43,12 @@ export class WorkerProcess {
         this.#configCache = configCache
         this.#messageHandler = new WorkerProcessMessageHandler({
             onItemsAddedToQueue: this.#handleItemsAddedToQueue.bind(this),
-            onItemTakenFromQueue: this.#handleItemTakenFromQueue.bind(this),
+            onResponseToItemRequest: this.#handleResponseToItemRequest.bind(this),
         })
+        this.#hasPendingItemRequest = false
+        this.#hasInProgressConversion = false
         // See if there is work to do
-        this.#messageHandler.requestDashboardItemFromQueue()
+        this.#requestDashboardItemFromQueue('INIT')
     }
 
     static async create(env: PushAnalyticsEnvVariables, debug: boolean) {
@@ -55,30 +60,57 @@ export class WorkerProcess {
         return new WorkerProcess(converter, authenticator, configCache)
     }
 
+    #requestDashboardItemFromQueue(reason: string) {
+        debugLog(`Going to request queue item because: ${reason}`)
+        this.#hasPendingItemRequest = true
+        this.#messageHandler.requestDashboardItemFromQueue()
+    }
+
+    #isBusy() {
+        return (
+            this.#converter.isConverting() ||
+            this.#hasPendingItemRequest ||
+            this.#hasInProgressConversion
+        )
+    }
+
     #handleItemsAddedToQueue() {
-        // Ignore this event if still converting
-        if (!this.#converter.isConverting()) {
-            this.#messageHandler.requestDashboardItemFromQueue()
+        // Ignore this event if working/waiting
+        if (!this.#isBusy()) {
+            this.#requestDashboardItemFromQueue('ITEMS_ADDED_TO_QUEUE')
         }
     }
 
-    async #handleItemTakenFromQueue(queueItem: QueueItem) {
+    async #handleResponseToItemRequest(queueItem: QueueItem | undefined) {
+        this.#hasPendingItemRequest = false
+        this.#hasInProgressConversion = !!queueItem
+
+        if (!queueItem) {
+            debugLog('Received reply to item request - queue is empty')
+            return
+        }
+
         if (this.#converter.isConverting()) {
             throw new WorkerProcessError(
-                'Received a queueItem while converting, this should not happen'
+                `Received a queueItem while converting, this should not happen (PID ${process.pid})`
             )
         }
 
         try {
+            debugLog(
+                'Received reply to item request - conversion starting for queue item: ',
+                queueItem
+            )
             let config = undefined
             if (this.#converter.isAppScraperConversion(queueItem)) {
-                config = await this.#configCache.getScrapeConfig(queueItem.dashboardItem)
                 await this.#authenticator.impersonateUser(queueItem.username)
+                config = await this.#configCache.getScrapeConfig(queueItem.dashboardItem)
             }
             const convertedItem: ConvertedItemPayload = await this.#converter.convert(
                 queueItem,
                 config
             )
+            debugLog('Conversion success', convertedItem)
             this.#messageHandler.sendConvertedItemToPrimaryProcess(convertedItem)
         } catch (error) {
             let errorMessage = 'Internal error'
@@ -95,6 +127,8 @@ export class WorkerProcess {
                 errorMessage = error.message
             }
 
+            debugLog(`Conversion error [${errorCode} | ${errorName}]: "${errorMessage}"`)
+
             const conversionError: ConversionErrorPayload = {
                 requestId: queueItem.requestId,
                 dashboardId: queueItem.dashboardId,
@@ -107,8 +141,15 @@ export class WorkerProcess {
             }
             this.#messageHandler.sendItemConversionErrorToPrimaryProcess(conversionError)
         } finally {
+            this.#hasInProgressConversion = false
             // See if there is more work to do
-            this.#messageHandler.requestDashboardItemFromQueue()
+            if (this.#isBusy()) {
+                debugLog(
+                    'Not requesting a new item after conversion because a pending item request is present'
+                )
+            } else {
+                this.#requestDashboardItemFromQueue('AFTER CONVERSION')
+            }
         }
     }
 }
