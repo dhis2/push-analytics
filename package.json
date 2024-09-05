@@ -13,7 +13,7 @@
         "build:compress": "./scripts/compress.sh",
         "build": "npm run build:compile && npm run build:compress",
         "lint:tsc": "npx tsc --noEmit -p ./tsconfig.json",
-        "lint:eslint": "npx eslint --quiet --ignore-pattern 'dist/*' --ext .js,.ts .",
+        "lint:eslint": "npx eslint --ignore-pattern 'dist/**/*' --no-warn-ignored **/*.[js][ts] .",
         "lint:prettier": "npx prettier --check .",
         "lint": "npm run lint:tsc && npm run lint:eslint && npm run lint:prettier",
         "format": "npx prettier --write . && npx eslint --quiet --fix --ext .js,.ts .",

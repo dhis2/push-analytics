@@ -32,7 +32,7 @@ module.exports = tseslint.config(
         },
     },
     {
-        files: ['eslint.config.js', '.prettierrc.js'],
+        files: ['eslint.config.js', '.prettierrc.js', '.commitlintrc.ts'],
         rules: {
             '@typescript-eslint/no-require-imports': 'off',
         },
