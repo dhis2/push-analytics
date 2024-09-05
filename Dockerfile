@@ -7,7 +7,7 @@
 # `with-node/Dockerfile` and `with-puppeteer/Dockerfile` found on
 # https://github.com/Zenika/alpine-chrome
 
-FROM alpine:3.20 as base
+FROM alpine:3.20 AS base
 
 # Installs latest Chromium package.
 RUN apk upgrade --no-cache --available \
