@@ -89,7 +89,7 @@ A `docker-compose.yml` is included with the following services:
 -   `push-analytics`: The Push Analytics Service itself, with a configurable image tag
 -   `e2e`: A NodeJS service that runs the e2e test suite.
 
-The `docker` folder contains a custom `dhis2.conf` that enables user impersonation and increases the number of allowed user sessions, and a DB Dump for a database that fulfills all preconditions has been uploaded to the Push Analytics repo and will be used to create the DHIS2 Core service. Details of what has been added to the database are [documented here](docker/README.md)
+The `docker` folder contains a custom `dhis2.conf` that enables user impersonation and increases the number of allowed user sessions, and a DB Dump for a database that fulfills all preconditions has been uploaded to the Push Analytics repo and will be used to create the DHIS2 Core service. Details of what has been added to the database are [documented here](docker/DB.md)
 
 Note that, by default, `docker compose` will look for a file called `.env` to source its environment variables, however, the `.env` file in the Push Analytics repo serves a different purpose ([as explained here](#environment-variables)). Instead, the `.env.e2e` file is meant to be used for docker compose, and as a result all docker compose commands will need to specify which environment file to use, i.e. `docker compose --env-file ./.env.e2e up [..]`.
 
