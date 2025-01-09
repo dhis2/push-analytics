@@ -33,6 +33,8 @@ describe('producing user specific dashboard content', () => {
             const expectedHtml = fs.readFileSync(filePath).toString()
             const response = await req.get('/').query({ dashboardId, username, locale })
 
+            console.log(response)
+
             assert.strictEqual(response.status, 200)
 
             // Strip whitespace and newlines to avoid
