@@ -17,8 +17,8 @@ describe('converting all types of dashboard items', () => {
 
     test(`produces the expected HTML for a dashboard with all dashboard item types`, async () => {
         const req = request(url)
-        const dashboardId = 'YN2Dju6t32Z'
-        const username = 'admin'
+        const dashboardId = 'ceneQPMhemM'
+        const username = 'test_user_national'
         const locale = 'en'
         const filePath = path.resolve(fixturesPath, `${dashboardId}_${username}.txt`)
         const expectedHtml = fs.readFileSync(filePath).toString()
@@ -28,7 +28,7 @@ describe('converting all types of dashboard items', () => {
 
         const actualHtml = response.text
         // Enable line below to generate new fixture
-        // fs.writeFileSync(filePath, actualHtml)
+        fs.writeFileSync(filePath, actualHtml)
 
         /* The e2e dashboard used to assert content customisation looks slightly different
          * depending on when it is viewed. As a result the HTML strings are not constant.
