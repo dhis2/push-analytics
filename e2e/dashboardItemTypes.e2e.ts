@@ -28,7 +28,7 @@ describe('converting all types of dashboard items', () => {
 
         const actualHtml = response.text
         // Enable line below to generate new fixture
-        fs.writeFileSync(filePath, actualHtml)
+        // fs.writeFileSync(filePath, actualHtml)
 
         /* The e2e dashboard used to assert content customisation looks slightly different
          * depending on when it is viewed. As a result the HTML strings are not constant.
