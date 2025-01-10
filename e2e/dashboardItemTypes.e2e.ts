@@ -17,8 +17,8 @@ describe('converting all types of dashboard items', () => {
 
     test(`produces the expected HTML for a dashboard with all dashboard item types`, async () => {
         const req = request(url)
-        const dashboardId = 'YN2Dju6t32Z'
-        const username = 'admin'
+        const dashboardId = 'ceneQPMhemM'
+        const username = 'test_user_national'
         const locale = 'en'
         const filePath = path.resolve(fixturesPath, `${dashboardId}_${username}.txt`)
         const expectedHtml = fs.readFileSync(filePath).toString()
