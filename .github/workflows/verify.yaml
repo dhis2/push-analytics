@@ -57,6 +57,7 @@ jobs:
             - name: Run the e2e test suite
               run: docker compose --env-file ./.env.e2e up --abort-on-container-exit --exit-code-from e2e e2e
             - name: Debug things
+              if: ${{ failure() }}
               run: ls
             - name: Store scrape logs as a GHA artefact
               if: ${{ failure() }}
