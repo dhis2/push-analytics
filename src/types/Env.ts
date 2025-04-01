@@ -11,7 +11,7 @@ export type EnvVariableName =
     | 'LOG_LEVEL'
 
 export type NodeEnvContext = 'development' | 'production' | 'ci' | 'testing'
-export type LogLevel = 'off' | 'on' | 'verbose'
+export type LogLevel = 'off' | 'on' | 'verbose' | 'scraper'
 
 export type PushAnalyticsEnvVariables = {
     host: string
