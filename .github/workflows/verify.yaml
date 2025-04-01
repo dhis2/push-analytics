@@ -7,6 +7,7 @@ on:
 
 env:
     LOG_LEVEL: 'scraper'
+    DHIS2_IMAGE: 'dhis2/core-dev:2.41'
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
