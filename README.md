@@ -51,7 +51,7 @@ The push analytics service needs to establish an authenticated connection to a D
 | `DHIS2_CORE_SESSION_TIMEOUT` | `3600`                  | Session expiry on the DHIS2 Core instance. Ensure that this value matches the actual session expiry timeout on the core instance to prevent authentication issues in the push analytics service.                                                         |
 | `MAX_THREADS`                | `4`                     | Max number of threads (worker nodes) to use. If set to "max", all available threads will be used. If a number is provided this will be used (capped by number of available threads). If this variable is not set, 50% of available threads will be used. |
 | `NODE_ENV`                   | `production`            | Environment context, can be one of the following values `development`, `production`, `ci` or `testing`                                                                                                                                                   |
-| `LOG_LEVEL`                  | `off`                   | Can be `off`,`on`, or `verbose` (see [logging section](#logging) for details)                                                                                                                                                                            |
+| `LOG_LEVEL`                  | `off`                   | Can be `off`, `on`, `scraper`, or `verbose` (see [logging section](#logging) for details)                                                                                                                                                                |
 
 In development mode this application uses [dotenv](https://github.com/motdotla/dotenv#readme) to load environment variables from a `.env` file at the project root. This file is being gitignored, because it may contain sensitive information. The `.env.template` file, can be used to get started.
 
@@ -169,7 +169,8 @@ Push Analytics comes with a very basic logging utility. It prefixes each log mes
 
 -   `LOG_LEVEL=off` (or omitting the `LOG_LEVEL` variable completely) disables log output completely
 -   `LOG_LEVEL=on` enables all log statements, but functions and objects will not be printed to the console
--   `LOG_LEVEL=verbose` enables all log statements, and functions and objects will also be printed to the console
+-   `LOG_LEVEL=scraper` enables the logger in the `AppScraper`. This logger will create a markdown file per worker which captures the entire app-scraping process and adds screenshots so it becomes possible to visually inspect the scraping process
+-   `LOG_LEVEL=verbose` enables all log statements, and functions and objects will also be printed to the console. This log level also enables the logger in the `AppScraper`
 
 ## Architecture
 
