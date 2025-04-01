@@ -10,6 +10,8 @@ export const initializeCluster = async () => {
 
     if (cluster.isPrimary) {
         const primaryProcess = new PrimaryProcess(env)
+        console.log('Cluster created, env:')
+        console.log(JSON.stringify(env, null, 4))
         createHttpServer(primaryProcess, env)
     } else {
         debugLog(`Starting dashboard-item conversion worker`)

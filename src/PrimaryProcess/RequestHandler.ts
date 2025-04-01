@@ -37,8 +37,6 @@ export class RequestHandler {
          * would be off-by-one. */
         const requestId = ++this.#requestId
         let dashboardDetails = undefined
-        console.log('REQUEST RECEIVED BY PUSH ANALYTICS, HERE IS MY ENV')
-        console.log(JSON.stringify(this.#env, null, 4))
 
         try {
             dashboardDetails = await this.#getDashboardDetails(request)
