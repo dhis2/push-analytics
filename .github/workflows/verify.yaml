@@ -5,6 +5,9 @@ on:
         types: ['opened', 'edited', 'reopened', 'synchronize', 'labeled']
         branches: ['master', 'beta', 'next', 'alpha']
 
+env:
+    LOG_LEVEL: 'scraper'
+
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
 
@@ -52,3 +55,9 @@ jobs:
               run: docker compose --env-file ./.env.e2e up -d web db db-dump post-install-scripts push-analytics
             - name: Run the e2e test suite
               run: docker compose --env-file ./.env.e2e up --abort-on-container-exit --exit-code-from e2e e2e
+            - name: Store scrape logs as a GHA artefact
+              if: ${{ failure() }}
+              uses: actions/upload-artifact@v4
+              with:
+                  name: scrape-markdown-logs
+                  path: scrape-markdown-logs/

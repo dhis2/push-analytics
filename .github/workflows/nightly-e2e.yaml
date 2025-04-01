@@ -24,6 +24,12 @@ jobs:
               run: docker ps --format '{{.Image}}'
             - name: Run the e2e test suite
               run: docker compose --env-file ./.env.e2e up --abort-on-container-exit --exit-code-from e2e e2e
+            - name: Store scrape logs as a GHA artefact
+              if: ${{ failure() }}
+              uses: actions/upload-artifact@v4
+              with:
+                  name: scrape-markdown-logs
+                  path: scrape-markdown-logs/
 
     send-slack-message:
         runs-on: ubuntu-latest
