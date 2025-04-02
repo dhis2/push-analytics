@@ -4,6 +4,7 @@ import type { Page } from 'puppeteer'
 import type { LogLevel, QueueItem } from '../../types'
 
 const BASE_DIR = './scrape-markdown-logs'
+const SCREENSHOTS_DIR = 'screenshots'
 
 export class MarkdownLogger {
     #page: Page
@@ -11,6 +12,7 @@ export class MarkdownLogger {
     #logDir: string
     #logFile: string
     #logScreenshotsDir: string
+    #relativeLogScreenshotsDir: string
     #screeshotId: number
 
     constructor(page: Page) {
@@ -19,7 +21,8 @@ export class MarkdownLogger {
         this.#shouldLog = logLevel === 'verbose' || logLevel === 'scraper'
         this.#logDir = path.resolve(BASE_DIR, process.pid.toString())
         this.#logFile = path.resolve(this.#logDir, 'log.md')
-        this.#logScreenshotsDir = path.resolve(this.#logDir, 'screenshots')
+        this.#logScreenshotsDir = path.resolve(this.#logDir, SCREENSHOTS_DIR)
+        this.#relativeLogScreenshotsDir = `${BASE_DIR}/${SCREENSHOTS_DIR}`
         this.#screeshotId = 0
 
         if (this.#shouldLog) {
@@ -79,9 +82,10 @@ export class MarkdownLogger {
         this.#screeshotId++
         const fileName = `img_${this.#screeshotId}.png`
         const filePath = path.resolve(this.#logScreenshotsDir, fileName)
+        const relativeFilePath = `${this.#relativeLogScreenshotsDir}/${fileName}`
         const page = downloadPage ?? this.#page
         await page.screenshot({ path: filePath })
-        this.#appendToLogFile(`![screenshot](${filePath})`)
+        this.#appendToLogFile(`![screenshot](${relativeFilePath})`)
     }
 
     #appendToLogFile(content: string) {
