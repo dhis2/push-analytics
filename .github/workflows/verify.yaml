@@ -6,7 +6,6 @@ on:
         branches: ['master', 'beta', 'next', 'alpha']
 
 env:
-    LOG_LEVEL: 'scraper'
     DHIS2_IMAGE: 'dhis2/core-dev:2.41'
 
 concurrency:
@@ -54,29 +53,14 @@ jobs:
             - name: Spin up the E2E environment
               # Fake SMTP is not needed for the e2e tests
               run: docker compose --env-file .env.e2e up -d web db db-dump post-install-scripts push-analytics
-            - name: Sleep for 40s
-              run: sleep 40s
-            - name: Show startup log for push-analytics
-              if: ${{ always() }}
-              run: docker compose --env-file .env.e2e logs push-analytics
             - name: Run the e2e test suite
-              if: ${{ always() }}
               run: docker compose --env-file .env.e2e up --abort-on-container-exit --exit-code-from e2e e2e
-            - name: Sleep for 40s
-              run: sleep 40s
-              if: ${{ always() }}
-            - name: Show check push-analytics log again
-              if: ${{ always() }}
-              run: docker compose --env-file .env.e2e logs push-analytics
             - name: Copy scrape markdown logs to runner
               if: ${{ failure() }}
               run: |
                   mkdir scrape-markdown-logs
                   container_id="$(docker compose --env-file .env.e2e ps -q push-analytics)"
                   docker cp ${container_id}:/usr/src/app/scrape-markdown-logs ./scrape-markdown-logs
-            - name: Check file system to see if artifact was created
-              if: ${{ failure() }}
-              run: ls -lh
             - name: Store scrape logs as a GHA artefact
               if: ${{ failure() }}
               uses: actions/upload-artifact@v4
