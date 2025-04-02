@@ -6,6 +6,7 @@ on:
         branches: ['master', 'beta', 'next', 'alpha']
 
 env:
+    # TODO: remove because this should be stable
     DHIS2_IMAGE: 'dhis2/core-dev:2.41'
 
 concurrency:
