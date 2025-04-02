@@ -53,19 +53,19 @@ jobs:
                   cache-to: type=gha,mode=max
             - name: Spin up the E2E environment
               # Fake SMTP is not needed for the e2e tests
-              run: docker compose --env-file ./.env.e2e up -d web db db-dump post-install-scripts push-analytics
-            - name: Show startup log for web
-              if: ${{ always() }}
-              run: docker compose logs web
-            - name: Show startup log for db
-              if: ${{ always() }}
-              run: docker compose logs db
+              run: docker compose --env-file .env.e2e up -d web db db-dump post-install-scripts push-analytics
+            # - name: Show startup log for web
+            #   if: ${{ always() }}
+            #   run: docker compose --env-file .env.e2e logs web
+            # - name: Show startup log for db
+            #   if: ${{ always() }}
+            #   run: docker compose --env-file .env.e2e logs db
             - name: Show startup log for push-analytics
               if: ${{ always() }}
-              run: docker compose logs push-analytics
+              run: docker compose --env-file .env.e2e logs push-analytics
             - name: Run the e2e test suite
               if: ${{ always() }}
-              run: docker compose --env-file ./.env.e2e up --abort-on-container-exit --exit-code-from e2e e2e
+              run: docker compose --env-file .env.e2e up --abort-on-container-exit --exit-code-from e2e e2e
             - name: Check file system to see if artifact was created
               if: ${{ failure() }}
               run: ls
