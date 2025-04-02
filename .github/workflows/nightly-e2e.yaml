@@ -20,6 +20,12 @@ jobs:
               run: docker compose --env-file ./.env.e2e up -d web db db-dump post-install-scripts push-analytics
             - name: Run the e2e test suite
               run: docker compose --env-file ./.env.e2e up --abort-on-container-exit --exit-code-from e2e e2e
+            - name: Copy scrape markdown logs to runner
+              if: ${{ failure() }}
+              run: |
+                  mkdir scrape-markdown-logs
+                  container_id="$(docker compose --env-file .env.e2e ps -q push-analytics)"
+                  docker cp ${container_id}:/usr/src/app/scrape-markdown-logs ./scrape-markdown-logs
             - name: Store scrape logs as a GHA artefact
               if: ${{ failure() }}
               uses: actions/upload-artifact@v4
