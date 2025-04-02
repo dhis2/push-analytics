@@ -8,7 +8,6 @@ on:
 env:
     DHIS2_IMAGE: 'dhis2/core-dev:2.41'
     PUSH_ANALYTICS_IMAGE: 'dhis2/push-analytics:latest'
-    LOG_LEVEL: 'scraper'
 
 jobs:
     nightly-e2e:
