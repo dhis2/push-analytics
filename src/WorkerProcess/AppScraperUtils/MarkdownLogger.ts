@@ -90,22 +90,20 @@ export class MarkdownLogger {
 
     #prepareLogDir() {
         if (!fs.existsSync(BASE_DIR)) {
-            try {
-                fs.mkdirSync(BASE_DIR)
-                console.log(`Created base dir "${BASE_DIR}"`)
-                console.log(`process.cwd(): ${process.cwd()}`)
-            } catch (error) {
-                console.log('Could not make base dir!!!')
-                console.log(error)
+            fs.mkdirSync(BASE_DIR)
+        }
+
+        try {
+            // Remove logs from previous runs if they exist
+            if (fs.existsSync(this.#logDir)) {
+                fs.rmdirSync(this.#logDir)
             }
-        }
 
-        // Remove logs from previous runs if they exist
-        if (fs.existsSync(this.#logDir)) {
-            fs.rmdirSync(this.#logDir)
+            fs.mkdirSync(this.#logDir)
+            fs.mkdirSync(this.#logScreenshotsDir)
+            console.log('Created log dir')
+        } catch {
+            console.log('Could not create log dir')
         }
-
-        fs.mkdirSync(this.#logDir)
-        fs.mkdirSync(this.#logScreenshotsDir)
     }
 }
