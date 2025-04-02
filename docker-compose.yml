@@ -126,8 +126,6 @@ services:
             mynetwork:
                 # This IP needs to be present to `switch_user_allow_listed_ips` in `dhis.conf`
                 ipv4_address: 172.26.0.10
-        volumes:
-            - ./scrape-markdown-logs:/usr/src/app/scrape-markdown-logs
         environment:
             - HOST=${HOST}
             - PORT=${PORT}
