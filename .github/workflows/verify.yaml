@@ -5,10 +5,6 @@ on:
         types: ['opened', 'edited', 'reopened', 'synchronize', 'labeled']
         branches: ['master', 'beta', 'next', 'alpha']
 
-env:
-    # TODO: remove because this should be stable
-    DHIS2_IMAGE: 'dhis2/core-dev:2.41'
-
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
 
