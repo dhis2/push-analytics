@@ -47,6 +47,7 @@ export function readEnv(): PushAnalyticsEnvVariables {
     }
 
     if (cluster.isPrimary) {
+        console.log(`process.pwd(): ${process.cwd()}`)
         console.log(
             `+++++++++\nresolved env:\n ${JSON.stringify(
                 resolvedEnd,
