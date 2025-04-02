@@ -73,7 +73,7 @@ jobs:
               run: |
                   mkdir scrape-markdown-logs
                   container_id="$(docker compose --env-file .env.e2e ps -q push-analytics)"
-                  docker cp $container_id:/usr/src/app/scrape-markdown-logs .scrape-markdown-logs
+                  docker cp ${container_id}:/usr/src/app/scrape-markdown-logs ./scrape-markdown-logs
             - name: Check file system to see if artifact was created
               if: ${{ failure() }}
               run: ls -lh
