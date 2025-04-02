@@ -26,7 +26,6 @@ export class MarkdownLogger {
         this.#screeshotId = 0
 
         if (this.#shouldLog) {
-            console.log(`Initializing logger for PID ${process.pid}`)
             this.#prepareLogDir()
         }
     }
@@ -41,7 +40,6 @@ export class MarkdownLogger {
                 dashboardItem.map?.name ??
                 dashboardItem.visualization?.name ??
                 'UNKNOWN NAME'
-            console.log(`Starting log for item ${name}`)
             const lines = [
                 '___', // Start with vertical line
                 `# Scrape log for: ${name}`, // Header with name
@@ -67,14 +65,12 @@ export class MarkdownLogger {
             this.#appendToLogFile(
                 '## Conversion completed successfully :white_check_mark:'
             )
-            console.log('Logged item conversion success')
         }
     }
 
     logError(message: string) {
         if (this.#shouldLog) {
             this.#appendToLogFile(`## Conversion failed :x:\n${message}`)
-            console.log('Logged item conversion failure')
         }
     }
 
@@ -97,18 +93,12 @@ export class MarkdownLogger {
             fs.mkdirSync(BASE_DIR)
         }
 
-        try {
-            // Remove logs from previous runs if they exist
-            if (fs.existsSync(this.#logDir)) {
-                fs.rmdirSync(this.#logDir)
-            }
-
-            fs.mkdirSync(this.#logDir)
-            fs.mkdirSync(this.#logScreenshotsDir)
-            console.log('Created log dir')
-        } catch (error) {
-            console.log('Could not create log dir')
-            console.error(error)
+        // Remove logs from previous runs if they exist
+        if (fs.existsSync(this.#logDir)) {
+            fs.rmdirSync(this.#logDir)
         }
+
+        fs.mkdirSync(this.#logDir)
+        fs.mkdirSync(this.#logScreenshotsDir)
     }
 }
