@@ -78,7 +78,7 @@ jobs:
               run: docker compose --env-file .env.e2e logs push-analytics
             - name: Check file system to see if artifact was created
               if: ${{ failure() }}
-              run: ls
+              run: ls -lh
             - name: Check file nested file system
               if: ${{ failure() }}
               run: ls scrape-markdown-logs
