@@ -55,12 +55,16 @@ jobs:
               # Fake SMTP is not needed for the e2e tests
               run: docker compose --env-file ./.env.e2e up -d web db db-dump post-install-scripts push-analytics
             - name: Show startup log for web
+              if: ${{ failure() }}
               run: docker compose logs web
             - name: Show startup log for db
+              if: ${{ failure() }}
               run: docker compose logs db
             - name: Show startup log for push-analytics
+              if: ${{ failure() }}
               run: docker compose logs push-analytics
             - name: Run the e2e test suite
+              if: ${{ failure() }}
               run: docker compose --env-file ./.env.e2e up --abort-on-container-exit --exit-code-from e2e e2e
             - name: Debug things
               if: ${{ failure() }}
