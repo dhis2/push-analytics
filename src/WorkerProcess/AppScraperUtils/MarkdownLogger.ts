@@ -12,7 +12,6 @@ export class MarkdownLogger {
     #logDir: string
     #logFile: string
     #logScreenshotsDir: string
-    #relativeLogScreenshotsDir: string
     #screeshotId: number
 
     constructor(page: Page) {
@@ -22,7 +21,6 @@ export class MarkdownLogger {
         this.#logDir = path.resolve(BASE_DIR, process.pid.toString())
         this.#logFile = path.resolve(this.#logDir, 'log.md')
         this.#logScreenshotsDir = path.resolve(this.#logDir, SCREENSHOTS_DIR)
-        this.#relativeLogScreenshotsDir = `${BASE_DIR}/${SCREENSHOTS_DIR}`
         this.#screeshotId = 0
 
         if (this.#shouldLog) {
@@ -78,7 +76,7 @@ export class MarkdownLogger {
         this.#screeshotId++
         const fileName = `img_${this.#screeshotId}.png`
         const filePath = path.resolve(this.#logScreenshotsDir, fileName)
-        const relativeFilePath = `${this.#relativeLogScreenshotsDir}/${fileName}`
+        const relativeFilePath = `./${SCREENSHOTS_DIR}/${fileName}`
         const page = downloadPage ?? this.#page
         await page.screenshot({ path: filePath })
         this.#appendToLogFile(`![screenshot](${relativeFilePath})`)
