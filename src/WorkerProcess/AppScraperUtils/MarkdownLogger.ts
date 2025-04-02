@@ -93,6 +93,7 @@ export class MarkdownLogger {
             try {
                 fs.mkdirSync(BASE_DIR)
                 console.log(`Created base dir "${BASE_DIR}"`)
+                console.log(`process.cwd(): ${process.cwd()}`)
             } catch (error) {
                 console.log('Could not make base dir!!!')
                 console.log(error)
