@@ -33,7 +33,7 @@ function readEnvVariable(name: EnvVariableName): string | NodeEnvContext | LogLe
 }
 
 export function readEnv(): PushAnalyticsEnvVariables {
-    return {
+    const resolvedEnd = {
         host: readEnvVariable('HOST'),
         port: readEnvVariable('PORT'),
         baseUrl: readEnvVariable('DHIS2_CORE_URL'),
@@ -45,4 +45,15 @@ export function readEnv(): PushAnalyticsEnvVariables {
         nodeEnv: readEnvVariable('NODE_ENV') as NodeEnvContext,
         logLevel: readEnvVariable('LOG_LEVEL') as LogLevel,
     }
+
+    if (cluster.isPrimary) {
+        console.log(
+            `+++++++++\nresolved env:\n ${JSON.stringify(
+                resolvedEnd,
+                null,
+                4
+            )}\n=========`
+        )
+    }
+    return resolvedEnd
 }
