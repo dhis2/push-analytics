@@ -64,7 +64,7 @@ jobs:
               run: sleep 40s
             - name: Show startup log for push-analytics
               if: ${{ always() }}
-              run: docker compose --env-file .env.e2e logs push-analytics --follow
+              run: docker compose --env-file .env.e2e logs push-analytics
             - name: Run the e2e test suite
               if: ${{ always() }}
               run: docker compose --env-file .env.e2e up --abort-on-container-exit --exit-code-from e2e e2e
