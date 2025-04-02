@@ -68,6 +68,9 @@ jobs:
             - name: Run the e2e test suite
               if: ${{ always() }}
               run: docker compose --env-file .env.e2e up --abort-on-container-exit --exit-code-from e2e e2e
+            - name: Sleep for 40s
+              run: sleep 40s
+              if: ${{ always() }}
             - name: Show check push-analytics log again
               if: ${{ always() }}
               run: docker compose --env-file .env.e2e logs push-analytics
