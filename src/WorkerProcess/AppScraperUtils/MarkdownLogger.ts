@@ -102,8 +102,9 @@ export class MarkdownLogger {
             fs.mkdirSync(this.#logDir)
             fs.mkdirSync(this.#logScreenshotsDir)
             console.log('Created log dir')
-        } catch {
+        } catch (error) {
             console.log('Could not create log dir')
+            console.error(error)
         }
     }
 }
