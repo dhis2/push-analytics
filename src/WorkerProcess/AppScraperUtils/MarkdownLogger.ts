@@ -40,7 +40,7 @@ export class MarkdownLogger {
                 dashboardItem.visualization?.name ??
                 'UNKNOWN NAME'
             const lines = [
-                '___', // Start with vertical line
+                '___', // Start with horizontal line
                 `# Scrape log for: ${name}`, // Header with name
                 '```json', // Start JSON code block
                 JSON.stringify(queueItem, null, 4), // Pretty JSON

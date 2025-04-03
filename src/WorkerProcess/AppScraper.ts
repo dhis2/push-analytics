@@ -178,7 +178,7 @@ export class AppScraper implements Converter {
 
         if (shouldModify) {
             await this.#logger.log(
-                'Going to modify download URL when new document',
+                'Going to modify download URL when new document is loading',
                 false
             )
         }
