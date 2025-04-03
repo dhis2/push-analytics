@@ -8,7 +8,7 @@ on:
 env:
     DHIS2_IMAGE: 'dhis2/core-dev:2.41'
     PUSH_ANALYTICS_IMAGE: 'dhis2/push-analytics:latest'
-    APPS_TO_INSTALL: 'Line Listing, Maps, Data Visualizer, Dashboard'
+    LOG_LEVEL: 'scraper'
 
 jobs:
     nightly-e2e:
@@ -18,11 +18,21 @@ jobs:
               uses: actions/checkout@v4
             - name: Spin up the E2E environment
               # Fake SMTP is not needed for the e2e tests
-              run: docker compose --env-file ./.env.e2e up -d web db db-dump post-install-scripts push-analytics
-            - name: List running Docker images
-              run: docker ps --format '{{.Image}}'
+              run: docker compose --env-file .env.e2e up -d web db db-dump post-install-scripts push-analytics
             - name: Run the e2e test suite
-              run: docker compose --env-file ./.env.e2e up --abort-on-container-exit --exit-code-from e2e e2e
+              run: docker compose --env-file .env.e2e up --abort-on-container-exit --exit-code-from e2e e2e
+            - name: Copy scrape markdown logs to runner
+              if: ${{ failure() }}
+              run: |
+                  mkdir scrape-markdown-logs
+                  container_id="$(docker compose --env-file .env.e2e ps -q push-analytics)"
+                  docker cp ${container_id}:/usr/src/app/scrape-markdown-logs ./scrape-markdown-logs
+            - name: Store scrape markdown logs as a GHA artefact
+              if: ${{ failure() }}
+              uses: actions/upload-artifact@v4
+              with:
+                  name: scrape-markdown-logs
+                  path: scrape-markdown-logs/
 
     send-slack-message:
         runs-on: ubuntu-latest

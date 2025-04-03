@@ -3,6 +3,7 @@ dist
 # `.env` files may contain sensitive information
 .env
 images
+scrape-markdown-logs
 error-screenshots
 db-dump
 dump.sql.gz

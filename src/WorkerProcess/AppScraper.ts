@@ -16,6 +16,7 @@ import {
     clearDir,
     downloadPath,
     getDashboardItemVisualization,
+    MarkdownLogger,
     sanitizeSearchReplaceValue,
     waitForFileToDownload,
 } from './AppScraperUtils'
@@ -37,6 +38,7 @@ export class AppScraper implements Converter {
     #cdpSession: CDPSession
     #currentRequestUrlGlob: string
     #interceptedResponseHtml: ConverterResult | null
+    #logger: MarkdownLogger
 
     protected constructor(
         baseUrl: string,
@@ -50,6 +52,7 @@ export class AppScraper implements Converter {
         this.#cdpSession = cdpSession
         this.#currentRequestUrlGlob = ''
         this.#interceptedResponseHtml = null
+        this.#logger = new MarkdownLogger(page)
         page.on('response', this.#interceptResponse.bind(this))
         /* Enable this for debugging browser events in a headless browser.
          * For debugging issues that happen in the browser context it is
@@ -102,7 +105,12 @@ export class AppScraper implements Converter {
                  * all unsupported dashboard item types */
                 return Promise.resolve({ html: '', css: '' })
             }
+            this.#logger.startLogForItem(queueItem)
+
             await this.page.bringToFront()
+
+            await this.#logger.log('Initial app state after focussing page')
+
             this.#updateRequestUrlGlob(config)
             /* Make sure we download the exported file to `./images/${PID}_${dashboardItemId}`,
              * which allows us to track the download process in a relatively sane way */
@@ -115,6 +123,8 @@ export class AppScraper implements Converter {
                 visualization
             )
             await this.#clearVisualization(config)
+
+            this.#logger.logSuccess()
 
             return { html, css }
         } catch (error) {
@@ -132,6 +142,8 @@ export class AppScraper implements Converter {
                     ? error.message
                     : 'An unknown conversion error occurred'
             const message = `[${queueItem.dashboardItem.type} | ${visualizationType}] ${errorMessage}`
+
+            this.#logger.logError(message)
             throw new AppScraperError(message)
         }
     }
@@ -163,6 +175,13 @@ export class AppScraper implements Converter {
             flags: DONWLOAD_PAGE_URL_PATTERN.flags,
             source: DONWLOAD_PAGE_URL_PATTERN.source,
         })
+
+        if (shouldModify) {
+            await this.#logger.log(
+                'Going to modify download URL when new document is loading',
+                false
+            )
+        }
 
         await this.page.evaluateOnNewDocument(
             (options) => {
@@ -198,12 +217,14 @@ export class AppScraper implements Converter {
 
     async #showVisualization(config: ParsedScrapeInstructions) {
         if (config.showVisualization.strategy !== 'noop') {
+            await this.#logger.log('showVisualization: initializing steps')
             await this.#executeSteps(config.showVisualization.steps)
         }
     }
 
     async #triggerDownload(config: ParsedScrapeInstructions) {
         if (config.triggerDownload.strategy !== 'noop') {
+            await this.#logger.log('triggerDownload: initializing steps')
             await this.#executeSteps(config.triggerDownload.steps)
         }
     }
@@ -213,9 +234,16 @@ export class AppScraper implements Converter {
         visualization: AnyVisualization
     ): Promise<ConverterResult> {
         const downloadInstructions = config.obtainDownloadArtifact
+        const strategy = downloadInstructions.strategy
+
+        await this.#logger.log(
+            `obtainDownloadArtifact: initializing for strategy "${strategy}"`,
+            false
+        )
+
         const usesDownloadPage =
-            downloadInstructions.strategy === 'scrapeDownloadPage' ||
-            downloadInstructions.strategy === 'screenShotImgOnDownloadPage'
+            strategy === 'scrapeDownloadPage' ||
+            strategy === 'screenShotImgOnDownloadPage'
         const downloadPage = usesDownloadPage ? await this.#getDownloadPage() : null
         const result = await this.#obtainDownloadArtifactForStrategy(
             downloadInstructions,
@@ -276,6 +304,8 @@ export class AppScraper implements Converter {
             cssSelector
         )
 
+        await this.#logger.log('Scraped downloadPage', true, downloadPage)
+
         return {
             html: insertIntoDivTemplate(
                 (rawHtml ?? '').replace(/ {4}|[\t\n\r]/gm, ''),
@@ -294,6 +324,8 @@ export class AppScraper implements Converter {
         const base64 = await img?.screenshot({ encoding: 'base64' })
         const base64Str = Buffer.isBuffer(base64) ? base64.toString() : base64 ?? ''
 
+        await this.#logger.log('Taken screenshot of download page', true, downloadPage)
+
         return { html: insertIntoImageTemplate(base64Str, name), css: '' }
     }
 
@@ -308,6 +340,7 @@ export class AppScraper implements Converter {
             const base64Str = await base64EncodeFile(fullFilePath)
             // Clear dir for next time
             await clearDir(downloadDir)
+            await this.#logger.log('Intercepted file download', false)
             return {
                 html: insertIntoImageTemplate(base64Str, visualization.name),
                 css: '',
@@ -338,6 +371,7 @@ export class AppScraper implements Converter {
 
     async #clearVisualization(config: ParsedScrapeInstructions) {
         if (config.clearVisualization.strategy !== 'noop') {
+            await this.#logger.log('clearVisualization: initializing steps')
             await this.#executeSteps(config.clearVisualization.steps)
         }
     }
@@ -367,6 +401,7 @@ export class AppScraper implements Converter {
             minimatch(response.url(), this.#currentRequestUrlGlob)
         ) {
             const responseData = await response.json()
+            await this.#logger.log('Received intercepted response data', false)
             this.#interceptedResponseHtml = {
                 html: parseResponseDataToTable(responseData),
                 css: '',
@@ -394,10 +429,15 @@ export class AppScraper implements Converter {
         for (const step of steps) {
             if (step.click && typeof step.click === 'string') {
                 await this.page.click(step.click)
+                await this.#logger.log(`Executed click step for selector "${step.click}"`)
             } else if (step.waitForSelector && typeof step.waitForSelector === 'string') {
                 await this.page.waitForSelector(step.waitForSelector)
+                await this.#logger.log(
+                    `Executed waitForSelector step for selector "${step.waitForSelector}"`
+                )
             } else if (step.goto && typeof step.goto === 'string') {
                 await this.page.goto(step.goto, { waitUntil: 'networkidle2' })
+                await this.#logger.log(`Executed goto step for route "${step.goto}"`)
             } else {
                 throw new AppScraperError(
                     `Failed to intepret step "${JSON.stringify(step)}"`
