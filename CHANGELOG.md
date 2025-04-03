@@ -1,5 +1,11 @@
 # Changelog
 
+## <small>1.0.3 (2025-04-03)</small>
+
+* fix: bump puppeteer from 23.3.0 to 24.0.0 and adjust imported type (#46) ([0414e44](https://github.com/dhis2/push-analytics/commit/0414e44)), closes [#46](https://github.com/dhis2/push-analytics/issues/46)
+* chore(deps): bump tar-fs from 3.0.6 to 3.0.8 (#59) ([96aecbc](https://github.com/dhis2/push-analytics/commit/96aecbc)), closes [#59](https://github.com/dhis2/push-analytics/issues/59)
+* chore(deps): bump the dependencies group across 1 directory with 14 updates (#62) ([ef05029](https://github.com/dhis2/push-analytics/commit/ef05029)), closes [#62](https://github.com/dhis2/push-analytics/issues/62)
+
 ## [1.0.2](https://github.com/dhis2/push-analytics/compare/1.0.1...1.0.2) (2025-04-03)
 
 ## [1.0.1](https://github.com/dhis2/push-analytics/compare/1.0.0...1.0.1) (2024-09-06)
