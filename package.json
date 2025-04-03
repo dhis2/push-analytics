@@ -59,7 +59,7 @@
     },
     "dependencies": {
         "@dhis2/d2-ui-rich-text": "^7.4.3",
-        "axios": "^1.7.9",
+        "axios": "^1.8.2",
         "globals": "^15.14.0",
         "minimatch": "^10.0.1",
         "puppeteer": "^23.3.0"
