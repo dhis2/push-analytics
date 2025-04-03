@@ -9,7 +9,7 @@ concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
 
 env:
-    LOG_LEVEL: 'scraper'
+    LOG_LEVEL: 'on'
 
 jobs:
     verify:
