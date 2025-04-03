@@ -1,4 +1,4 @@
-import type { PuppeteerLaunchOptions } from 'puppeteer'
+import type { LaunchOptions } from 'puppeteer'
 import puppeteer from 'puppeteer'
 
 /* Notes about Chrome args:
@@ -7,7 +7,7 @@ import puppeteer from 'puppeteer'
 
 export async function createPuppeteerBrowser(debug: boolean) {
     const defaultViewport = { width: 1280, height: 1000 }
-    const browserOptions: PuppeteerLaunchOptions = debug
+    const browserOptions: LaunchOptions = debug
         ? {
               headless: false,
               devtools: true,
