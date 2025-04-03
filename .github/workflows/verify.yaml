@@ -9,7 +9,7 @@ concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
 
 env:
-    LOG_LEVEL: 'on'
+    LOG_LEVEL: 'scraper'
 
 jobs:
     verify:
@@ -53,8 +53,6 @@ jobs:
             - name: Spin up the E2E environment
               # Fake SMTP is not needed for the e2e tests
               run: docker compose --env-file .env.e2e up -d web db db-dump post-install-scripts push-analytics
-            - name: Show push-analytics logs to inspect if the scraping logger is activated
-              run: sleep 40s && docker compose --env-file .env.e2e logs push-analytics
             - name: Run the e2e test suite
               run: docker compose --env-file .env.e2e up --abort-on-container-exit --exit-code-from e2e e2e
             - name: Copy scrape markdown logs to runner
