@@ -25,6 +25,7 @@ export class MarkdownLogger {
 
         if (this.#shouldLog) {
             this.#prepareLogDir()
+            console.log(`Initializing MarkdownLogger for PID ${process.pid}`)
         }
     }
 
