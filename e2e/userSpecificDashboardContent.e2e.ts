@@ -4,8 +4,7 @@ import assert from 'node:assert'
 import { describe, test } from 'node:test'
 import stringSimilarity from 'string-similarity'
 import request from 'supertest'
-
-const fixturesPath = path.resolve('./e2e/__fixtures__')
+import { getFixtureDir } from './utils'
 
 describe('producing user specific dashboard content', () => {
     if (!process.env.HOST || !process.env.PORT) {
@@ -13,6 +12,8 @@ describe('producing user specific dashboard content', () => {
     }
     const url = `${process.env.HOST}:${process.env.PORT}`
     console.log(`Running tests agains URL "${url}"`)
+    const fixtureDir = getFixtureDir()
+    const fixturesPath = path.resolve('./e2e/__fixtures__', fixtureDir)
     const req = request(url)
     const dashboardId = 'KQVXh5tlzW2'
     const usernameWithNorwegianLocale = 'test_user_national_nb'
