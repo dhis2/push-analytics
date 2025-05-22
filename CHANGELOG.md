@@ -1,5 +1,9 @@
 # Changelog
 
+## <small>1.0.4 (2025-05-22)</small>
+
+* chore: start working with version specific fixtures (#72) ([efc8f82](https://github.com/dhis2/push-analytics/commit/efc8f82)), closes [#72](https://github.com/dhis2/push-analytics/issues/72)
+
 ## <small>1.0.3 (2025-04-03)</small>
 
 * fix: bump puppeteer from 23.3.0 to 24.0.0 and adjust imported type (#46) ([0414e44](https://github.com/dhis2/push-analytics/commit/0414e44)), closes [#46](https://github.com/dhis2/push-analytics/issues/46)
