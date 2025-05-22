@@ -5,6 +5,7 @@
         ".prettierrc.js",
         ".commitlintrc.ts",
         "src/**/*",
-        "e2e/**/*.e2e.ts"
+        "e2e/**/*.e2e.ts",
+        "e2e/utils.ts"
     ]
 }

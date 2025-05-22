@@ -4,14 +4,14 @@ import assert from 'node:assert'
 import { describe, test } from 'node:test'
 import stringSimilarity from 'string-similarity'
 import request from 'supertest'
-
-const fixturesPath = path.resolve('./e2e/__fixtures__')
+import { getFixtureDir } from './utils'
 
 describe('converting all types of dashboard items', () => {
     if (!process.env.HOST || !process.env.PORT) {
         throw new Error('HOST and PORT env variables missing, aborting test run')
     }
     const url = `${process.env.HOST}:${process.env.PORT}`
+    const fixturesPath = getFixtureDir()
 
     console.log(`Running tests agains URL "${url}"`)
 
