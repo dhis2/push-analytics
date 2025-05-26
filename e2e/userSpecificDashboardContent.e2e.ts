@@ -4,7 +4,7 @@ import assert from 'node:assert'
 import { describe, test } from 'node:test'
 import stringSimilarity from 'string-similarity'
 import request from 'supertest'
-import { assertEnv, getFixtureDir } from './utils'
+import { assertEnv, getFixtureDir, saveActualHtml } from './utils'
 
 describe('producing user specific dashboard content', () => {
     test('ensure the expected env vars are in place', () => {
@@ -57,13 +57,7 @@ describe('producing user specific dashboard content', () => {
             )
             console.log(`Actual and expected string are ${similarity * 100}% similar`)
             if (similarity <= 0.8) {
-                fs.writeFileSync(
-                    path.resolve(
-                        './e2e/generated-html/',
-                        `${dashboardId}_${username}.html`
-                    ),
-                    actualHtml
-                )
+                saveActualHtml(`${dashboardId}_${username}.html`, actualHtml)
             }
             assert.strictEqual(similarity > 0.8, true)
         })

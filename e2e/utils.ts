@@ -1,5 +1,6 @@
 import path from 'node:path'
 import assert from 'node:assert'
+import fs from 'node:fs'
 
 export function assertEnv() {
     assert.ok(process.env.HOST)
@@ -17,4 +18,12 @@ export function getFixtureDir(dhis2ImageTag = '') {
     console.log(`Using fixtures from "${fixturesPath}"`)
 
     return fixturesPath
+}
+
+export function saveActualHtml(fileName: string, actualHtml: string) {
+    const dir = path.resolve('./e2e/generated-html')
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir)
+    }
+    fs.writeFileSync(path.resolve(dir, fileName), actualHtml)
 }
