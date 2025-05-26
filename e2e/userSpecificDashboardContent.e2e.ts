@@ -4,12 +4,10 @@ import assert from 'node:assert'
 import { describe, test } from 'node:test'
 import stringSimilarity from 'string-similarity'
 import request from 'supertest'
-import { getFixtureDir } from './utils'
+import { assertEnv, getFixtureDir } from './utils'
 
 describe('producing user specific dashboard content', () => {
-    if (!process.env.HOST || !process.env.PORT) {
-        throw new Error('HOST and PORT env variables missing, aborting test run')
-    }
+    assertEnv()
     const url = `${process.env.HOST}:${process.env.PORT}`
     console.log(`Running tests agains URL "${url}"`)
     const fixtureDir = getFixtureDir()
