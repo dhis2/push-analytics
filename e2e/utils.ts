@@ -1,12 +1,16 @@
 import path from 'node:path'
+import assert from 'node:assert'
+import fs from 'node:fs'
 
-export function getFixtureDir() {
-    if (!process.env.DHIS2_IMAGE) {
-        throw new Error(
-            'Ensure DHIS2_IMAGE is set before running these tests, because the fixtures are version specific'
-        )
-    }
-    const imageTagDir = process.env.DHIS2_IMAGE.replace('dhis2/', '')
+export function assertEnv() {
+    assert.ok(process.env.HOST)
+    assert.ok(process.env.PORT)
+    assert.ok(process.env.DHIS2_IMAGE)
+}
+
+export function getFixtureDir(dhis2ImageTag = '') {
+    const imageTagDir = dhis2ImageTag
+        .replace('dhis2/', '')
         .replace(':', '_')
         .replace('.', '-')
     const fixturesPath = path.resolve('./e2e/__fixtures__', imageTagDir)
@@ -14,4 +18,12 @@ export function getFixtureDir() {
     console.log(`Using fixtures from "${fixturesPath}"`)
 
     return fixturesPath
+}
+
+export function saveActualHtml(fileName: string, actualHtml: string) {
+    const dir = path.resolve('./e2e/generated-html')
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir)
+    }
+    fs.writeFileSync(path.resolve(dir, fileName), actualHtml)
 }

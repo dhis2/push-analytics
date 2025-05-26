@@ -4,14 +4,14 @@ import assert from 'node:assert'
 import { describe, test } from 'node:test'
 import stringSimilarity from 'string-similarity'
 import request from 'supertest'
-import { getFixtureDir } from './utils'
+import { assertEnv, getFixtureDir, saveActualHtml } from './utils'
 
 describe('converting all types of dashboard items', () => {
-    if (!process.env.HOST || !process.env.PORT) {
-        throw new Error('HOST and PORT env variables missing, aborting test run')
-    }
+    test('ensure the expected env vars are in place', () => {
+        assertEnv()
+    })
     const url = `${process.env.HOST}:${process.env.PORT}`
-    const fixturesPath = getFixtureDir()
+    const fixtureDir = getFixtureDir(process.env.DHIS2_IMAGE)
 
     console.log(`Running tests agains URL "${url}"`)
 
@@ -20,7 +20,7 @@ describe('converting all types of dashboard items', () => {
         const dashboardId = 'ceneQPMhemM'
         const username = 'test_user_national'
         const locale = 'en'
-        const filePath = path.resolve(fixturesPath, `${dashboardId}_${username}.txt`)
+        const filePath = path.resolve(fixtureDir, `${dashboardId}_${username}.txt`)
         const expectedHtml = fs.readFileSync(filePath).toString()
         const response = await req.get('/').query({ dashboardId, username, locale })
 
@@ -41,6 +41,9 @@ describe('converting all types of dashboard items', () => {
          * are showing.*/
         const similarity = stringSimilarity.compareTwoStrings(actualHtml, expectedHtml)
         console.log(`Actual and expected string are ${similarity * 100}% similar`)
+        if (similarity <= 0.8) {
+            saveActualHtml(`${dashboardId}_${username}.html`, actualHtml)
+        }
         assert.strictEqual(similarity > 0.8, true)
     })
 })

@@ -4,15 +4,15 @@ import assert from 'node:assert'
 import { describe, test } from 'node:test'
 import stringSimilarity from 'string-similarity'
 import request from 'supertest'
-import { getFixtureDir } from './utils'
+import { assertEnv, getFixtureDir, saveActualHtml } from './utils'
 
 describe('producing user specific dashboard content', () => {
-    if (!process.env.HOST || !process.env.PORT) {
-        throw new Error('HOST and PORT env variables missing, aborting test run')
-    }
+    test('ensure the expected env vars are in place', () => {
+        assertEnv()
+    })
     const url = `${process.env.HOST}:${process.env.PORT}`
     console.log(`Running tests agains URL "${url}"`)
-    const fixtureDir = getFixtureDir()
+    const fixtureDir = getFixtureDir(process.env.DHIS2_IMAGE)
     const fixturesPath = path.resolve('./e2e/__fixtures__', fixtureDir)
     const req = request(url)
     const dashboardId = 'KQVXh5tlzW2'
@@ -56,6 +56,9 @@ describe('producing user specific dashboard content', () => {
                 expectedHtml
             )
             console.log(`Actual and expected string are ${similarity * 100}% similar`)
+            if (similarity <= 0.8) {
+                saveActualHtml(`${dashboardId}_${username}.html`, actualHtml)
+            }
             assert.strictEqual(similarity > 0.8, true)
         })
     }
