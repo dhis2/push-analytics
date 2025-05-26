@@ -152,6 +152,7 @@ services:
         environment:
             - HOST=${HOST}
             - PORT=${PORT}
+            - DHIS2_IMAGE=${DHIS2_IMAGE}
         command: >
             sh -c "npm install npm@latest -g &&
                    npm ci --yes --ignore-scripts --include=dev &&
