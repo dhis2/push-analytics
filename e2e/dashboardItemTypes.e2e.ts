@@ -9,7 +9,7 @@ import { assertEnv, getFixtureDir } from './utils'
 describe('converting all types of dashboard items', () => {
     assertEnv()
     const url = `${process.env.HOST}:${process.env.PORT}`
-    const fixturesPath = getFixtureDir(process.env.DHIS2_IMAGE)
+    const fixtureDir = getFixtureDir(process.env.DHIS2_IMAGE)
 
     console.log(`Running tests agains URL "${url}"`)
 
@@ -18,7 +18,7 @@ describe('converting all types of dashboard items', () => {
         const dashboardId = 'ceneQPMhemM'
         const username = 'test_user_national'
         const locale = 'en'
-        const filePath = path.resolve(fixturesPath, `${dashboardId}_${username}.txt`)
+        const filePath = path.resolve(fixtureDir, `${dashboardId}_${username}.txt`)
         const expectedHtml = fs.readFileSync(filePath).toString()
         const response = await req.get('/').query({ dashboardId, username, locale })
 
