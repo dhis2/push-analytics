@@ -7,7 +7,9 @@ import request from 'supertest'
 import { assertEnv, getFixtureDir } from './utils'
 
 describe('producing user specific dashboard content', () => {
-    assertEnv()
+    test('ensure the expected env vars are in place', () => {
+        assertEnv()
+    })
     const url = `${process.env.HOST}:${process.env.PORT}`
     console.log(`Running tests agains URL "${url}"`)
     const fixtureDir = getFixtureDir(process.env.DHIS2_IMAGE)

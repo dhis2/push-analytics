@@ -7,7 +7,9 @@ import request from 'supertest'
 import { assertEnv, getFixtureDir } from './utils'
 
 describe('converting all types of dashboard items', () => {
-    assertEnv()
+    test('ensure the expected env vars are in place', () => {
+        assertEnv()
+    })
     const url = `${process.env.HOST}:${process.env.PORT}`
     const fixtureDir = getFixtureDir(process.env.DHIS2_IMAGE)
 
