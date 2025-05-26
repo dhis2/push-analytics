@@ -9,7 +9,7 @@ import { assertEnv, getFixtureDir } from './utils'
 describe('converting all types of dashboard items', () => {
     assertEnv()
     const url = `${process.env.HOST}:${process.env.PORT}`
-    const fixturesPath = getFixtureDir()
+    const fixturesPath = getFixtureDir(process.env.DHIS2_IMAGE)
 
     console.log(`Running tests agains URL "${url}"`)
 

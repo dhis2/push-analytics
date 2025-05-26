@@ -10,7 +10,7 @@ describe('producing user specific dashboard content', () => {
     assertEnv()
     const url = `${process.env.HOST}:${process.env.PORT}`
     console.log(`Running tests agains URL "${url}"`)
-    const fixtureDir = getFixtureDir()
+    const fixtureDir = getFixtureDir(process.env.DHIS2_IMAGE)
     const fixturesPath = path.resolve('./e2e/__fixtures__', fixtureDir)
     const req = request(url)
     const dashboardId = 'KQVXh5tlzW2'
