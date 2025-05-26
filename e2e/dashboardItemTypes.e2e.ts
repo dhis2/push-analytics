@@ -42,7 +42,7 @@ describe('converting all types of dashboard items', () => {
         const similarity = stringSimilarity.compareTwoStrings(actualHtml, expectedHtml)
         console.log(`Actual and expected string are ${similarity * 100}% similar`)
         if (similarity <= 0.8) {
-            fs.writeFileSync(path.resolve('./generated-html'), actualHtml)
+            fs.writeFileSync(path.resolve('./e2e/generated-html'), actualHtml)
         }
         assert.strictEqual(similarity > 0.8, true)
     })
