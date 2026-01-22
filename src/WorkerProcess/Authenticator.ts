@@ -57,7 +57,8 @@ export class Authenticator implements IAuthenticator {
                     this.#env.adminUsername
                 }"`
             )
-        } catch {
+        } catch (error) {
+            debugLog(error)
             throw new AuthenticationError(
                 'Admin user could not login to the DHIS2 Core instance'
             )
@@ -160,7 +161,11 @@ export class Authenticator implements IAuthenticator {
         await this.#page.waitForSelector('#username')
         await this.#page.type('#username', this.#env.adminUsername)
         await this.#page.type('#password', this.#env.adminPassword)
-        await this.#page.click('button[type="submit"]')
+        // Click submit and wait for navigation to complete
+        await Promise.all([
+            this.#page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 }),
+            this.#page.click('button[type="submit"]')
+        ])
     }
 
     #preventSessionExpiry() {
