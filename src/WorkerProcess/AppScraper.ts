@@ -1,6 +1,6 @@
-import fs from 'fs'
+import fs from 'node:fs'
+import path from 'node:path'
 import { minimatch } from 'minimatch'
-import path from 'path'
 import type { Browser, CDPSession, HTTPResponse, Page } from 'puppeteer'
 import type {
     AnyVisualization,
@@ -33,13 +33,13 @@ const DONWLOAD_PAGE_URL_PATTERN =
     /api\/analytics\/enrollments|events\/query\/[a-zA-Z0-9]{11}\.html\+css/
 
 export class AppScraper implements Converter {
-    baseUrl: string
-    #browser: Browser
-    #page: Page
-    #cdpSession: CDPSession
+    readonly baseUrl: string
+    readonly #browser: Browser
+    readonly #page: Page
+    readonly #cdpSession: CDPSession
     #currentRequestUrlGlob: string
     #interceptedResponseHtml: ConverterResult | null
-    #logger: MarkdownLogger
+    readonly #logger: MarkdownLogger
 
     protected constructor(
         baseUrl: string,
@@ -104,7 +104,7 @@ export class AppScraper implements Converter {
                 /* We only support event-visualizations of type line-lists.
                  * For any other type we return empty HTML as we do for all
                  * all unsupported dashboard item types */
-                return Promise.resolve({ html: '', css: '' })
+                return { html: '', css: '' }
             }
             this.#logger.startLogForItem(queueItem)
 
@@ -427,25 +427,28 @@ export class AppScraper implements Converter {
     }
 
     async #executeSteps(steps: Steps) {
-        for (const step of steps) {
-            if (step.click && typeof step.click === 'string') {
-                await this.page.click(step.click)
-                await this.#logger.log(`Executed click step for selector "${step.click}"`)
-            } else if (step.waitForSelector && typeof step.waitForSelector === 'string') {
-                await this.page.waitForSelector(step.waitForSelector)
-                await this.#logger.log(
-                    `Executed waitForSelector step for selector "${step.waitForSelector}"`
-                )
-            } else if (step.goto && typeof step.goto === 'string') {
-                await this.page.goto(toStandaloneAppUrl(step.goto), {
-                    waitUntil: 'networkidle2',
-                })
-                await this.#logger.log(`Executed goto step for route "${step.goto}"`)
-            } else {
-                throw new AppScraperError(
-                    `Failed to intepret step "${JSON.stringify(step)}"`
-                )
-            }
+        await steps.reduce<Promise<void>>(
+            (previousStep, step) => previousStep.then(() => this.#executeStep(step)),
+            Promise.resolve()
+        )
+    }
+
+    async #executeStep(step: Steps[number]) {
+        if (step.click && typeof step.click === 'string') {
+            await this.page.click(step.click)
+            await this.#logger.log(`Executed click step for selector "${step.click}"`)
+        } else if (step.waitForSelector && typeof step.waitForSelector === 'string') {
+            await this.page.waitForSelector(step.waitForSelector)
+            await this.#logger.log(
+                `Executed waitForSelector step for selector "${step.waitForSelector}"`
+            )
+        } else if (step.goto && typeof step.goto === 'string') {
+            await this.page.goto(toStandaloneAppUrl(step.goto), {
+                waitUntil: 'networkidle2',
+            })
+            await this.#logger.log(`Executed goto step for route "${step.goto}"`)
+        } else {
+            throw new AppScraperError(`Failed to intepret step "${JSON.stringify(step)}"`)
         }
     }
 

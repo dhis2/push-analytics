@@ -20,9 +20,9 @@ export interface IAuthenticator {
 }
 
 export class Authenticator implements IAuthenticator {
-    #env: PushAnalyticsEnvVariables
-    #page: Page
-    #converter: DashboardItemConverter
+    readonly #env: PushAnalyticsEnvVariables
+    readonly #page: Page
+    readonly #converter: DashboardItemConverter
     #sessionCookie: Cookie | null
     #impersonatedUser: string | null
 
@@ -178,7 +178,7 @@ export class Authenticator implements IAuthenticator {
 
     #preventSessionExpiry() {
         // Do a ping request 30 seconds before the session is due to expire
-        const intervalInMs = (parseInt(this.#env.sessionTimeout) - 30) * 1000
+        const intervalInMs = (Number.parseInt(this.#env.sessionTimeout) - 30) * 1000
         const intervalId = setInterval(async () => {
             /* Bringing the login page to the front could break the
              * dashboard item conversion process. And and the naturally
