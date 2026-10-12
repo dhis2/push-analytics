@@ -20,9 +20,9 @@ type RequestHandlerOptions = {
 }
 
 export class RequestHandler {
-    #env: PushAnalyticsEnvVariables
+    readonly #env: PushAnalyticsEnvVariables
     #requestId: number
-    #onDashboardDetailsReceived: (options: AddDashboardOptions) => void
+    readonly #onDashboardDetailsReceived: (options: AddDashboardOptions) => void
 
     constructor({ env, onDashboardDetailsReceived }: RequestHandlerOptions) {
         this.#env = env
