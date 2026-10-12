@@ -7,7 +7,7 @@ while true; do
     if curl -fsS -o /dev/null --user "$USERNAME:$PASSWORD" "$BASE_URL/api/me"; then
         echo "DHIS2 Core is up" 1>&2
         exit 0
-    elif test $TRIES -ge 120; then
+    elif [[ $TRIES -ge 120 ]]; then
         echo "DHIS2 Core did not come up within 20 minutes" 1>&2
         exit 1
     else

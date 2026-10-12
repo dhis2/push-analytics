@@ -22,7 +22,7 @@ while true; do
         exit 0
         break
     # Let's give up after 30 minutes (30*60/5=360)
-    elif test $TRIES -ge 360; then
+    elif [[ $TRIES -ge 360 ]]; then
         echo "Analytics table generation timed out" 1>&2
         exit 1
         break
