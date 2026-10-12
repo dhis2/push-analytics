@@ -89,6 +89,7 @@ export class RequestHandler {
                 params: {
                     fields: getDashboardFieldsParam(),
                     locale,
+                    translate: true,
                 },
                 auth: { username: adminUsername, password: adminPassword },
             }
