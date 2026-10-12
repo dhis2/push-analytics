@@ -18,6 +18,7 @@ import {
     getDashboardItemVisualization,
     MarkdownLogger,
     sanitizeSearchReplaceValue,
+    toStandaloneAppUrl,
     waitForFileToDownload,
 } from './AppScraperUtils'
 import { AppScraperError } from './AppScraperUtils/AppScraperError'
@@ -436,7 +437,9 @@ export class AppScraper implements Converter {
                     `Executed waitForSelector step for selector "${step.waitForSelector}"`
                 )
             } else if (step.goto && typeof step.goto === 'string') {
-                await this.page.goto(step.goto, { waitUntil: 'networkidle2' })
+                await this.page.goto(toStandaloneAppUrl(step.goto), {
+                    waitUntil: 'networkidle2',
+                })
                 await this.#logger.log(`Executed goto step for route "${step.goto}"`)
             } else {
                 throw new AppScraperError(
