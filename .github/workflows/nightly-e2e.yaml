@@ -6,16 +6,42 @@ on:
         - cron: '30 5 * * 1-5'
 
 env:
-    DHIS2_IMAGE: 'dhis2/core-dev:2.41'
-    PUSH_ANALYTICS_IMAGE: 'dhis2/push-analytics:latest'
+    PUSH_ANALYTICS_IMAGE: 'dhis2/push-analytics:local'
     LOG_LEVEL: 'scraper'
 
 jobs:
     nightly-e2e:
         runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - dhis2-image: 'dhis2/core-dev:2.41'
+                      dhis2-major-version: '41'
+                    - dhis2-image: 'dhis2/core-dev:2.42'
+                      dhis2-major-version: '42'
+                    - dhis2-image: 'dhis2/core-dev:2.43'
+                      dhis2-major-version: '43'
+                    - dhis2-image: 'dhis2/core-dev:master'
+                      dhis2-major-version: '44'
+        env:
+            DHIS2_IMAGE: ${{ matrix.dhis2-image }}
+            DHIS2_CORE_MAJOR_VERSION: ${{ matrix.dhis2-major-version }}
         steps:
             - name: Checkout repo
               uses: actions/checkout@v4
+            - name: Setup Docker BuildX
+              uses: docker/setup-buildx-action@v3
+            - name: Build local Docker image
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  file: ./Dockerfile
+                  push: false
+                  load: true
+                  tags: dhis2/push-analytics:local
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
             - name: Spin up the E2E environment
               # Fake SMTP is not needed for the e2e tests
               run: docker compose --env-file .env.e2e up -d web db db-dump post-install-scripts push-analytics
@@ -34,7 +60,7 @@ jobs:
               if: ${{ failure() }}
               uses: actions/upload-artifact@v4
               with:
-                  name: e2e-failure-output
+                  name: e2e-failure-output-${{ matrix.dhis2-major-version }}
                   path: e2e-output/
 
     send-slack-message:
