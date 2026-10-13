@@ -434,7 +434,13 @@ export class AppScraper implements Converter {
 
     async #executeStep(step: Steps[number]) {
         if (step.click && typeof step.click === 'string') {
-            await this.page.click(step.click)
+            await this.page.evaluate((selector) => {
+                const element = document.querySelector<HTMLElement>(selector)
+                if (!element) {
+                    throw new Error(`No element found for selector "${selector}"`)
+                }
+                element.click()
+            }, step.click)
             await this.#logger.log(`Executed click step for selector "${step.click}"`)
         } else if (step.waitForSelector && typeof step.waitForSelector === 'string') {
             await this.page.waitForSelector(step.waitForSelector)
