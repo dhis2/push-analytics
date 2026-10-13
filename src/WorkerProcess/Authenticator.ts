@@ -156,6 +156,7 @@ export class Authenticator implements IAuthenticator {
 
     async #loginViaApi() {
         await this.#page.bringToFront()
+        // Open a lightweight unauthenticated page on the DHIS2 origin so the login fetch below is same-origin and its session cookie is stored in the browser
         await this.#page.goto(`${this.#env.baseUrl}/api/ping`)
 
         const loginStatus = await this.#page.evaluate(
