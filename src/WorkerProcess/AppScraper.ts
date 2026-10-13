@@ -18,7 +18,6 @@ import {
     getDashboardItemVisualization,
     MarkdownLogger,
     sanitizeSearchReplaceValue,
-    toStandaloneAppUrl,
     waitForFileToDownload,
 } from './AppScraperUtils'
 import { AppScraperError } from './AppScraperUtils/AppScraperError'
@@ -443,10 +442,12 @@ export class AppScraper implements Converter {
                 `Executed waitForSelector step for selector "${step.waitForSelector}"`
             )
         } else if (step.goto && typeof step.goto === 'string') {
-            await this.page.goto(toStandaloneAppUrl(step.goto), {
-                waitUntil: 'networkidle2',
-            })
-            await this.#logger.log(`Executed goto step for route "${step.goto}"`)
+            // Since 2.42 legacy app paths redirect into the global shell (iframe);
+            // `redirect=false` opts out. Must go in the real query string, before the hash.
+            const url = new URL(step.goto)
+            url.searchParams.set('redirect', 'false')
+            await this.page.goto(url.toString(), { waitUntil: 'networkidle2' })
+            await this.#logger.log(`Executed goto step for route "${url}"`)
         } else {
             throw new AppScraperError(`Failed to intepret step "${JSON.stringify(step)}"`)
         }
