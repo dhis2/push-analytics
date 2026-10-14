@@ -1,0 +1,52 @@
+name: push-analytics-e2e-db
+
+services:
+    web:
+        image: '${DHIS2_IMAGE:-dhis2/core:2.41}'
+        ports:
+            - '127.0.0.1:${DHIS2_PORT:-8090}:8080'
+        volumes:
+            - ../dhis.conf:/opt/dhis2/dhis.conf:ro
+        depends_on:
+            db:
+                condition: service_healthy
+
+    db:
+        image: ghcr.io/baosystems/postgis:12-3.3
+        volumes:
+            - ./dump.sql.gz:/docker-entrypoint-initdb.d/sierra-leone.sql.gz:ro
+        environment:
+            POSTGRES_USER: dhis
+            POSTGRES_DB: dhis
+            POSTGRES_PASSWORD: &postgres_password dhis
+            PGPASSWORD: *postgres_password
+        healthcheck:
+            test:
+                [
+                    'CMD-SHELL',
+                    'psql --no-password --quiet --username $$POSTGRES_USER postgres://127.0.0.1/$$POSTGRES_DB -p 5432 --command "SELECT ''ok''" > /dev/null',
+                ]
+            start_period: 600s
+            interval: 5s
+            timeout: 600s
+            retries: 120
+
+    configure:
+        image: alpine:latest
+        environment:
+            - BASE_URL=http://web:8080
+            - USERNAME=system
+            - PASSWORD=System123
+            - DATA_YEAR=${DATA_YEAR}
+            - FAKESMTP_PORT=${FAKESMTP_PORT}
+            - FAKESMTP_AUTHENTICATION_USERNAME=${FAKESMTP_AUTHENTICATION_USERNAME}
+            - FAKESMTP_AUTHENTICATION_PASSWORD=${FAKESMTP_AUTHENTICATION_PASSWORD}
+        volumes:
+            - .:/opt/e2e-db:ro
+        working_dir: /opt/e2e-db
+        command: >
+            sh -c "apk add --no-cache bash curl jq &&
+                   ./configure_e2e_db.sh"
+        depends_on:
+            web:
+                condition: service_started

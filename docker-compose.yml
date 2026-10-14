@@ -92,6 +92,7 @@ services:
             - USERNAME=admin
             - PASSWORD=district
             - APPS_TO_INSTALL='${APPS_TO_INSTALL:-Line Listing}'
+            - ANALYTICS_FIRST_YEAR=${ANALYTICS_FIRST_YEAR}
         volumes:
             - ./docker/scripts:/opt/scripts
         working_dir: /opt/scripts
