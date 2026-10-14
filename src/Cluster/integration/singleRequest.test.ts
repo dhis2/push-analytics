@@ -14,6 +14,7 @@ import {
     getHttpServer,
     getOutputFixture,
     initializeMockCluster,
+    waitMs,
 } from './utils'
 import { tearDownCluster } from './utils/tearDownCluster'
 
@@ -43,6 +44,7 @@ describe(
                 const response = await request(getHttpServer()).get(
                     `/?dashboardId=${dashboardId}&username=admin&locale=en`
                 )
+                await waitMs(200)
                 const itemRequestedMessages = messagesFromWorkers.filter(
                     ({ type }) => type === 'ITEM_REQUESTED_FROM_QUEUE'
                 )
