@@ -98,6 +98,17 @@ export class AppScraper implements Converter {
         config: ParsedScrapeInstructions
     ): Promise<ConverterResult> {
         try {
+            return await this.#convertOnce(queueItem, config)
+        } catch {
+            return await this.#convertOnce(queueItem, config)
+        }
+    }
+
+    async #convertOnce(
+        queueItem: QueueItem,
+        config: ParsedScrapeInstructions
+    ): Promise<ConverterResult> {
+        try {
             const visualization = getDashboardItemVisualization(queueItem.dashboardItem)
 
             if (
