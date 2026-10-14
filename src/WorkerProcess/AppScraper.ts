@@ -39,6 +39,8 @@ export class AppScraper implements Converter {
     #currentRequestUrlGlob: string
     #interceptedResponseHtml: ConverterResult | null
     readonly #logger: MarkdownLogger
+    #lastUsername: string | null
+    #requiresFullPageLoad: boolean
 
     protected constructor(
         baseUrl: string,
@@ -53,6 +55,8 @@ export class AppScraper implements Converter {
         this.#currentRequestUrlGlob = ''
         this.#interceptedResponseHtml = null
         this.#logger = new MarkdownLogger(page)
+        this.#lastUsername = null
+        this.#requiresFullPageLoad = false
         page.on('response', this.#interceptResponse.bind(this))
         /* Enable this for debugging browser events in a headless browser.
          * For debugging issues that happen in the browser context it is
@@ -107,6 +111,11 @@ export class AppScraper implements Converter {
             }
             this.#logger.startLogForItem(queueItem)
 
+            if (queueItem.username !== this.#lastUsername) {
+                this.#requiresFullPageLoad = true
+                this.#lastUsername = queueItem.username
+            }
+
             await this.page.bringToFront()
 
             await this.#logger.log('Initial app state after focussing page')
@@ -143,6 +152,7 @@ export class AppScraper implements Converter {
                     : 'An unknown conversion error occurred'
             const message = `[${queueItem.dashboardItem.type} | ${visualizationType}] ${errorMessage}`
 
+            this.#requiresFullPageLoad = true
             this.#logger.logError(message)
             throw new AppScraperError(message)
         }
@@ -446,6 +456,10 @@ export class AppScraper implements Converter {
             // `redirect=false` opts out. Must go in the real query string, before the hash.
             const url = new URL(step.goto)
             url.searchParams.set('redirect', 'false')
+            if (this.#requiresFullPageLoad) {
+                await this.page.goto('about:blank')
+                this.#requiresFullPageLoad = false
+            }
             await this.page.goto(url.toString(), { waitUntil: 'networkidle2' })
             await this.#logger.log(`Executed goto step for route "${url}"`)
         } else {
