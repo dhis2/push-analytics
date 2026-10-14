@@ -41,6 +41,7 @@ services:
             - FAKESMTP_PORT=${FAKESMTP_PORT}
             - FAKESMTP_AUTHENTICATION_USERNAME=${FAKESMTP_AUTHENTICATION_USERNAME}
             - FAKESMTP_AUTHENTICATION_PASSWORD=${FAKESMTP_AUTHENTICATION_PASSWORD}
+            - PUSH_ANALYTICS_URL_TEMPLATE=${HOST}:${PORT}/?dashboardId={id}&username={username}&locale={locale}
         volumes:
             - .:/opt/e2e-db:ro
         working_dir: /opt/e2e-db

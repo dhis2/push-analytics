@@ -75,6 +75,7 @@ api POST systemSettings -o /dev/null -d "$(jq -n \
     --arg port "$FAKESMTP_PORT" \
     --arg username "$FAKESMTP_AUTHENTICATION_USERNAME" \
     --arg password "$FAKESMTP_AUTHENTICATION_PASSWORD" \
+    --arg url "$PUSH_ANALYTICS_URL_TEMPLATE" \
     '{
         keyCacheStrategy: "NO_CACHE",
         keyEmailHostName: "fake-smtp-server",
@@ -83,7 +84,7 @@ api POST systemSettings -o /dev/null -d "$(jq -n \
         keyEmailPassword: $password,
         keyEmailTls: "false",
         keyEmailSender: "push-analytics@example.org",
-        keyHtmlPushAnalyticsUrl: "http://push-analytics:1337/?dashboardId={id}&username={username}&locale={locale}"
+        keyHtmlPushAnalyticsUrl: $url
     }')"
 echo "Configured email, the push analytics URL and no HTTP caching"
 
