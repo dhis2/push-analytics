@@ -20,9 +20,9 @@ export interface IAuthenticator {
 }
 
 export class Authenticator implements IAuthenticator {
-    #env: PushAnalyticsEnvVariables
-    #page: Page
-    #converter: DashboardItemConverter
+    readonly #env: PushAnalyticsEnvVariables
+    readonly #page: Page
+    readonly #converter: DashboardItemConverter
     #sessionCookie: Cookie | null
     #impersonatedUser: string | null
 
@@ -49,7 +49,7 @@ export class Authenticator implements IAuthenticator {
 
     public async establishNonExpiringAdminSession(): Promise<void> {
         try {
-            await this.#loginViaForm()
+            await this.#loginViaApi()
             await this.#setSessionCookie()
             this.#preventSessionExpiry()
             debugLog(
@@ -154,18 +154,32 @@ export class Authenticator implements IAuthenticator {
         }, options)
     }
 
-    async #loginViaForm() {
+    async #loginViaApi() {
         await this.#page.bringToFront()
-        await this.#page.goto(`${this.#env.baseUrl}/dhis-web-login/`)
-        await this.#page.waitForSelector('#username')
-        await this.#page.type('#username', this.#env.adminUsername)
-        await this.#page.type('#password', this.#env.adminPassword)
-        await this.#page.click('button[type="submit"]')
+        // Open a lightweight unauthenticated page on the DHIS2 origin so the login fetch below is same-origin and its session cookie is stored in the browser
+        await this.#page.goto(`${this.#env.baseUrl}/api/ping`)
+
+        const loginStatus = await this.#page.evaluate(
+            (credentials) =>
+                fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(credentials),
+                })
+                    .then((response) => response.json())
+                    .then((body) => body.loginStatus)
+                    .catch(() => undefined),
+            { username: this.#env.adminUsername, password: this.#env.adminPassword }
+        )
+
+        if (loginStatus !== 'SUCCESS') {
+            throw new AuthenticationError(`Login failed with status "${loginStatus}"`)
+        }
     }
 
     #preventSessionExpiry() {
         // Do a ping request 30 seconds before the session is due to expire
-        const intervalInMs = (parseInt(this.#env.sessionTimeout) - 30) * 1000
+        const intervalInMs = (Number.parseInt(this.#env.sessionTimeout) - 30) * 1000
         const intervalId = setInterval(async () => {
             /* Bringing the login page to the front could break the
              * dashboard item conversion process. And and the naturally
