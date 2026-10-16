@@ -87,7 +87,7 @@ describe('parseQueryString', () => {
                     assert(error instanceof RequestHandlerError)
                     assert.strictEqual(
                         error?.message,
-                        'Request has no query parameters. Make sure the "keyHtmlPushAnalyticsUrl" system setting in DHIS2 Core is a URL template such as "http://<host>:<port>/?dashboardId={id}&username={username}&locale={locale}", not only the host and port'
+                        'Request has no query parameters. Make sure the "keyHtmlPushAnalyticsUrl" system setting in DHIS2 Core is a URL template such as "<host>:<port>/?dashboardId={id}&username={username}&locale={locale}", not only the host and port'
                     )
                     return true
                 }

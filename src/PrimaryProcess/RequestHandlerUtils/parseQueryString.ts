@@ -3,7 +3,7 @@ import { RequestHandlerError } from './RequestHandlerError'
 
 const UID_REGEX = /^[a-zA-Z][a-zA-Z0-9]{10}$/
 const URL_TEMPLATE_EXAMPLE =
-    'http://<host>:<port>/?dashboardId={id}&username={username}&locale={locale}'
+    '<host>:<port>/?dashboardId={id}&username={username}&locale={locale}'
 
 export function parseQueryString(url = '', baseUrl: string) {
     const { searchParams } = new URL(url, baseUrl)
