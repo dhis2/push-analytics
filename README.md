@@ -35,6 +35,13 @@ A service to convert DHIS2 Core Dashboards into static HTML, which can be sent b
         -   `M_dhis-web-dashboard`
         -   `M_dhis-web-maps`
 -   A user account needs to be created which gets assigned to this role. The username and password for this user then need to be provided as the `DHIS2_CORE_USERNAME` and `DHIS2_CORE_PASSWORD` environment variables for the push analytics service.
+-   The `keyHtmlPushAnalyticsUrl` system setting needs to point to the Push Analytics Service. This setting is a URL **template**, not just the address of the service. When the job runs, DHIS2 Core replaces `{id}` with the dashboard ID, `{username}` with each receiving user and `{locale}` with that user's locale, so all three placeholders must be present. Type the placeholders exactly as shown, including the curly braces; do not replace `{id}` with a real dashboard ID, the dashboard is taken from the job configuration:
+
+    ```
+    http://<PUSH_ANALYTICS_HOST>:<PUSH_ANALYTICS_PORT>/?dashboardId={id}&username={username}&locale={locale}
+    ```
+
+    A value with only the host and port (e.g. `http://127.0.0.1:1337`) makes every request fail with `Request has no query parameters` (`E1502`).
 
 ### Environment variables
 

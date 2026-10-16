@@ -2,14 +2,25 @@ import { URL } from 'node:url'
 import { RequestHandlerError } from './RequestHandlerError'
 
 const UID_REGEX = /^[a-zA-Z][a-zA-Z0-9]{10}$/
+const URL_TEMPLATE_EXAMPLE =
+    '<host>:<port>/?dashboardId={id}&username={username}&locale={locale}'
 
 export function parseQueryString(url = '', baseUrl: string) {
     const { searchParams } = new URL(url, baseUrl)
-    const { dashboardId, username, locale } = Object.fromEntries(searchParams)
+    const queryParams = Object.fromEntries(searchParams)
+    const { dashboardId, username, locale } = queryParams
+
+    if (Object.keys(queryParams).length === 0) {
+        throw new RequestHandlerError(
+            `Request has no query parameters. Make sure the "keyHtmlPushAnalyticsUrl" system setting in DHIS2 Core is a URL template such as "${URL_TEMPLATE_EXAMPLE}", not only the host and port`,
+            'E1502',
+            400
+        )
+    }
 
     if (!UID_REGEX.test(dashboardId)) {
         throw new RequestHandlerError(
-            `Invalid dashhboard UID "${dashboardId}"`,
+            `Invalid dashboard UID "${dashboardId}"`,
             'E1502',
             400
         )
