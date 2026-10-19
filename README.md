@@ -24,7 +24,7 @@ A service to convert DHIS2 Core Dashboards into static HTML, which can be sent b
     -   `max.sessions.per_user = 100` (not required for user impersonation, but the default value of 10 could be problematic when different chrome instances are impersonating different users)
 -   The URL/IP of the push analytics service needs to be added to the CORS whitelist of the DHIS2 Core Instance
 -   A "User impersonator" role needs to be added which gets granted the following authorities:
-    -   `IMPERSONATE_USER` so it can impersonate different users to produce different conversions of the same dashboard
+    -   `F_IMPERSONATE_USER` so it can impersonate different users to produce different conversions of the same dashboard
     -   `F_VIEW_EVENT_ANALYTICS` is also needed to ensure all dashboards can be fetched and viewed
     -   Authorities to all apps that may be present on a dashboard, the dashboards-app and the login-app:
         -   `M_dhis-web-event-visualizer`
@@ -34,7 +34,8 @@ A service to convert DHIS2 Core Dashboards into static HTML, which can be sent b
         -   `M_linelisting`
         -   `M_dhis-web-dashboard`
         -   `M_dhis-web-maps`
--   A user account needs to be created which gets assigned to this role. The username and password for this user then need to be provided as the `DHIS2_CORE_USERNAME` and `DHIS2_CORE_PASSWORD` environment variables for the push analytics service.
+-   A user account needs to be created which gets assigned to this role. The username and password for this user then need to be provided as the `DHIS2_CORE_ADMIN_USERNAME` and `DHIS2_CORE_ADMIN_PASSWORD` environment variables for the push analytics service.
+-   Every dashboard that should be sent by email needs to be shared (at least "can view") with this user account. The service fetches the dashboard name and its list of items with its own credentials before it impersonates the recipient, so a dashboard that is not shared with this user account fails for every recipient.
 -   The `keyHtmlPushAnalyticsUrl` system setting needs to point to the Push Analytics Service. This setting is a URL **template**, not just the address of the service. When the job runs, DHIS2 Core replaces `{id}` with the dashboard ID, `{username}` with each receiving user and `{locale}` with that user's locale, so all three placeholders must be present. Type the placeholders exactly as shown, including the curly braces; do not replace `{id}` with a real dashboard ID, the dashboard is taken from the job configuration:
 
     ```
@@ -80,9 +81,19 @@ The amount of prerequisites that need to be fulfilled to successfully run Push A
 
 The `Dockerfile` is based on Alpine Linux with various packages installed to run NodeJS and headless Chrome with WebGL support. It also contains the production dependencies and the production version of the Push Analytics Service (Typescript compiled to JavaScript). This image is primarily meant to be installed on a production server, but can also be used for demos etc.
 
-Whenever a new version is released, a new Docker image is automatically generated and uploaded to the Docker Hub. The image on Docker Hub supports both the `linux/amd64` and `linux/arm64` (Apple Silicon) architecture.
+Whenever a new version is released, a new Docker image is automatically generated and uploaded to the Docker Hub as [`dhis2/push-analytics`](https://hub.docker.com/r/dhis2/push-analytics). The image on Docker Hub supports both the `linux/amd64` and `linux/arm64` (Apple Silicon) architecture. The [environment variables](#environment-variables) are passed to the container in the usual way, for example:
 
-Creating a local image with the tag `dhis2/push-analytics:local` is also supported by issuing the command `npm run build:docker:local`. This local image is being used when the e2e tests run on CI and can be used in a local development machine too.
+```sh
+docker run -d --name push-analytics -p 1337:1337 \
+    -e DHIS2_CORE_URL=https://dhis2.example.org \
+    -e DHIS2_CORE_MAJOR_VERSION=42 \
+    -e DHIS2_CORE_ADMIN_USERNAME=push_analytics \
+    -e DHIS2_CORE_ADMIN_PASSWORD=<password> \
+    -e DHIS2_CORE_SESSION_TIMEOUT=3600 \
+    dhis2/push-analytics:latest
+```
+
+Creating a local image with the tag `dhis2/push-analytics:local` is also supported by issuing the command `npm run docker:build:local`. This local image is being used when the e2e tests run on CI and can be used in a local development machine too.
 
 #### Docker compose stack
 
