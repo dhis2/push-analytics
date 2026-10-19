@@ -57,7 +57,8 @@ export class Authenticator implements IAuthenticator {
                     this.#env.adminUsername
                 }"`
             )
-        } catch {
+        } catch (error) {
+            debugLog(error)
             throw new AuthenticationError(
                 'Admin user could not login to the DHIS2 Core instance'
             )
