@@ -1,0 +1,376 @@
+{
+    "userRoles": [
+        {
+            "id": "S3Ql7ycHvot",
+            "name": "User impersonator",
+            "authorities": [
+                "F_IMPERSONATE_USER",
+                "F_VIEW_EVENT_ANALYTICS",
+                "M_dhis-web-dashboard",
+                "M_dhis-web-data-visualizer",
+                "M_dhis-web-event-reports",
+                "M_dhis-web-event-visualizer",
+                "M_dhis-web-login",
+                "M_dhis-web-maps",
+                "M_linelisting"
+            ]
+        }
+    ],
+    "users": [
+        {
+            "id": "aLmzuXT1vxF",
+            "username": "push_analytics_admin",
+            "password": "Test123!",
+            "firstName": "Push Analytics",
+            "surname": "Admin",
+            "email": "push_analytics_admin@example.org",
+            "organisationUnits": [
+                {
+                    "id": "ImspTQPwCqd"
+                }
+            ],
+            "dataViewOrganisationUnits": [
+                {
+                    "id": "ImspTQPwCqd"
+                }
+            ],
+            "teiSearchOrganisationUnits": [
+                {
+                    "id": "ImspTQPwCqd"
+                }
+            ],
+            "userRoles": [
+                {
+                    "id": "S3Ql7ycHvot"
+                }
+            ]
+        },
+        {
+            "id": "uXkx2AaIyln",
+            "username": "test_user_national",
+            "password": "Test123!",
+            "firstName": "Test User",
+            "surname": "National",
+            "email": "test_user_national@example.org",
+            "organisationUnits": [
+                {
+                    "id": "ImspTQPwCqd"
+                }
+            ],
+            "dataViewOrganisationUnits": [
+                {
+                    "id": "ImspTQPwCqd"
+                }
+            ],
+            "teiSearchOrganisationUnits": [
+                {
+                    "id": "ImspTQPwCqd"
+                }
+            ],
+            "userRoles": [
+                {
+                    "id": "UYXOT4A7JMI"
+                },
+                {
+                    "id": "Ufph3mGRmMo"
+                },
+                {
+                    "id": "Euq3XfEIEbx"
+                },
+                {
+                    "id": "cUlTcejWree"
+                },
+                {
+                    "id": "aNk5AyC7ydy"
+                },
+                {
+                    "id": "TMK9CMZ2V98"
+                },
+                {
+                    "id": "Ql6Gew7eaX6"
+                },
+                {
+                    "id": "Pqoy4DLOdMK"
+                },
+                {
+                    "id": "DRdaVRtwmG5"
+                },
+                {
+                    "id": "jRWSNIHdKww"
+                },
+                {
+                    "id": "txB7vu1w2Pr"
+                }
+            ]
+        },
+        {
+            "id": "IcuswlmA6f9",
+            "username": "test_user_national_nb",
+            "password": "Test123!",
+            "firstName": "Test User",
+            "surname": "National NB",
+            "email": "test_user_national_nb@example.org",
+            "organisationUnits": [
+                {
+                    "id": "ImspTQPwCqd"
+                }
+            ],
+            "dataViewOrganisationUnits": [
+                {
+                    "id": "ImspTQPwCqd"
+                }
+            ],
+            "teiSearchOrganisationUnits": [
+                {
+                    "id": "ImspTQPwCqd"
+                }
+            ],
+            "userRoles": [
+                {
+                    "id": "UYXOT4A7JMI"
+                },
+                {
+                    "id": "Euq3XfEIEbx"
+                },
+                {
+                    "id": "cUlTcejWree"
+                },
+                {
+                    "id": "aNk5AyC7ydy"
+                },
+                {
+                    "id": "TMK9CMZ2V98"
+                },
+                {
+                    "id": "Ql6Gew7eaX6"
+                },
+                {
+                    "id": "Pqoy4DLOdMK"
+                },
+                {
+                    "id": "DRdaVRtwmG5"
+                },
+                {
+                    "id": "jRWSNIHdKww"
+                },
+                {
+                    "id": "txB7vu1w2Pr"
+                }
+            ]
+        },
+        {
+            "id": "BIVkd89rmSJ",
+            "username": "test_user_bo",
+            "password": "Test123!",
+            "firstName": "Test User",
+            "surname": "Bo",
+            "email": "test_user_bo@example.org",
+            "organisationUnits": [
+                {
+                    "id": "O6uvpzGd5pu"
+                }
+            ],
+            "dataViewOrganisationUnits": [
+                {
+                    "id": "O6uvpzGd5pu"
+                }
+            ],
+            "teiSearchOrganisationUnits": [
+                {
+                    "id": "O6uvpzGd5pu"
+                }
+            ],
+            "userRoles": [
+                {
+                    "id": "UYXOT4A7JMI"
+                },
+                {
+                    "id": "Euq3XfEIEbx"
+                },
+                {
+                    "id": "cUlTcejWree"
+                },
+                {
+                    "id": "aNk5AyC7ydy"
+                },
+                {
+                    "id": "TMK9CMZ2V98"
+                },
+                {
+                    "id": "Ql6Gew7eaX6"
+                },
+                {
+                    "id": "Pqoy4DLOdMK"
+                },
+                {
+                    "id": "DRdaVRtwmG5"
+                },
+                {
+                    "id": "jRWSNIHdKww"
+                },
+                {
+                    "id": "txB7vu1w2Pr"
+                }
+            ]
+        },
+        {
+            "id": "FPUnXmhGahQ",
+            "username": "test_user_bonthe",
+            "password": "Test123!",
+            "firstName": "Test User",
+            "surname": "Bonthe",
+            "email": "test_user_bonthe@example.org",
+            "organisationUnits": [
+                {
+                    "id": "lc3eMKXaEfw"
+                }
+            ],
+            "dataViewOrganisationUnits": [
+                {
+                    "id": "lc3eMKXaEfw"
+                }
+            ],
+            "teiSearchOrganisationUnits": [
+                {
+                    "id": "lc3eMKXaEfw"
+                }
+            ],
+            "userRoles": [
+                {
+                    "id": "UYXOT4A7JMI"
+                },
+                {
+                    "id": "Euq3XfEIEbx"
+                },
+                {
+                    "id": "cUlTcejWree"
+                },
+                {
+                    "id": "aNk5AyC7ydy"
+                },
+                {
+                    "id": "TMK9CMZ2V98"
+                },
+                {
+                    "id": "Ql6Gew7eaX6"
+                },
+                {
+                    "id": "Pqoy4DLOdMK"
+                },
+                {
+                    "id": "DRdaVRtwmG5"
+                },
+                {
+                    "id": "jRWSNIHdKww"
+                },
+                {
+                    "id": "txB7vu1w2Pr"
+                }
+            ]
+        }
+    ],
+    "userGroups": [
+        {
+            "id": "cbyGCxlLq2t",
+            "name": "Test users",
+            "users": [
+                {
+                    "id": "uXkx2AaIyln"
+                },
+                {
+                    "id": "IcuswlmA6f9"
+                },
+                {
+                    "id": "BIVkd89rmSJ"
+                },
+                {
+                    "id": "FPUnXmhGahQ"
+                }
+            ]
+        }
+    ],
+    "dashboards": [
+        {
+            "id": "ceneQPMhemM",
+            "name": "One of everything",
+            "dashboardItems": [
+                {
+                    "id": "HG0dvOhJWQ9",
+                    "type": "VISUALIZATION",
+                    "visualization": {
+                        "id": "LW0O27b7TdD"
+                    }
+                },
+                {
+                    "id": "EndKYVZheYT",
+                    "type": "MAP",
+                    "map": {
+                        "id": "zDP78aJU8nX"
+                    }
+                },
+                {
+                    "id": "bug4BHJRr1X",
+                    "type": "EVENT_VISUALIZATION",
+                    "eventVisualization": {
+                        "id": "R4wAb2yMLik"
+                    }
+                },
+                {
+                    "id": "FMrs8QTjvqG",
+                    "type": "EVENT_REPORT",
+                    "eventReport": {
+                        "id": "YZzuVprU7aZ"
+                    }
+                },
+                {
+                    "id": "iJSy9OCRQAt",
+                    "type": "EVENT_CHART",
+                    "eventChart": {
+                        "id": "WIxuUpm5m4U"
+                    }
+                },
+                {
+                    "id": "hLZLU5aioa7",
+                    "type": "REPORTS",
+                    "reports": [
+                        {
+                            "id": "qYVNH1wkZR0"
+                        },
+                        {
+                            "id": "AMERNML55Tg"
+                        },
+                        {
+                            "id": "Cb2BcgxBUPz"
+                        },
+                        {
+                            "id": "fqERdm6UtkI"
+                        }
+                    ]
+                },
+                {
+                    "id": "Zlt7ChrvZIS",
+                    "type": "RESOURCES",
+                    "resources": [
+                        {
+                            "id": "hKYLLpNinZR"
+                        },
+                        {
+                            "id": "V8emVumNG4D"
+                        },
+                        {
+                            "id": "bhjS25ZgCxD"
+                        }
+                    ]
+                },
+                {
+                    "id": "jPNHuFEt7uq",
+                    "type": "TEXT",
+                    "text": "*Header*\n _Italic_\n [link](https://link-url)\n :-) "
+                }
+            ],
+            "sharing": {
+                "public": "rw------"
+            }
+        }
+    ]
+}

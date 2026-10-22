@@ -14,6 +14,7 @@ import {
     getHttpServer,
     getOutputFixture,
     initializeMockCluster,
+    waitMs,
 } from './utils'
 import { tearDownCluster } from './utils/tearDownCluster'
 
@@ -57,6 +58,7 @@ describe('Handling parallel requests', { concurrency: 1 }, () => {
                     `/?dashboardId=${dashboardId3}&username=admin&locale=en`
                 ),
             ])
+            await waitMs(200)
             const itemRequestedMessages = messagesFromWorkers.filter(
                 ({ type }) => type === 'ITEM_REQUESTED_FROM_QUEUE'
             )
