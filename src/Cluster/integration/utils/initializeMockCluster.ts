@@ -29,7 +29,7 @@ const initializeMockCluster = async (
 ) => {
     const env: PushAnalyticsEnvVariables = {
         host: 'localhost',
-        port: '1337',
+        port: '0',
         baseUrl: 'http://localhost:8080',
         apiVersion: '40',
         adminUsername: 'admin',

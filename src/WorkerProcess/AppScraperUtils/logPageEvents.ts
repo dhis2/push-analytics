@@ -24,7 +24,8 @@ export function logPageEvents(page: Page) {
                 .toUpperCase()}] ${messages.filter(Boolean).join(' ')}`
         )
     })
-        .on('pageerror', ({ message }) => {
+        .on('pageerror', (error) => {
+            const message = error instanceof Error ? error.message : String(error)
             console.log(`[BROWSER::PAGE_ERROR] ${message}`)
         })
         .on('response', (response) => {
