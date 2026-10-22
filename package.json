@@ -42,7 +42,7 @@
         "@types/supertest": "^6.0.3",
         "@typescript-eslint/eslint-plugin": "^8.71.2",
         "@typescript-eslint/parser": "^8.71.2",
-        "dotenv": "^16.6.1",
+        "dotenv": "^18.0.8",
         "eslint": "^9.39.5",
         "husky": "^9.1.7",
         "lint-staged": "^17.6.0",
