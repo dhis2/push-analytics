@@ -49,7 +49,7 @@ describe('parseQueryString', () => {
             () => parseQueryString('/?username=test&locale=no', baseUrl),
             (error: unknown) => {
                 assert(error instanceof RequestHandlerError)
-                assert.strictEqual(error?.message, 'Invalid dashhboard UID "undefined"')
+                assert.strictEqual(error?.message, 'Invalid dashboard UID "undefined"')
                 return true
             }
         )
@@ -64,10 +64,7 @@ describe('parseQueryString', () => {
                 ),
             (error: unknown) => {
                 assert(error instanceof RequestHandlerError)
-                assert.strictEqual(
-                    error?.message,
-                    `Invalid dashhboard UID "${invalidId}"`
-                )
+                assert.strictEqual(error?.message, `Invalid dashboard UID "${invalidId}"`)
                 return true
             }
         )
@@ -81,6 +78,21 @@ describe('parseQueryString', () => {
                 return true
             }
         )
+    })
+    it('should point to the URL template system setting if the request has no query parameters', () => {
+        for (const url of ['', '/', '/?']) {
+            assert.throws(
+                () => parseQueryString(url, baseUrl),
+                (error: unknown) => {
+                    assert(error instanceof RequestHandlerError)
+                    assert.strictEqual(
+                        error?.message,
+                        'Request has no query parameters. Make sure the "keyHtmlPushAnalyticsUrl" system setting in DHIS2 Core is a URL template such as "<host>:<port>/?dashboardId={id}&username={username}&locale={locale}", not only the host and port'
+                    )
+                    return true
+                }
+            )
+        }
     })
     it('should return the default locale if the locale parameter is empty', () => {
         const dashboardId = 'gkhrgyD3Rd4'
