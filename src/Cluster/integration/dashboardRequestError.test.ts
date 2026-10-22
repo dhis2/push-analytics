@@ -58,7 +58,7 @@ describe('An error on the dashboard request', { concurrency: 1 }, () => {
             assert.strictEqual(response.status, 400)
             assert.strictEqual(
                 response.text,
-                'REQUEST HANDLER ERROR (E1502): Invalid dashhboard UID "IAMNOTAVALIDID"'
+                'REQUEST HANDLER ERROR (E1502): Invalid dashboard UID "IAMNOTAVALIDID"'
             )
         })
     } else {
