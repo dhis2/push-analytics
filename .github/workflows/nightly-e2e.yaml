@@ -4,10 +4,6 @@ on:
     schedule:
         # mon-fri at 5:30 AM
         - cron: '30 5 * * 1-5'
-    # TEMPORARY: run the matrix on this PR, remove before merge
-    pull_request:
-        types: ['opened', 'reopened', 'synchronize']
-        branches: ['master']
 
 env:
     PUSH_ANALYTICS_IMAGE: 'dhis2/push-analytics:local'
@@ -71,8 +67,7 @@ jobs:
         runs-on: ubuntu-latest
         if: |
             failure() &&
-            !cancelled() &&
-            github.event_name == 'schedule'
+            !cancelled()
         needs: [nightly-e2e]
         steps:
             - uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58
