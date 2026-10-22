@@ -1,6 +1,6 @@
-import fs from 'fs'
+import fs from 'node:fs'
+import path from 'node:path'
 import { minimatch } from 'minimatch'
-import path from 'path'
 import type { Browser, CDPSession, HTTPResponse, Page } from 'puppeteer'
 import type {
     AnyVisualization,
@@ -32,13 +32,15 @@ const DONWLOAD_PAGE_URL_PATTERN =
     /api\/analytics\/enrollments|events\/query\/[a-zA-Z0-9]{11}\.html\+css/
 
 export class AppScraper implements Converter {
-    baseUrl: string
-    #browser: Browser
-    #page: Page
-    #cdpSession: CDPSession
+    readonly baseUrl: string
+    readonly #browser: Browser
+    readonly #page: Page
+    readonly #cdpSession: CDPSession
     #currentRequestUrlGlob: string
     #interceptedResponseHtml: ConverterResult | null
-    #logger: MarkdownLogger
+    readonly #logger: MarkdownLogger
+    #lastUsername: string | null
+    #requiresFullPageLoad: boolean
 
     protected constructor(
         baseUrl: string,
@@ -53,6 +55,8 @@ export class AppScraper implements Converter {
         this.#currentRequestUrlGlob = ''
         this.#interceptedResponseHtml = null
         this.#logger = new MarkdownLogger(page)
+        this.#lastUsername = null
+        this.#requiresFullPageLoad = false
         page.on('response', this.#interceptResponse.bind(this))
         /* Enable this for debugging browser events in a headless browser.
          * For debugging issues that happen in the browser context it is
@@ -94,6 +98,17 @@ export class AppScraper implements Converter {
         config: ParsedScrapeInstructions
     ): Promise<ConverterResult> {
         try {
+            return await this.#convertOnce(queueItem, config)
+        } catch {
+            return await this.#convertOnce(queueItem, config)
+        }
+    }
+
+    async #convertOnce(
+        queueItem: QueueItem,
+        config: ParsedScrapeInstructions
+    ): Promise<ConverterResult> {
+        try {
             const visualization = getDashboardItemVisualization(queueItem.dashboardItem)
 
             if (
@@ -103,9 +118,14 @@ export class AppScraper implements Converter {
                 /* We only support event-visualizations of type line-lists.
                  * For any other type we return empty HTML as we do for all
                  * all unsupported dashboard item types */
-                return Promise.resolve({ html: '', css: '' })
+                return { html: '', css: '' }
             }
             this.#logger.startLogForItem(queueItem)
+
+            if (queueItem.username !== this.#lastUsername) {
+                this.#requiresFullPageLoad = true
+                this.#lastUsername = queueItem.username
+            }
 
             await this.page.bringToFront()
 
@@ -143,6 +163,7 @@ export class AppScraper implements Converter {
                     : 'An unknown conversion error occurred'
             const message = `[${queueItem.dashboardItem.type} | ${visualizationType}] ${errorMessage}`
 
+            this.#requiresFullPageLoad = true
             this.#logger.logError(message)
             throw new AppScraperError(message)
         }
@@ -426,23 +447,40 @@ export class AppScraper implements Converter {
     }
 
     async #executeSteps(steps: Steps) {
-        for (const step of steps) {
-            if (step.click && typeof step.click === 'string') {
-                await this.page.click(step.click)
-                await this.#logger.log(`Executed click step for selector "${step.click}"`)
-            } else if (step.waitForSelector && typeof step.waitForSelector === 'string') {
-                await this.page.waitForSelector(step.waitForSelector)
-                await this.#logger.log(
-                    `Executed waitForSelector step for selector "${step.waitForSelector}"`
-                )
-            } else if (step.goto && typeof step.goto === 'string') {
-                await this.page.goto(step.goto, { waitUntil: 'networkidle2' })
-                await this.#logger.log(`Executed goto step for route "${step.goto}"`)
-            } else {
-                throw new AppScraperError(
-                    `Failed to intepret step "${JSON.stringify(step)}"`
-                )
+        await steps.reduce<Promise<void>>(
+            (previousStep, step) => previousStep.then(() => this.#executeStep(step)),
+            Promise.resolve()
+        )
+    }
+
+    async #executeStep(step: Steps[number]) {
+        if (step.click && typeof step.click === 'string') {
+            await this.page.evaluate((selector) => {
+                const element = document.querySelector<HTMLElement>(selector)
+                if (!element) {
+                    throw new Error(`No element found for selector "${selector}"`)
+                }
+                element.click()
+            }, step.click)
+            await this.#logger.log(`Executed click step for selector "${step.click}"`)
+        } else if (step.waitForSelector && typeof step.waitForSelector === 'string') {
+            await this.page.waitForSelector(step.waitForSelector)
+            await this.#logger.log(
+                `Executed waitForSelector step for selector "${step.waitForSelector}"`
+            )
+        } else if (step.goto && typeof step.goto === 'string') {
+            // Since 2.42 legacy app paths redirect into the global shell (iframe);
+            // `redirect=false` opts out. Must go in the real query string, before the hash.
+            const url = new URL(step.goto)
+            url.searchParams.set('redirect', 'false')
+            if (this.#requiresFullPageLoad) {
+                await this.page.goto('about:blank')
+                this.#requiresFullPageLoad = false
             }
+            await this.page.goto(url.toString(), { waitUntil: 'networkidle2' })
+            await this.#logger.log(`Executed goto step for route "${url}"`)
+        } else {
+            throw new AppScraperError(`Failed to intepret step "${JSON.stringify(step)}"`)
         }
     }
 

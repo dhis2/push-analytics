@@ -26,12 +26,6 @@ services:
         depends_on:
             db:
                 condition: service_healthy
-        healthcheck:
-            test: ['CMD', 'curl', '-f', '127.0.0.1:8080/dhis-web-login']
-            start_period: 600s
-            interval: 5s
-            timeout: 600s
-            retries: 120
 
     db:
         image: ghcr.io/baosystems/postgis:12-3.3
@@ -98,12 +92,14 @@ services:
             - USERNAME=admin
             - PASSWORD=district
             - APPS_TO_INSTALL='${APPS_TO_INSTALL:-Line Listing}'
+            - ANALYTICS_FIRST_YEAR=${ANALYTICS_FIRST_YEAR}
         volumes:
             - ./docker/scripts:/opt/scripts
         working_dir: /opt/scripts
         command: >
             sh -c "apk update --no-cache &&
                    apk add --no-cache bash curl jq &&
+                   ./wait_for_dhis2.sh &&
                    ./install_apps_from_app_hub.sh &&
                    ./generate_analytics_tables.sh"
         networks:
@@ -111,7 +107,7 @@ services:
                 ipv4_address: 172.26.0.11
         depends_on:
             web:
-                condition: service_healthy
+                condition: service_started
 
     push-analytics:
         hostname: 'push-analytics'
