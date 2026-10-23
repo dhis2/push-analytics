@@ -63,7 +63,7 @@ jobs:
                   mkdir e2e-output/generated-html
                   pa_container_id="$(docker compose --env-file .env.e2e ps -q push-analytics)"
                   docker cp ${pa_container_id}:/usr/src/app/scrape-markdown-logs ./e2e-output
-                  cp -r ./e2e/generated-html ./e2e-output
+                  if [[ -d ./e2e/generated-html ]]; then cp -r ./e2e/generated-html ./e2e-output; fi
             - name: Store scrape markdown logs and generated HTML as a GHA artefact
               if: ${{ failure() }}
               uses: actions/upload-artifact@v7
