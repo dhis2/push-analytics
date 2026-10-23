@@ -4,6 +4,7 @@ on:
     schedule:
         # mon-fri at 5:30 AM
         - cron: '30 5 * * 1-5'
+    workflow_dispatch:
 
 env:
     PUSH_ANALYTICS_IMAGE: 'dhis2/push-analytics:local'
