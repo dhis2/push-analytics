@@ -39,7 +39,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
               with:
                   fetch-depth: 0
                   token: ${{secrets.DHIS2_BOT_GITHUB_TOKEN}}
@@ -48,7 +48,7 @@ jobs:
                   git config --global user.name "@dhis2-bot"
                   git config --global user.email "apps@dhis2.org"
             - name: Setup NodeJS
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v7
               with:
                   node-version-file: '.nvmrc'
                   cache: 'npm'
@@ -88,7 +88,7 @@ jobs:
         name: Create new image and push to Docker Hub
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
 
             # Note that "most recent" is different than "latest" in the context
             # of semantic versioning, because "latest" does not include pre-releases.
@@ -108,23 +108,23 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Log in to Docker Hub
-              uses: docker/login-action@v3
+              uses: docker/login-action@v4
               with:
                   username: ${{ secrets.DHIS2_BOT_DOCKER_HUB_USERNAME }}
                   password: ${{ secrets.DHIS2_BOT_DOCKER_HUB_PASSWORD }}
 
             - name: Extract metadata (tags, labels) for Docker
               id: meta
-              uses: docker/metadata-action@v5
+              uses: docker/metadata-action@v6
               with:
                   images: dhis2/push-analytics
                   tags: |
                       type=semver,pattern={{raw}},value=${{steps.get_most_recent_release_tag.outputs.tag}}
 
-            - uses: docker/setup-qemu-action@v3
-            - uses: docker/setup-buildx-action@v3
+            - uses: docker/setup-qemu-action@v4
+            - uses: docker/setup-buildx-action@v4
             - name: Build and push Docker image
-              uses: docker/build-push-action@v5
+              uses: docker/build-push-action@v7
               with:
                   context: .
                   file: ./Dockerfile
@@ -136,7 +136,7 @@ jobs:
                   cache-to: type=gha,mode=max
 
             - name: Update repo description
-              uses: peter-evans/dockerhub-description@v3
+              uses: peter-evans/dockerhub-description@v5
               with:
                   username: ${{ secrets.DHIS2_BOT_DOCKER_HUB_USERNAME }}
                   password: ${{ secrets.DHIS2_BOT_DOCKER_HUB_PASSWORD }}

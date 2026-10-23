@@ -17,6 +17,7 @@ export async function createPuppeteerBrowser(debug: boolean) {
                   '--window-position=4000,0',
                   '--no-sandbox',
                   '--enable-gpu',
+                  '--enable-unsafe-swiftshader',
               ],
               /* Uncomment to add a delay between puppeteer steps
                * making it easier to visually debug problems */
@@ -25,7 +26,7 @@ export async function createPuppeteerBrowser(debug: boolean) {
         : {
               headless: true,
               defaultViewport,
-              args: ['--no-sandbox', '--enable-gpu'],
+              args: ['--no-sandbox', '--enable-gpu', '--enable-unsafe-swiftshader'],
           }
     const browser = await puppeteer.launch(browserOptions)
     return browser
