@@ -141,7 +141,7 @@ services:
 
     e2e:
         hostname: e2e
-        image: node:lts-alpine
+        image: node:24-alpine
         networks:
             mynetwork:
                 ipv4_address: 172.26.0.12

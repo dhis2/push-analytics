@@ -6,7 +6,7 @@ A service to convert DHIS2 Core Dashboards into static HTML, which can be sent b
 
 ### Prerequisites for the Push Analytics Service
 
--   NodeJS with a min version `20.11.0` (LTS at the time of writing). Lower version may also suffice, as far as I am aware, the most modern API feature used by the Push Analytics Service is [os.availableParallelism()](https://nodejs.org/api/os.html#osavailableparallelism).
+-   NodeJS 24 or higher.
 -   Push Analytics uses [Puppeteer](https://pptr.dev/), which is _"a Node.js library which provides a high-level API to control Chrome/Chromium over the DevTools Protocol"_. When installing Puppeteer, a version of the Chrome browser is installed along with it, but the system does need to have a few tools installed in order for Chrome to work. Please refer to the [Puppeteer Docker file](https://github.com/puppeteer/puppeteer/blob/main/docker/Dockerfile) to see which libs are needed.
 
 ### Prerequisites for the DHIS2 Core Instance
