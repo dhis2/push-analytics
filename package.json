@@ -39,7 +39,7 @@
         "@types/eslint__js": "^8.42.3",
         "@types/node": "^24.19.2",
         "@types/string-similarity": "^4.0.2",
-        "@types/supertest": "^6.0.3",
+        "@types/supertest": "^7.2.1",
         "@typescript-eslint/eslint-plugin": "^8.71.2",
         "@typescript-eslint/parser": "^8.71.2",
         "dotenv": "^18.0.8",
