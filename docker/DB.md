@@ -20,7 +20,8 @@ It accepts these environment variables:
 Afterwards:
 
 1. Set `ANALYTICS_FIRST_YEAR` in `.env.e2e` to the same year as `DATA_YEAR`
-2. Regenerate the fixtures in `e2e/__fixtures__` for every DHIS2 version in the nightly matrix
+2. Regenerate the fixtures in `e2e/__fixtures__` for every supported stable DHIS2 version (the weekly e2e workflow gets these from
+   releases.dhis2.org; versions without fixtures fall back to the nearest older version's fixtures)
 3. Attach the dump to a GitHub release and point `DHIS2_DB_DUMP_URL` in `.env.e2e` to it
 
 ## What the script changes
