@@ -27,10 +27,11 @@ export function getFixtureDir(dhis2ImageTag = '') {
  * version can show up before anybody has generated fixtures for it. In that case
  * use the fixtures of the newest older version of the same image. */
 function getNearestOlderFixtureDir(fixturesRoot: string, imageTagDir: string) {
-    const [, imageName, version] = imageTagDir.match(/^(.+)_2-(\d+)$/) ?? []
+    const fixtureDirPattern = /^(.+)_2-(\d+)$/
+    const [, imageName, version] = fixtureDirPattern.exec(imageTagDir) ?? []
     const candidates = fs
         .readdirSync(fixturesRoot)
-        .map((dir) => dir.match(/^(.+)_2-(\d+)$/))
+        .map((dir) => fixtureDirPattern.exec(dir))
         .filter((match) => match?.[1] === imageName && Number(match[2]) < Number(version))
         .sort((a, b) => Number(b?.[2]) - Number(a?.[2]))
     assert.ok(candidates[0], `No fixtures found for "${imageTagDir}" or an older version`)

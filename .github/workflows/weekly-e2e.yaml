@@ -19,7 +19,7 @@ jobs:
             - name: Get the supported stable DHIS2 versions
               id: supported
               run: |
-                  versions="$(curl -fsSL https://releases.dhis2.org/v1/versions/stable.json \
+                  versions="$(curl --proto '=https' --proto-redir '=https' --tlsv1.2 -fsSL https://releases.dhis2.org/v1/versions/stable.json \
                       | jq -c '[.versions[] | select(.supported) | {image: "dhis2/core:\(.name)", major: "\(.version)"}]')"
                   echo "versions=${versions}" >> "${GITHUB_OUTPUT}"
             - name: Keep the versions that have a published Docker image
