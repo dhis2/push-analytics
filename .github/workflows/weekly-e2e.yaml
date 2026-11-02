@@ -1,9 +1,9 @@
-name: Nightly regression e2e test
+name: Weekly regression e2e test against stable DHIS2
 
 on:
     schedule:
-        # mon-fri at 5:30 AM
-        - cron: '30 5 * * 1-5'
+        # every Monday at 4:00 AM (UTC)
+        - cron: '0 4 * * 1'
     workflow_dispatch:
 
 env:
@@ -11,23 +11,49 @@ env:
     LOG_LEVEL: 'scraper'
 
 jobs:
-    nightly-e2e:
+    supported-versions:
+        runs-on: ubuntu-latest
+        outputs:
+            matrix: ${{ steps.matrix.outputs.matrix }}
+        steps:
+            - name: Get the supported stable DHIS2 versions
+              id: supported
+              run: |
+                  versions="$(curl --proto '=https' --proto-redir '=https' --tlsv1.2 -fsSL https://releases.dhis2.org/v1/versions/stable.json \
+                      | jq -c '[.versions[] | select(.supported) | {image: "dhis2/core:\(.name)", major: "\(.version)"}]')"
+                  echo "versions=${versions}" >> "${GITHUB_OUTPUT}"
+            - name: Keep the versions that have a published Docker image
+              id: matrix
+              env:
+                  VERSIONS: ${{ steps.supported.outputs.versions }}
+              run: |
+                  matrix="$(jq -c '.[]' <<< "${VERSIONS}" | while read -r version; do
+                      if docker manifest inspect "$(jq -r .image <<< "${version}")" > /dev/null 2>&1; then
+                          echo "${version}"
+                      fi
+                  done | jq -sc .)"
+                  echo "matrix=${matrix}" >> "${GITHUB_OUTPUT}"
+            - name: Fail if no version was found
+              if: steps.matrix.outputs.matrix == '[]'
+              run: |
+                  echo "::error::No supported stable DHIS2 version with a published Docker image was found"
+                  exit 1
+            - name: Log the versions that will be tested
+              if: steps.matrix.outputs.matrix != '[]'
+              env:
+                  MATRIX: ${{ steps.matrix.outputs.matrix }}
+              run: jq -r '.[] | "Testing \(.image) (major version \(.major))"' <<< "${MATRIX}"
+
+    weekly-e2e:
+        needs: [supported-versions]
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false
             matrix:
-                include:
-                    - dhis2-image: 'dhis2/core-dev:2.41'
-                      dhis2-major-version: '41'
-                    - dhis2-image: 'dhis2/core-dev:2.42'
-                      dhis2-major-version: '42'
-                    - dhis2-image: 'dhis2/core-dev:2.43'
-                      dhis2-major-version: '43'
-                    - dhis2-image: 'dhis2/core-dev:master'
-                      dhis2-major-version: '44'
+                include: ${{ fromJSON(needs.supported-versions.outputs.matrix) }}
         env:
-            DHIS2_IMAGE: ${{ matrix.dhis2-image }}
-            DHIS2_CORE_MAJOR_VERSION: ${{ matrix.dhis2-major-version }}
+            DHIS2_IMAGE: ${{ matrix.image }}
+            DHIS2_CORE_MAJOR_VERSION: ${{ matrix.major }}
         steps:
             - name: Checkout repo
               uses: actions/checkout@v7
@@ -61,7 +87,7 @@ jobs:
               if: ${{ failure() }}
               uses: actions/upload-artifact@v7
               with:
-                  name: e2e-failure-output-${{ matrix.dhis2-major-version }}
+                  name: e2e-failure-output-${{ matrix.major }}
                   path: e2e-output/
 
     send-slack-message:
@@ -69,11 +95,11 @@ jobs:
         if: |
             failure() &&
             !cancelled()
-        needs: [nightly-e2e]
+        needs: [supported-versions, weekly-e2e]
         steps:
             - uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58
               env:
                   SLACK_WEBHOOK: ${{ secrets.SLACK_BACKEND_WEBHOOK }}
                   SLACK_CHANNEL: 'analytics-internal-bot'
-                  SLACK_MESSAGE: 'Push Analytics Nightly E2E run failed and needs investigation ::female-detective:.'
+                  SLACK_MESSAGE: 'Push Analytics Weekly E2E run against stable DHIS2 failed and needs investigation ::female-detective:.'
                   SLACK_COLOR: '#ff0000'
